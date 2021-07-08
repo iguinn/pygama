@@ -4,9 +4,9 @@ import importlib
 from copy import deepcopy
 
 from pygama.dsp.ProcessingChain import ProcessingChain
+from pygama.dsp.errors import ProcessingChainError
 from pygama.dsp.units import *
 from pygama import lh5
-
 
 def build_processing_chain(lh5_in, dsp_config, db_dict = None,
                            outputs = None, verbosity=1, block_width=16):
@@ -167,8 +167,11 @@ def build_processing_chain(lh5_in, dsp_config, db_dict = None,
     # now add the processors
     for proc_par in proc_par_list:
         recipe = processors[proc_par]
-        module = importlib.import_module(recipe['module'])
-        func = getattr(module, recipe['function'])
+        try:
+            module = importlib.import_module(recipe['module'])
+            func = getattr(module, recipe['function'])
+        except AttributeError:
+            raise ProcessingChainError("Did not find {} in {}".format(recipe['function'], recipe['module']))
         args = recipe['args']
         for i, arg in enumerate(args):
             if isinstance(arg, str) and arg[0:3]=='db.':
@@ -221,8 +224,11 @@ def build_processing_chain(lh5_in, dsp_config, db_dict = None,
             func = func(*init_args)
         except KeyError:
             pass
-        proc_chain.add_processor(func, *args, **kwargs)
-
+        
+        try:
+            proc_chain.add_processor(func, *args, **kwargs)
+        except: 
+            raise ProcessingChainError("Could not add processor {} with args {} and kwargs {}".format(func.__name__, str(args), str(kwargs)))
     
     # build the output buffers
     lh5_out = lh5.Table(size=proc_chain._buffer_len)

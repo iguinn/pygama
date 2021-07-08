@@ -23,3 +23,23 @@ from ._processors.bl_subtract import bl_subtract
 from ._processors.convolutions import cusp_filter, zac_filter, t0_filter
 from ._processors.trap_filters import trap_filter, trap_norm, asym_trap_filter, trap_pickoff
 from ._processors.moving_windows import moving_window_left, moving_window_right, moving_window_multi, avg_current
+from ._processors.mean_stdev import mean_stdev
+from ._processors.time_point_frac import time_point_frac
+asymTrapFilter = asym_trap_filter
+
+deprecated = {'time_point_frac': "Use time_point_thresh instead",
+              'mean_stdev': "Use linear_slope_fit instead",
+              'asymTrapFilter': "Use asym_trap_filter instead"
+             }
+
+depr_funs = { name:globals()[name] for name in deprecated.keys() }
+for name in deprecated.keys():
+    del globals()[name]
+
+
+def __getattr__(name):
+    if name in deprecated:
+        print(name + " is deprecated: " + deprecated[name])
+        return depr_funs[name]
+    raise AttributeError
+
