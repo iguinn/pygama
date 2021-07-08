@@ -297,8 +297,7 @@
         <span class="c1">#          proc.execute()</span>
 
         <span class="c1"># Handle list-of-files recursively</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">lh5_file</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">n_rows_read</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">h5f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
