@@ -667,7 +667,7 @@ This is how I used it in root peak fitting scripts</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><p><strong>(pars, cov)</strong> --</p>
 <dl class="simple">
-<dt>pars<span class="classifier">2-tuple with the parameters (maximum, mode) of the gaussian fit</span></dt><dd><p>maximum : the estimated maximum value of the peak
+<dt>pars<span class="classifier">2-tuple with the parameters (mode, maximum) of the gaussian fit</span></dt><dd><p>maximum : the estimated maximum value of the peak
 mode : the estimated x-position of the maximum</p>
 </dd>
 <dt>cov<span class="classifier">2x2 matrix of floats</span></dt><dd><p>The covariance matrix for the 2 parameters in pars</p>
@@ -797,13 +797,6 @@ default.</p>
 high and all the poisson stats are roughly gaussian and you don't need it
 anyway. But the G.O.F. is calculable for the Poisson likelihood. So we do
 it here.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pygama.analysis.peak_fitting.radford_fwhm">
-<span class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></span><span class="sig-name descname"><span class="pre">radford_fwhm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">htail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#radford_fwhm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.radford_fwhm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the FWHM of the radford_peak function, ignoring background and
-step components. TODO: also get the uncertainty</p>
 </dd></dl>
 
 <dl class="py function">
