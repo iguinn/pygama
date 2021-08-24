@@ -265,14 +265,15 @@
 <span class="sd">            will be sliced to obey those constraints, where n_rows is</span>
 <span class="sd">            interpreted as the (max) number of -selected- values (in idx) to be</span>
 <span class="sd">            read out.</span>
-<span class="sd">        field_mask : dict or defaultdict { str : bool } (optional)</span>
+<span class="sd">        field_mask : dict or defaultdict { str : bool } or list/tuple (optional)</span>
 <span class="sd">            For tables and structs, determines which fields get written out.</span>
 <span class="sd">            Only applies to immediate fields of the requested objects. If a dict</span>
 <span class="sd">            is used, a defaultdict will be made with the default set to the</span>
 <span class="sd">            opposite of the first element in the dict. This way if one specifies</span>
 <span class="sd">            a few fields at &quot;false&quot;, all but those fields will be read out,</span>
 <span class="sd">            while if one specifies just a few fields as &quot;true&quot;, only those</span>
-<span class="sd">            fields will be read out.</span>
+<span class="sd">            fields will be read out. If a list is provided, the listed fields</span>
+<span class="sd">            will be set to &quot;true&quot;, while the rest will default to &quot;false&quot;.</span>
 <span class="sd">        obj_buf : lh5 object (optional)</span>
 <span class="sd">            Read directly into memory provided in obj_buf. Note: the buffer will</span>
 <span class="sd">            be expanded to accommodate the data requested. To maintain the</span>
@@ -383,6 +384,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">default</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">field_mask</span><span class="p">[</span><span class="n">field_mask</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
                 <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">default</span><span class="p">,</span> <span class="n">field_mask</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{</span> <span class="n">field</span> <span class="p">:</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_mask</span><span class="p">}</span> <span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bad field_mask of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
@@ -430,6 +433,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">default</span> <span class="o">=</span> <span class="ow">not</span> <span class="p">(</span><span class="n">field_mask</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">field_mask</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]])</span>
                 <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">default</span><span class="p">,</span> <span class="n">field_mask</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{</span> <span class="n">field</span> <span class="p">:</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_mask</span><span class="p">}</span> <span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bad field_mask of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>

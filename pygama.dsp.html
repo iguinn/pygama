@@ -436,75 +436,84 @@ to store the output</p>
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp.build_processing_chain.</span></span><span class="sig-name descname"><span class="pre">build_processing_chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lh5_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsp_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/build_processing_chain.html#build_processing_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.build_processing_chain.build_processing_chain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Produces a ProcessingChain object and an lh5 table for output parameters
 from an input lh5 table and a json recipe.</p>
-<p>Returns (proc_chain, lh5_out):
-- proc_chain: ProcessingChain object that is bound to lh5_in and lh5_out;</p>
-<blockquote>
-<div><p>all you need to do is handle file i/o for lh5_in/out and run execute</p>
-</div></blockquote>
-<ul class="simple">
-<li><p>lh5_out: output LH5 table</p></li>
-</ul>
-<p>Required arguments:
-- lh5_in: input LH5 table
-- config: dict or name of json file containing a recipe for</p>
-<blockquote>
-<div><p>constructing the ProcessingChain object produced by this function.
-config is formated as a json dict with different processors. Config
-should have a dictionary called processors, containing dictionaries
-of the following format:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lh5_in</strong> (<em>lgdo.Table</em>) -- HDF5 table from which raw data is read. At least one row of entries
+should be read in prior to calling this!</p></li>
+<li><p><strong>dsp_config</strong> (<em>dict</em><em> or </em><em>str</em>) -- <p>A dict or json filename containing the recipes for computing DSP
+parameter from raw parameters. The format is as follows:
+{</p>
 <blockquote>
 <div><dl>
-<dt>Key: parameter name: name of parameter produced by the processor.</dt><dd><p>can optionally provide multiple, separated by spaces</p>
+<dt>&quot;outputs&quot;<span class="classifier">[ &quot;parnames&quot;, ... ] -&gt; list of output parameters</span></dt><dd><p>to compute by default; see outputs parameter.</p>
 </dd>
-<dt>Values:</dt><dd><p>processor (req): name of gufunc
-module (req): name of module in which to find processor
-prereqs (req): name of parameters from other processors and from</p>
+<dt>&quot;processors&quot;<span class="classifier">{</span></dt><dd><dl>
+<dt>&quot;name1, ...&quot;<span class="classifier">{ -&gt; names of parameters computed</span></dt><dd><dl class="simple">
+<dt>&quot;function&quot;<span class="classifier">str -&gt; name of function to call. Function</span></dt><dd><p>should implement the gufunc interface, a factory
+function returning a gufunc, or an arbitrary
+function that can be mapped onto a gufunc</p>
+</dd>
+</dl>
+<p>&quot;module&quot; : str -&gt; name of module containing function
+&quot;args&quot; : [ str or numeric, ... ] -&gt; list of names of</p>
 <blockquote>
-<div><p>input that are required to exist to run this</p>
+<div><p>computed and input parameters or constant values
+used as inputs to function. Note that outputs
+should be fed by reference as args! Arguments read
+from the database are prepended with db.</p>
 </div></blockquote>
 <dl class="simple">
-<dt>args (req): list of arguments for processor, with variables passed</dt><dd><p>by name or value. Names should either be inputs from lh5_in, or
-parameter names for other processors. Names of the format db.name
-will look up the parameter in the metadata.</p>
+<dt>&quot;kwargs&quot;<span class="classifier">dict -&gt; keyword arguments for</span></dt><dd><p>ProcesssingChain.add_processor.</p>
+</dd>
+<dt>&quot;init_args&quot;<span class="classifier">[ str or numeric, ... ] -&gt; list of names</span></dt><dd><p>of computed and input parameters or constant values
+used to initialize a gufunc via a factory function</p>
 </dd>
 </dl>
-<p>kwargs (opt): kwargs used when adding processors to proc_chain
-init_args (opt): args used when initializing a processor that has</p>
+<p>&quot;unit&quot; : str or [ strs, ... ] -&gt; units for parameters
+&quot;defaults&quot; : dict -&gt; default value to be used for</p>
 <blockquote>
-<div><p>static data (for factory functions)</p>
+<div><p>arguments read from the database</p>
 </div></blockquote>
-<p>default (opt): default value for db parameters if not found
-unit (opt): unit to be used for attr in lh5 file.</p>
+<dl class="simple">
+<dt>&quot;prereqs&quot;<span class="classifier">DEPRECATED [ strs, ...] -&gt; list of parameters</span></dt><dd><p>that must be computed before these can</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}</p>
 </dd>
 </dl>
 </div></blockquote>
-<p>There may also be a list called 'outputs', containing a list of parameters
-to put into lh5_out.</p>
-</div></blockquote>
-<p>Optional keyword arguments:
-- outputs: list of parameters to put in the output lh5 table. If None,</p>
-<blockquote>
-<div><p>use the parameters in the 'outputs' list from config</p>
-</div></blockquote>
-<ul>
-<li><p>db_dict: a nested dict pointing to values for db args.
-e.g. if a processor uses arg db.trap.risetime, it will look up</p>
+</p></li>
+<li><p><strong>outputs</strong> (<em>[</em><em>str</em><em>, </em><em>...</em><em>] </em><em>(</em><em>optional</em><em>)</em>) -- List of parameters to put in the output lh5 table. If None,
+use the parameters in the 'outputs' list from config</p></li>
+<li><p><strong>db_dict</strong> (<em>dict</em><em> (</em><em>optional</em><em>)</em>) -- <p>A nested dict pointing to values for db args. e.g. if a processor
+uses arg db.trap.risetime, it will look up</p>
 <blockquote>
 <div><p>db_dict['trap']['risetime']</p>
 </div></blockquote>
-<p>and use the found value. If no value is found, use the default defined
-in the config file.</p>
-</li>
-<li><dl class="simple">
-<dt>verbosity: verbosity level:</dt><dd><p>0: Print nothing (except errors...)
+<p>and use the found value. If no value is found, use the default
+defined in the config file.</p>
+</p></li>
+<li><p><strong>verbosity</strong> (<em>int</em><em> (</em><em>optional</em><em>)</em>) -- 0: Print nothing (except errors...)
 1: Print basic warnings (default)
 2: Print basic debug info
-3: Print friggin' everything!</p>
+3: Print friggin' everything!</p></li>
+<li><p><strong>block_width</strong> (<em>int</em><em> (</em><em>optional</em><em>)</em>) -- number of entries to process at once. To optimize performance,
+a multiple of 16 is preferred, but if performance is not an issue
+any value can be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>(proc_chain, field_mask, lh5_out)</strong> -- proc_chain : ProcessingChain object that is executed
+field_mask : List of input fields that are used
+lh5_out : output lh5 table containing processed values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
 </dd>
 </dl>
-</li>
-<li><p>block_width: number of entries to process at once.</p></li>
-</ul>
 </dd></dl>
 
 </div>
