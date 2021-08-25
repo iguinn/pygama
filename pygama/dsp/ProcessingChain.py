@@ -12,6 +12,15 @@ ast_ops_dict = {ast.Add: np.add, ast.Sub: np.subtract, ast.Mult: np.multiply,
                 ast.USub: np.negative}
 
 
+def ndarray_aligned(shape, dtype='f', alignment=64):
+    """Helper to produce an aligned fortran-style array"""
+    dtype = np.dtype(dtype)
+    extra = alignment // dtype.itemsize
+    arr = np.zeros(np.prod(shape)+extra, dtype=dtype)
+    shift = arr.ctypes.data%alignment // dtype.itemsize
+    if shift==0: shift = extra
+    return arr[extra-shift:-shift].reshape(*shape, order='F')
+
 class ProcessingChain:
     """
     A ProcessingChain is used to efficiently perform a sequence of digital
@@ -204,6 +213,8 @@ class ProcessingChain:
                 param_val = self.get_variable(param)
                 if param_val is not None:
                     param=param_val
+                elif param=="None":
+                    param = None
             params.append(param)
 
         # Make sure arrays obey the broadcasting rules, and make a dictionary
@@ -362,7 +373,7 @@ class ProcessingChain:
             return node.s
 
         elif isinstance(node, ast.Constant):
-            return node.val
+            return node.n
 
         # look for name in variable dictionary
         elif isinstance(node, ast.Name):
@@ -489,7 +500,7 @@ class ProcessingChain:
                             raise ProcessingChainError("Requested shape and type for " + func + " do not match existing values")
                         return var
                     else:
-                        var = np.zeros(shape, dtype, 'F')
+                        var = ndarray_aligned(shape, dtype)
                         if allocate_memory:
                             self.__vars_dict[func] = var
                             self.__print(2, 'Added variable', func, 'with shape', tuple(shape), 'and type', dtype)
@@ -509,7 +520,7 @@ class ProcessingChain:
             raise ProcessingChainError(name+' is not a valid alphanumeric name')
         if name in self.__vars_dict:
             raise ProcessingChainError(name+' is already in variable list')
-        arr = np.zeros(shape, dtype)
+        arr = ndarray_aligned(shape, dtype)
         self.__vars_dict[name] = arr
         self.__print(2, 'Added variable', re.search('(\w+)', name).group(0), 'with shape', tuple(shape), 'and type', dtype)
         return arr
@@ -602,7 +613,7 @@ class ProcessingChain:
                     dtype=var.dtype
                 else:
                     dtype=np.dtype('float'+str(var.dtype.itemsize*8))
-            buff = np.zeros((self._buffer_len,)+var.shape[1:], dtype)
+            buff = ndarray_aligned((self._buffer_len,)+var.shape[1:], dtype)
             returnbuffer=True
 
         # Check that the buffer length is correct. For 1D buffer, reshape
@@ -651,4 +662,3 @@ class ProcessingChain:
             ret += '\n' + proc[0].__name__ + str(strs)
         ret += '\nOutput variables: ' + str([name for name in self.__output_buffers.keys()])
         return ret.replace("'", "")
-

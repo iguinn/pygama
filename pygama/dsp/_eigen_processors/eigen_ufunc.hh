@@ -6,7 +6,6 @@
 #define _EIGEN_UFUNC_HH_
 
 #include <tuple>
-#include <string>
 #include <vector>
 #include <type_traits>
 
@@ -22,7 +21,8 @@
 
 // The first part of this contains all of the typedefs that we would need
 // to work with eigen. These could be placed in a header file.
-const int align = Eigen::Aligned64;
+const int Aligned = Eigen::Aligned64;
+const int Unaligned = Eigen::Unaligned;
 
 // Data storage classes. Do not pass these to functions, to avoid copying. If
 // used for tmp variable storage, use static thread_local to avoid reallocating
@@ -39,7 +39,7 @@ template<typename T, int Align>
 using wfblock_ref    = Eigen::Ref<wfblock<T, (Align>0 ? Align/sizeof(T) : 1)>, Align, typename std::conditional< (Align>0), Eigen::OuterStride<Eigen::Dynamic>, Eigen::InnerStride<Eigen::Dynamic> >::type >;
 
 template<typename T, int Align>
-using scalarblock_ref = Eigen::Ref<scalarblock<T, (Align>0 ? Align/sizeof(T) : 1)>, Align, Eigen::OuterStride<1> >;
+using scalarblock_ref = Eigen::Ref<scalarblock<T, (Align>0 ? Align/sizeof(T) : 1)>, Align, typename std::conditional< (Align>0), Eigen::OuterStride<Eigen::Dynamic>, Eigen::InnerStride<Eigen::Dynamic> >::type >;
 
 // Read only references to data holding class or array expressions. Use this
 // for inputs, so that you can send in things like replications of scalars!
@@ -219,8 +219,7 @@ void execute_ufunc( void(*f_align)(T_align...), void(*f_unalign)(T_unalign...), 
 
 
 struct ufunc_signature {
-  std::string fTypes;
-  std::string fSignature;
+  const char* fTypes;
   size_t fNargs;
   size_t fNin;
   size_t fNout;
@@ -240,14 +239,7 @@ auto get_signature( void(*f_align)(T_align...), void(*f_unalign)(T_unalign...)) 
   sig.fNargs = n_args;
   sig.fNin = ( (size_t)(arg_info<T_align>::is_const) + ...);
   sig.fNout = sig.fNargs - sig.fNin;
-  
-  bool has_inner_dim[n_args] = {arg_info<T_align>::has_inner_dim...};
-  for(size_t i_arg=0; i_arg<n_args; i_arg++) {
-    if(i_arg>0) sig.fSignature += (i_arg==sig.fNin ? "->" : ",");
-    sig.fSignature += (has_inner_dim[i_arg] ? "(n)" : "()");
-  }
-  
-  ( (sig.fTypes += arg_info<T_align>::dtype_char), ...);
+  sig.fTypes = (const char[]) { arg_info<T_align>::dtype_char... };
 		   
   return sig;
 }
@@ -258,9 +250,10 @@ auto get_signature( void(*f_align)(T_align...), void(*f_unalign)(T_unalign...)) 
   static std::pair<PyUFuncGenericFunction, ufunc_signature> ufunc_impl	\
      = std::make_pair( [](char** args, const npy_intp* dims,		\
 			  const npy_intp* steps, void*) {		\
-		execute_ufunc( f_align, f_unalign, args, dims, steps);  \
+			 execute_ufunc( f_align, f_unalign, args,	\
+					dims, steps);			\
 		       },						\
-		    get_signature(f_align, f_unalign) );		\
+		       get_signature(f_align, f_unalign) );		\
 
 
 // Collect list of ufunc implementations as a single ufunc
@@ -269,39 +262,38 @@ struct ufunc_implementation {
   PyUFuncGenericFunction* fFuncs;
   char* fTypeSigs;
   size_t fNargs, fNin, fNout;
-  std::string fSignature;
-  std::string fName;
-  std::string fDescription;
+  const char* fName;
+  const char* fSignature;
+  const char* fDescription;
 
-  ufunc_implementation(const std::vector<std::pair<PyUFuncGenericFunction, ufunc_signature> >& impl_list, const std::string& name, const std::string& description) :
+  ufunc_implementation(const std::vector<std::pair<PyUFuncGenericFunction, ufunc_signature> >& impl_list, const char* name, const char* signature, const char* description) :
     fN(0), fFuncs(NULL), fTypeSigs(NULL), fNargs(0), fNin(0), fNout(0),
-    fSignature(""), fName(name), fDescription(description) {
+    fName(name), fSignature(signature), fDescription(description) {
     for(auto impl : impl_list) {
       auto info = impl.second;
       if(fNargs==0) fNargs = info.fNargs;
       if(fNin==0) fNin = info.fNin;
       if(fNout==0) fNout = info.fNout;
-      if(fSignature=="") fSignature = info.fSignature;
       // Make sure all functions have the same signature!
-      assert(fNargs==info.fNargs && fNin==info.fNin && fNout==info.fNout &&
-	     fSignature==info.fSignature);
-
+      assert(fNargs==info.fNargs && fNin==info.fNin && fNout==info.fNout);
+      
       if(fFuncs==NULL)
 	fFuncs = new PyUFuncGenericFunction[impl_list.size()];
       fFuncs[fN] = impl.first;
-
+      
       if(fTypeSigs==NULL)
 	fTypeSigs = new char[fNargs*impl_list.size()];
-      strncpy(fTypeSigs + fN*fNargs, info.fTypes.c_str(), fNargs);
+      strncpy(fTypeSigs + fN*fNargs, info.fTypes, fNargs);
       fN++;
     }
   }
 };
 
-#define create_ufunc(ufunc_var, ufunc_name, ufunc_description, ...)	\
+#define create_ufunc(ufunc_var, ufunc_name, ufunc_sig, ufunc_doc, ...)	\
   static ufunc_implementation ufunc_var({ __VA_ARGS__ },		\
 					ufunc_name,			\
-					ufunc_description);
+					ufunc_sig,			\
+					ufunc_doc );
 
 
 #define create_module(module_name, ...)					\
@@ -317,7 +309,7 @@ struct ufunc_implementation {
   };									\
   static void *data[1] = { NULL };					\
 									\
-  PyMODINIT_FUNC PyInit_##module_name(void) {				\
+PyMODINIT_FUNC PyInit_##module_name(void) {				\
     PyObject* m = PyModule_Create(&moduledef);				\
     if(!m) return NULL;							\
 									\
@@ -325,13 +317,14 @@ struct ufunc_implementation {
     import_umath();							\
 									\
     PyObject* d = PyModule_GetDict(m);					\
+    									\
     std::vector<ufunc_implementation> ufunc_list = { __VA_ARGS__ };	\
     for(ufunc_implementation& ufunc : ufunc_list ) {			\
       PyObject* ufunc_obj = PyUFunc_FromFuncAndDataAndSignature(        \
         ufunc.fFuncs, data, ufunc.fTypeSigs, ufunc.fN,                  \
-	ufunc.fNin, ufunc.fNout, PyUFunc_None, ufunc.fName.c_str(),	\
-	ufunc.fDescription.c_str(), 0, ufunc.fSignature.c_str() );	\
-      PyDict_SetItemString(d, ufunc.fName.c_str(), ufunc_obj);		\
+	ufunc.fNin, ufunc.fNout, PyUFunc_None, ufunc.fName,		\
+	ufunc.fDescription, 0, ufunc.fSignature );			\
+      PyDict_SetItemString(d, ufunc.fName, ufunc_obj);			\
       Py_DECREF(ufunc_obj);						\
     }									\
 									\
