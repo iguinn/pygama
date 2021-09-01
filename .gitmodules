@@ -1,4 +1,4 @@
-[submodule "pygama/dsp/_eigen_processors/eigen"]
-	path = pygama/dsp/_eigen_processors/eigen
+[submodule "pygama/dsp/eigama/eigen"]
+	path = pygama/dsp/eigama/eigen
 	url = https://gitlab.com/libeigen/eigen.git
 	branch = 3.4.0

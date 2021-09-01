@@ -98,16 +98,16 @@ setup(
         'matplotlib'
         # 'fcutils @ https://github.com/legend-exp/pyfcutils.git#egg=1.0.0'
     ],
-    ext_modules=[Extension(name = 'pygama.dsp._eigen_processors.' + os.path.splitext(os.path.basename(src))[0],
+    ext_modules=[Extension(name = 'pygama.dsp.eigama.' + os.path.splitext(os.path.basename(src))[0],
                            sources = [src],
                            include_dirs=[
-                               'pygama/dsp/_eigen_processors',
-                               'pygama/dsp/_eigen_processors/eigen',
+                               'pygama/dsp/eigama',
+                               'pygama/dsp/eigama/eigen',
                                numpy.get_include()
                            ],
                            extra_compile_args=["-std=c++17"]
                            )
-                 for src in glob.glob('pygama/dsp/_eigen_processors/*.cpp')],
+                 for src in glob.glob('pygama/dsp/eigama/*.cpp')],
     cmdclass=dict(build_ext=PygamaExt, build_py=PygamaBuild, develop=PygamaDev),
     zip_safe=False,
 )
