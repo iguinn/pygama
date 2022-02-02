@@ -68,6 +68,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">.orcadaq</span> <span class="kn">import</span> <span class="n">OrcaDecoder</span><span class="p">,</span> <span class="n">get_ccc</span>
+<span class="kn">from</span> <span class="nn">pygama.lh5</span> <span class="kn">import</span> <span class="n">Table</span>
 
 <div class="viewcode-block" id="ORCAStruck3302"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302">[docs]</a><span class="k">class</span> <span class="nc">ORCAStruck3302</span><span class="p">(</span><span class="n">OrcaDecoder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -373,7 +374,7 @@
             <span class="n">mrpsrt</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Mrpsrt&#39;</span><span class="p">]</span> <span class="c1"># index for channel&#39;s presum rate</span>
             <span class="n">dividers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span> <span class="p">]</span> <span class="c1"># dividers for presummed data</span>
             <span class="n">mrpsdv</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Mrpsdv&#39;</span><span class="p">]</span> <span class="c1"># index for channel&#39;s divider</span>
-            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
                 <span class="c1"># only care about enabled channels</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">is_enabled</span><span class="p">[</span><span class="n">channel</span><span class="p">]:</span> <span class="k">continue</span>
                 <span class="n">ccc</span> <span class="o">=</span> <span class="n">get_ccc</span><span class="p">(</span><span class="n">crate</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
@@ -421,7 +422,7 @@
 
         <span class="c1"># aliases for brevity</span>
         <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tb</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tb</span><span class="p">,</span> <span class="n">Table</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lh5_tables</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
