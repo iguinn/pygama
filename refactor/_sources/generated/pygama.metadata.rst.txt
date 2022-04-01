@@ -1,0 +1,7 @@
+pygama.metadata package
+=======================
+
+.. automodule:: pygama.metadata
+   :members:
+   :undoc-members:
+   :show-inheritance:

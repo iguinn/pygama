@@ -1,0 +1,18 @@
+pygama.vis package
+==================
+
+.. automodule:: pygama.vis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+pygama.vis.waveform\_browser module
+-----------------------------------
+
+.. automodule:: pygama.vis.waveform_browser
+   :members:
+   :undoc-members:
+   :show-inheritance:
