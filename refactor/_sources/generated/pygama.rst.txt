@@ -18,7 +18,6 @@ Subpackages
    pygama.hit
    pygama.lgdo
    pygama.math
-   pygama.metadata
    pygama.pargen
    pygama.raw
    pygama.vis
