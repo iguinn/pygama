@@ -5,6 +5,7 @@ pygama.vis package
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 Submodules
 ----------
@@ -16,3 +17,4 @@ pygama.vis.waveform\_browser module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:

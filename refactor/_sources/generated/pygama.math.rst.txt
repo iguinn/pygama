@@ -5,6 +5,7 @@ pygama.math package
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 Submodules
 ----------
@@ -16,6 +17,7 @@ pygama.math.histogram module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.math.peak\_fitting module
 --------------------------------
@@ -24,6 +26,7 @@ pygama.math.peak\_fitting module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.math.units module
 ------------------------
@@ -32,6 +35,7 @@ pygama.math.units module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.math.utils module
 ------------------------
@@ -40,3 +44,4 @@ pygama.math.utils module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:

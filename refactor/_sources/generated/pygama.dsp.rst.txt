@@ -5,6 +5,15 @@ pygama.dsp package
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pygama.dsp._processors
 
 Submodules
 ----------
@@ -16,6 +25,7 @@ pygama.dsp.build\_dsp module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.dsp.errors module
 ------------------------
@@ -24,6 +34,7 @@ pygama.dsp.errors module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.dsp.processing\_chain module
 -----------------------------------
@@ -32,6 +43,7 @@ pygama.dsp.processing\_chain module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.dsp.processors module
 ----------------------------
@@ -40,3 +52,4 @@ pygama.dsp.processors module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:

@@ -5,6 +5,7 @@ pygama.pargen package
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 Submodules
 ----------
@@ -16,6 +17,7 @@ pygama.pargen.data\_cleaning module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.pargen.dsp\_optimize module
 ----------------------------------
@@ -24,6 +26,7 @@ pygama.pargen.dsp\_optimize module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.pargen.ecal\_th module
 -----------------------------
@@ -32,6 +35,7 @@ pygama.pargen.ecal\_th module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.pargen.energy\_cal module
 --------------------------------
@@ -40,6 +44,7 @@ pygama.pargen.energy\_cal module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 pygama.pargen.mse\_psd module
 -----------------------------
@@ -48,3 +53,4 @@ pygama.pargen.mse\_psd module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:

@@ -5,6 +5,7 @@ pygama.flow package
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 Submodules
 ----------
@@ -16,3 +17,4 @@ pygama.flow.datagroup module
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
