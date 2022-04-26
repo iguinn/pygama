@@ -76,8 +76,8 @@
       <div class="rst-other-versions">
         <dl>
           <dt>Branches</dt>
-          <dd><a href="../../main/index.html">main</a></dd>
           <dd><a href="pygama.raw.fc.html">refactor</a></dd>
+          <dd><a href="../../main/index.html">main</a></dd>
         </dl>
       </div>
     </div>
@@ -152,10 +152,10 @@ required for this decoder, overload this function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>etc</em>) -- used by init_obj to initialize the lgdo for a particular key (e.g.
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>etc</em>) -- used by init_obj to initialize the lgdo for a particular key (e.g.
 to have different trace lengths for different channels of a piece of
 hardware). Leave as None if such specialization is not necessary</p></li>
-<li><p><strong>size</strong> (<em>int</em>) -- the size to be allocated for the lgdo, if applicable</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- the size to be allocated for the lgdo, if applicable</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -191,18 +191,18 @@ hardware). Leave as None if such specialization is not necessary</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fcio</strong> (<em>fcio reader object</em>) -- The interface to the fcio data. Enters this function after a call to
 fcio.get_record() so that data for packet_id ready to be read out</p></li>
-<li><p><strong>lgdo_tables</strong> (<em>lgdo.Table</em><em> or </em><em>dict</em>) -- A single table for reading out all data, or a dict of tables keyed
+<li><p><strong>lgdo_tables</strong> (<em>lgdo.Table</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- A single table for reading out all data, or a dict of tables keyed
 by channel number (i.e. as returned by raw_groups.build_tables())</p></li>
-<li><p><strong>packet_id</strong> (<em>int</em>) -- The index of the packet in the fcio stream. Incremented by
+<li><p><strong>packet_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The index of the packet in the fcio stream. Incremented by
 fc_streamer</p></li>
-<li><p><strong>verbosity</strong> (<em>int</em>) -- verbosity level for packet decoding</p></li>
+<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- verbosity level for packet decoding</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>n_bytes</strong> -- (estimated) number of bytes in the packet that was just decoded.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -273,7 +273,7 @@ fc_config = FCConfigDecoder.decode_config(fcio)</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
+    <p>&#169; Copyright 2020, the LEGEND Collaboration.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

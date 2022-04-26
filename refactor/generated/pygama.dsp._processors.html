@@ -50,7 +50,7 @@
 <li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#pygama-dsp-build-dsp-module">pygama.dsp.build_dsp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#module-pygama.dsp.errors">pygama.dsp.errors module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#module-pygama.dsp.processing_chain">pygama.dsp.processing_chain module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#module-pygama.dsp.processors">pygama.dsp.processors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#pygama-dsp-processors-module">pygama.dsp.processors module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pygama.flow.html">pygama.flow package</a></li>
@@ -76,8 +76,8 @@
       <div class="rst-other-versions">
         <dl>
           <dt>Branches</dt>
-          <dd><a href="../../main/index.html">main</a></dd>
           <dd><a href="pygama.dsp._processors.html">refactor</a></dd>
+          <dd><a href="../../main/index.html">main</a></dd>
         </dl>
       </div>
     </div>
@@ -113,6 +113,9 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
 </section>
+<section id="pygama-dsp-processors-wiener-filter-module">
+<h2>pygama.dsp._processors.Wiener_filter module<a class="headerlink" href="#pygama-dsp-processors-wiener-filter-module" title="Permalink to this headline"></a></h2>
+</section>
 <section id="module-pygama.dsp._processors.bl_subtract">
 <span id="pygama-dsp-processors-bl-subtract-module"></span><h2>pygama.dsp._processors.bl_subtract module<a class="headerlink" href="#module-pygama.dsp._processors.bl_subtract" title="Permalink to this headline"></a></h2>
 <dl class="py function">
@@ -123,7 +126,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>a_in</strong> (<em>float</em>) -- The baseline value to subtract</p></li>
+<li><p><strong>a_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The baseline value to subtract</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The output waveform with the baseline subtracted</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -320,8 +323,8 @@ provided index is out of range, return NaN.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>t_in</strong> (<em>int</em>) -- The waveform index to pick off</p></li>
-<li><p><strong>a_out</strong> (<em>float</em>) -- The output pick-off value</p></li>
+<li><p><strong>t_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The waveform index to pick off</p></li>
+<li><p><strong>a_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output pick-off value</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
 <li><p><strong>&quot;trapEftp&quot;</strong> -- &quot;function&quot;: &quot;fixed_time_pickoff&quot;,
@@ -402,10 +405,10 @@ using linear regression.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>a_mean</strong> (<em>float</em>) -- The mean of the waveform</p></li>
-<li><p><strong>stdev</strong> (<em>float</em>) -- The standard deviation of the waveform</p></li>
-<li><p><strong>slope</strong> (<em>float</em>) -- The slope of the linear fit</p></li>
-<li><p><strong>intercept</strong> (<em>float</em>) -- The intercept of the linear fit</p></li>
+<li><p><strong>a_mean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The mean of the waveform</p></li>
+<li><p><strong>stdev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The standard deviation of the waveform</p></li>
+<li><p><strong>slope</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The slope of the linear fit</p></li>
+<li><p><strong>intercept</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The intercept of the linear fit</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
 <li><p><strong>&quot;bl_mean</strong> -- &quot;function&quot;: &quot;linear_slope_fit&quot;,
@@ -473,10 +476,10 @@ in the waveform will be returned.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>t_min</strong> (<em>int</em>) -- The index of the minimum value</p></li>
-<li><p><strong>t_max</strong> (<em>int</em>) -- The index of the maximum value</p></li>
-<li><p><strong>a_min</strong> (<em>float</em>) -- The minimum value</p></li>
-<li><p><strong>a_max</strong> (<em>float</em>) -- The maximum value</p></li>
+<li><p><strong>t_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The index of the minimum value</p></li>
+<li><p><strong>t_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The index of the maximum value</p></li>
+<li><p><strong>a_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The minimum value</p></li>
+<li><p><strong>a_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The maximum value</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
 <li><p><strong>&quot;tp_min</strong> -- &quot;function&quot;: &quot;min_max&quot;,
@@ -517,7 +520,7 @@ number of samples.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>length</strong> (<em>int</em>) -- The length of the moving window</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the moving window</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The output derivative</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -540,7 +543,7 @@ number of samples.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>length</strong> (<em>int</em>) -- The length of the moving window</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the moving window</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The windowed waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -564,8 +567,8 @@ its application between the left and the right.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>length</strong> (<em>int</em>) -- The length of the moving window</p></li>
-<li><p><strong>num_mw</strong> (<em>int</em>) -- The number of moving windows</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the moving window</p></li>
+<li><p><strong>num_mw</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of moving windows</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The windowed waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -588,7 +591,7 @@ its application between the left and the right.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>length</strong> (<em>int</em>) -- The length of the moving window</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the moving window</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The windowed waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -687,7 +690,7 @@ t_in : array-like</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pygama.dsp._processors.optimize.Model">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.optimize.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.optimize.Model" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The model class containing the function to minimize.</p>
 </dd></dl>
 
@@ -700,13 +703,13 @@ by minimizing the slope in the waveform's specified time range.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>a_baseline_in</strong> (<em>float</em>) -- The resting baseline</p></li>
-<li><p><strong>t_beg_in</strong> (<em>int</em>) -- The lower bound's index for the time range over
+<li><p><strong>a_baseline_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The resting baseline</p></li>
+<li><p><strong>t_beg_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The lower bound's index for the time range over
 which to optimize the pole-zero cancellation</p></li>
-<li><p><strong>t_end_in</strong> (<em>int</em>) -- The upper bound's index for the time range over
+<li><p><strong>t_end_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The upper bound's index for the time range over
 which to optimize the pole-zero cancellation</p></li>
-<li><p><strong>p0_in</strong> (<em>float</em>) -- The initial guess of the optimal time constant</p></li>
-<li><p><strong>val0_out</strong> (<em>float</em>) -- The output value of the best-fit time constant</p></li>
+<li><p><strong>p0_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The initial guess of the optimal time constant</p></li>
+<li><p><strong>val0_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output value of the best-fit time constant</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
 <li><p><strong>&quot;tau0&quot;</strong> -- &quot;function&quot;: &quot;optimize_1pz&quot;,
@@ -729,17 +732,17 @@ by minimizing the slope in the waveform's specified time range.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>a_baseline_in</strong> (<em>float</em>) -- The resting baseline</p></li>
-<li><p><strong>t_beg_in</strong> (<em>int</em>) -- The lower bound's index for the time range over
+<li><p><strong>a_baseline_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The resting baseline</p></li>
+<li><p><strong>t_beg_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The lower bound's index for the time range over
 which to optimize the pole-zero cancellation</p></li>
-<li><p><strong>t_end_in</strong> (<em>int</em>) -- The upper bound's index for the time range over
+<li><p><strong>t_end_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The upper bound's index for the time range over
 which to optimize the pole-zero cancellation</p></li>
-<li><p><strong>p0_in</strong> (<em>float</em>) -- The initial guess of the optimal, longer time constant</p></li>
-<li><p><strong>p1_in</strong> (<em>float</em>) -- The initial guess of the optimal, shorter time constant</p></li>
-<li><p><strong>p2_in</strong> (<em>float</em>) -- The initial guess of the optimal fraction</p></li>
-<li><p><strong>val0_out</strong> (<em>float</em>) -- The output value of the best-fit, longer time constant</p></li>
-<li><p><strong>val1_out</strong> (<em>float</em>) -- The output value of the best-fit, shorter time constant</p></li>
-<li><p><strong>val2_out</strong> (<em>float</em>) -- The output value of the best-fit fraction</p></li>
+<li><p><strong>p0_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The initial guess of the optimal, longer time constant</p></li>
+<li><p><strong>p1_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The initial guess of the optimal, shorter time constant</p></li>
+<li><p><strong>p2_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The initial guess of the optimal fraction</p></li>
+<li><p><strong>val0_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output value of the best-fit, longer time constant</p></li>
+<li><p><strong>val1_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output value of the best-fit, shorter time constant</p></li>
+<li><p><strong>val2_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output value of the best-fit fraction</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
 <li><p><strong>&quot;tau1</strong> -- &quot;function&quot;: &quot;optimize_2pz&quot;,
@@ -786,9 +789,9 @@ constant to the waveform.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>t_tau1</strong> (<em>float</em>) -- The time constant of the first exponential to be deconvolved</p></li>
-<li><p><strong>t_tau2</strong> (<em>float</em>) -- The time constant of the second exponential to be deconvolved</p></li>
-<li><p><strong>frac</strong> (<em>float</em>) -- The fraction which the second exponential contributes</p></li>
+<li><p><strong>t_tau1</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The time constant of the first exponential to be deconvolved</p></li>
+<li><p><strong>t_tau2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The time constant of the second exponential to be deconvolved</p></li>
+<li><p><strong>frac</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The fraction which the second exponential contributes</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The pole-zero cancelled waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -812,7 +815,7 @@ constant to the waveform.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>t_tau</strong> (<em>float</em>) -- The time constant of the exponential to be deconvolved</p></li>
+<li><p><strong>t_tau</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The time constant of the exponential to be deconvolved</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The pole-zero cancelled waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -847,6 +850,21 @@ will be omitted.</p>
 </dd></dl>
 
 </section>
+<section id="module-pygama.dsp._processors.pulse_injector">
+<span id="pygama-dsp-processors-pulse-injector-module"></span><h2>pygama.dsp._processors.pulse_injector module<a class="headerlink" href="#module-pygama.dsp._processors.pulse_injector" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.dsp._processors.pulse_injector.inject_exp_pulse">
+<span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.pulse_injector.</span></span><span class="sig-name descname"><span class="pre">inject_exp_pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wf_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.pulse_injector.inject_exp_pulse" title="Permalink to this definition"></a></dt>
+<dd><p>Inject exponential pulse into existing waveform to simulate pileup</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.dsp._processors.pulse_injector.inject_sig_pulse">
+<span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.pulse_injector.</span></span><span class="sig-name descname"><span class="pre">inject_sig_pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wf_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.pulse_injector.inject_sig_pulse" title="Permalink to this definition"></a></dt>
+<dd><p>Inject sigmoid pulse into existing waveform to simulate pileup</p>
+</dd></dl>
+
+</section>
 <section id="module-pygama.dsp._processors.saturation">
 <span id="pygama-dsp-processors-saturation-module"></span><h2>pygama.dsp._processors.saturation module<a class="headerlink" href="#module-pygama.dsp._processors.saturation" title="Permalink to this headline"></a></h2>
 <dl class="py function">
@@ -859,9 +877,9 @@ on the bit depth.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>bit_depth_in</strong> (<em>int</em>) -- The bit depth of the analog-to-digital converter</p></li>
-<li><p><strong>n_lo_out</strong> (<em>int</em>) -- The output number of samples at the minimum</p></li>
-<li><p><strong>n_hi_out</strong> (<em>int</em>) -- The output number of samples at the maximum</p></li>
+<li><p><strong>bit_depth_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The bit depth of the analog-to-digital converter</p></li>
+<li><p><strong>n_lo_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The output number of samples at the minimum</p></li>
+<li><p><strong>n_hi_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The output number of samples at the maximum</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
 <li><p><strong>&quot;sat_lo</strong> -- &quot;function&quot;: &quot;saturation&quot;,
@@ -893,9 +911,9 @@ entire waveform.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>n_in</strong> (<em>int</em>) -- The number of samples at the beginning of the waveform
+<li><p><strong>n_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples at the beginning of the waveform
 to fit to an exponential</p></li>
-<li><p><strong>tau_in</strong> (<em>float</em>) -- The fixed, exponential time constant</p></li>
+<li><p><strong>tau_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The fixed, exponential time constant</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The output waveform with the exponential subtracted</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -920,10 +938,10 @@ entire waveform.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>n_in</strong> (<em>int</em>) -- The number of samples at the beginning of the waveform
+<li><p><strong>n_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples at the beginning of the waveform
 to fit to an exponential</p></li>
-<li><p><strong>tau_in</strong> (<em>float</em>) -- The fixed, exponential time constant</p></li>
-<li><p><strong>B_in</strong> (<em>float</em>) -- The fixed, exponential constant</p></li>
+<li><p><strong>tau_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The fixed, exponential time constant</p></li>
+<li><p><strong>B_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The fixed, exponential constant</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The output waveform with the exponential subtracted</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -960,10 +978,10 @@ walking either forward or backward from the starting index.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>a_threshold</strong> (<em>float</em>) -- The threshold value</p></li>
-<li><p><strong>t_start</strong> (<em>int</em>) -- The starting index</p></li>
-<li><p><strong>walk_forward</strong> (<em>int</em>) -- The backward (0) or forward (1) search direction</p></li>
-<li><p><strong>t_out</strong> (<em>float</em>) -- The index where the waveform value crosses the threshold</p></li>
+<li><p><strong>a_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The threshold value</p></li>
+<li><p><strong>t_start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The starting index</p></li>
+<li><p><strong>walk_forward</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The backward (0) or forward (1) search direction</p></li>
+<li><p><strong>t_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The index where the waveform value crosses the threshold</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
 <li><p><strong>&quot;tp_0&quot;</strong> -- &quot;function&quot;: &quot;time_point_thresh&quot;,
@@ -989,9 +1007,9 @@ by the number of samples averaged in the rise and fall sections.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>rise</strong> (<em>int</em>) -- The number of samples averaged in the rise section</p></li>
-<li><p><strong>flat</strong> (<em>int</em>) -- The delay between the rise and fall sections</p></li>
-<li><p><strong>fall</strong> (<em>int</em>) -- The number of samples averaged in the fall section</p></li>
+<li><p><strong>rise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples averaged in the rise section</p></li>
+<li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The delay between the rise and fall sections</p></li>
+<li><p><strong>fall</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples averaged in the fall section</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The normalized, filtered waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -1014,8 +1032,8 @@ by the number of samples averaged in the rise and fall sections.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>rise</strong> (<em>int</em>) -- The number of samples averaged in the rise and fall sections</p></li>
-<li><p><strong>flat</strong> (<em>int</em>) -- The delay between the rise and fall sections</p></li>
+<li><p><strong>rise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples averaged in the rise and fall sections</p></li>
+<li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The delay between the rise and fall sections</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The filtered waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -1039,8 +1057,8 @@ by the number of samples averaged in the rise and fall sections.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>rise</strong> (<em>int</em>) -- The number of samples averaged in the rise and fall sections</p></li>
-<li><p><strong>flat</strong> (<em>int</em>) -- The delay between the rise and fall sections</p></li>
+<li><p><strong>rise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples averaged in the rise and fall sections</p></li>
+<li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The delay between the rise and fall sections</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The normalized, filtered waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
@@ -1065,10 +1083,10 @@ in the rise and fall sections.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>rise</strong> (<em>int</em>) -- The number of samples averaged in the rise and fall sections</p></li>
-<li><p><strong>flat</strong> (<em>int</em>) -- The delay between the rise and fall sections</p></li>
-<li><p><strong>t_pickoff</strong> (<em>float</em>) -- The waveform index to pick off</p></li>
-<li><p><strong>a_out</strong> (<em>float</em>) -- The output pick-off value of the filtered waveform</p></li>
+<li><p><strong>rise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples averaged in the rise and fall sections</p></li>
+<li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The delay between the rise and fall sections</p></li>
+<li><p><strong>t_pickoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The waveform index to pick off</p></li>
+<li><p><strong>a_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output pick-off value of the filtered waveform</p></li>
 <li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
 <li><p><strong>------------------------</strong> -- </p></li>
 <li><p><strong>&quot;ct_corr&quot;</strong> -- &quot;function&quot;: &quot;trap_pickoff&quot;,
@@ -1098,7 +1116,7 @@ values are padded with NaN.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>t0_in</strong> (<em>int</em>) -- The starting index of the window</p></li>
+<li><p><strong>t0_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The starting index of the window</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The windowed waveform</p></li>
 </ul>
 </dd>
@@ -1119,7 +1137,7 @@ values are padded with NaN.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
+    <p>&#169; Copyright 2020, the LEGEND Collaboration.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
