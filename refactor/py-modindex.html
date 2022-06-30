@@ -6,6 +6,7 @@
   <title>Python Module Index &mdash; pygama  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -13,7 +14,10 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,9 +44,10 @@
     
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manuals/index.html">User Manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials (Jupyter notebooks)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated/pygama.html">Package API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/modules.html">Package API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer's guide</a></li>
 </ul>
 
     <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
@@ -103,7 +108,7 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="generated/pygama.analysis.html#module-pygama.analysis"><code class="xref">pygama.analysis</code></a></td><td>
+       <a href="generated/pygama.html#module-pygama.cli"><code class="xref">pygama.cli</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -213,11 +218,6 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="generated/pygama.dsp._processors.html#module-pygama.dsp._processors.template"><code class="xref">pygama.dsp._processors.template</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
        <a href="generated/pygama.dsp._processors.html#module-pygama.dsp._processors.time_point_thresh"><code class="xref">pygama.dsp._processors.time_point_thresh</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
@@ -228,7 +228,22 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
+       <a href="generated/pygama.dsp._processors.html#module-pygama.dsp._processors.upsampler"><code class="xref">pygama.dsp._processors.upsampler</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.dsp._processors.html#module-pygama.dsp._processors.wiener_filter"><code class="xref">pygama.dsp._processors.wiener_filter</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
        <a href="generated/pygama.dsp._processors.html#module-pygama.dsp._processors.windower"><code class="xref">pygama.dsp._processors.windower</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.dsp.html#module-pygama.dsp.build_dsp"><code class="xref">pygama.dsp.build_dsp</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -243,7 +258,17 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
+       <a href="generated/pygama.dsp.html#module-pygama.dsp.processors"><code class="xref">pygama.dsp.processors</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
        <a href="generated/pygama.flow.html#module-pygama.flow"><code class="xref">pygama.flow</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.flow.html#module-pygama.flow.datagroup"><code class="xref">pygama.flow.datagroup</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -254,6 +279,11 @@
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="generated/pygama.hit.html#module-pygama.hit.build_hit"><code class="xref">pygama.hit.build_hit</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.hit.html#module-pygama.hit.hit_to_evt"><code class="xref">pygama.hit.hit_to_evt</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -318,6 +348,16 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
+       <a href="generated/pygama.math.html#module-pygama.math.histogram"><code class="xref">pygama.math.histogram</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.math.html#module-pygama.math.peak_fitting"><code class="xref">pygama.math.peak_fitting</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
        <a href="generated/pygama.math.html#module-pygama.math.units"><code class="xref">pygama.math.units</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
@@ -333,7 +373,37 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
+       <a href="generated/pygama.pargen.html#module-pygama.pargen.data_cleaning"><code class="xref">pygama.pargen.data_cleaning</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.pargen.html#module-pygama.pargen.dsp_optimize"><code class="xref">pygama.pargen.dsp_optimize</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.pargen.html#module-pygama.pargen.ecal_th"><code class="xref">pygama.pargen.ecal_th</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.pargen.html#module-pygama.pargen.energy_cal"><code class="xref">pygama.pargen.energy_cal</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.pargen.html#module-pygama.pargen.mse_psd"><code class="xref">pygama.pargen.mse_psd</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
        <a href="generated/pygama.raw.html#module-pygama.raw"><code class="xref">pygama.raw</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.html#module-pygama.raw.build_raw"><code class="xref">pygama.raw.build_raw</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -368,7 +438,52 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.fc.html#module-pygama.raw.fc.fc_streamer"><code class="xref">pygama.raw.fc.fc_streamer</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
        <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca"><code class="xref">pygama.raw.orca</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca.orca_base"><code class="xref">pygama.raw.orca.orca_base</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca.orca_digitizers"><code class="xref">pygama.raw.orca.orca_digitizers</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca.orca_flashcam"><code class="xref">pygama.raw.orca.orca_flashcam</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca.orca_header"><code class="xref">pygama.raw.orca.orca_header</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca.orca_header_decoder"><code class="xref">pygama.raw.orca.orca_header_decoder</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca.orca_packet"><code class="xref">pygama.raw.orca.orca_packet</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca.orca_pollers"><code class="xref">pygama.raw.orca.orca_pollers</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.raw.orca.html#module-pygama.raw.orca.orca_streamer"><code class="xref">pygama.raw.orca.orca_streamer</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -379,6 +494,11 @@
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="generated/pygama.vis.html#module-pygama.vis"><code class="xref">pygama.vis</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generated/pygama.vis.html#module-pygama.vis.waveform_browser"><code class="xref">pygama.vis.waveform_browser</code></a></td><td>
        <em></em></td></tr>
    </table>
 

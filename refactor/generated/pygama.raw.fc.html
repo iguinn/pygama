@@ -7,6 +7,7 @@
   <title>pygama.raw.fc package &mdash; pygama  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -14,7 +15,10 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -40,31 +44,28 @@
     
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manuals/index.html">User Manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials (Jupyter notebooks)</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="pygama.html">Package API reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="pygama.analysis.html">pygama.analysis package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.flow.html">pygama.flow package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.hit.html">pygama.hit package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.lgdo.html">pygama.lgdo package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.math.html">pygama.math package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.pargen.html">pygama.pargen package</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="pygama.raw.html">pygama.raw package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="pygama.raw.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.raw.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.raw.html#pygama-raw-build-raw-module">pygama.raw.build_raw module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.raw.html#module-pygama.raw.data_decoder">pygama.raw.data_decoder module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.raw.html#module-pygama.raw.data_streamer">pygama.raw.data_streamer module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.raw.html#module-pygama.raw.raw_buffer">pygama.raw.raw_buffer module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html">pygama package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.flow.html">pygama.flow package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.hit.html">pygama.hit package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.lgdo.html">pygama.lgdo package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.math.html">pygama.math package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.pargen.html">pygama.pargen package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pygama.raw.html">pygama.raw package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.vis.html">pygama.vis package</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.vis.html">pygama.vis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.html#module-pygama.cli">pygama.cli module</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer's guide</a></li>
 </ul>
 
     <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
@@ -96,6 +97,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">pygama</a> &raquo;</li>
           <li><a href="pygama.html">pygama package</a> &raquo;</li>
           <li><a href="pygama.raw.html">pygama.raw package</a> &raquo;</li>
       <li>pygama.raw.fc package</li>
@@ -109,17 +111,17 @@
            <div itemprop="articleBody">
              
   <section id="module-pygama.raw.fc">
-<span id="pygama-raw-fc-package"></span><h1>pygama.raw.fc package<a class="headerlink" href="#module-pygama.raw.fc" title="Permalink to this headline"></a></h1>
+<span id="pygama-raw-fc-package"></span><h1>pygama.raw.fc package<a class="headerlink" href="#module-pygama.raw.fc" title="Permalink to this heading"></a></h1>
 <p>Subpackage documentation</p>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
 <section id="module-pygama.raw.fc.fc_config_decoder">
-<span id="pygama-raw-fc-fc-config-decoder-module"></span><h2>pygama.raw.fc.fc_config_decoder module<a class="headerlink" href="#module-pygama.raw.fc.fc_config_decoder" title="Permalink to this headline"></a></h2>
+<span id="pygama-raw-fc-fc-config-decoder-module"></span><h2>pygama.raw.fc.fc_config_decoder module<a class="headerlink" href="#module-pygama.raw.fc.fc_config_decoder" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_config_decoder.FCConfigDecoder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.raw.fc.fc_config_decoder.</span></span><span class="sig-name descname"><span class="pre">FCConfigDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_config_decoder.FCConfigDecoder" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="pygama.raw.html#pygama.raw.data_decoder.DataDecoder" title="pygama.raw.data_decoder.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.raw.data_decoder.DataDecoder</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="pygama.raw.html#pygama.raw.data_decoder.DataDecoder" title="pygama.raw.data_decoder.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataDecoder</span></code></a></p>
 <p>Decode FlashCam config data</p>
 <p>Derives from DataDecoder in anticipation of possible future functionality;
 currently DataDecoder interface is not used.</p>
@@ -128,7 +130,7 @@ currently DataDecoder interface is not used.</p>
 <p>Then you just use the fcio_config, which is a lgdo Struct (i.e. a dict)</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_config_decoder.FCConfigDecoder._abc_impl">
-<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pygama.raw.fc.fc_config_decoder.FCConfigDecoder._abc_impl" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pygama.raw.fc.fc_config_decoder.FCConfigDecoder._abc_impl" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -145,7 +147,7 @@ currently DataDecoder interface is not used.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_config_decoder.FCConfigDecoder.make_lgdo">
 <span class="sig-name descname"><span class="pre">make_lgdo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_config_decoder.FCConfigDecoder.make_lgdo" title="Permalink to this definition"></a></dt>
-<dd><p>Make an lgdo for this DataDecoder</p>
+<dd><p>Make an lgdo for this DataDecoder to fill</p>
 <p>This default version of this function allocates a Table using
 the decoded_values for key. If a different type of lgdo object is
 required for this decoder, overload this function.</p>
@@ -171,31 +173,31 @@ hardware). Leave as None if such specialization is not necessary</p></li>
 
 </section>
 <section id="module-pygama.raw.fc.fc_event_decoder">
-<span id="pygama-raw-fc-fc-event-decoder-module"></span><h2>pygama.raw.fc.fc_event_decoder module<a class="headerlink" href="#module-pygama.raw.fc.fc_event_decoder" title="Permalink to this headline"></a></h2>
+<span id="pygama-raw-fc-fc-event-decoder-module"></span><h2>pygama.raw.fc.fc_event_decoder module<a class="headerlink" href="#module-pygama.raw.fc.fc_event_decoder" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_event_decoder.FCEventDecoder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.raw.fc.fc_event_decoder.</span></span><span class="sig-name descname"><span class="pre">FCEventDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_event_decoder.FCEventDecoder" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="pygama.raw.html#pygama.raw.data_decoder.DataDecoder" title="pygama.raw.data_decoder.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.raw.data_decoder.DataDecoder</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="pygama.raw.html#pygama.raw.data_decoder.DataDecoder" title="pygama.raw.data_decoder.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataDecoder</span></code></a></p>
 <p>decode FlashCam digitizer event data.</p>
+<p>DOCME</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_event_decoder.FCEventDecoder._abc_impl">
-<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pygama.raw.fc.fc_event_decoder.FCEventDecoder._abc_impl" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pygama.raw.fc.fc_event_decoder.FCEventDecoder._abc_impl" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_event_decoder.FCEventDecoder.decode_packet">
-<span class="sig-name descname"><span class="pre">decode_packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evt_rbkd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_event_decoder.FCEventDecoder.decode_packet" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">decode_packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evt_rbkd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_event_decoder.FCEventDecoder.decode_packet" title="Permalink to this definition"></a></dt>
 <dd><p>access FCIOEvent members for each event in the raw file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fcio</strong> (<em>fcio reader object</em>) -- The interface to the fcio data. Enters this function after a call to
 fcio.get_record() so that data for packet_id ready to be read out</p></li>
-<li><p><strong>lgdo_tables</strong> (<em>lgdo.Table</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- A single table for reading out all data, or a dict of tables keyed
+<li><p><strong>evt_rbkd</strong> (<em>lgdo.Table</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) -- A single table for reading out all data, or a dict of tables keyed
 by channel number (i.e. as returned by raw_groups.build_tables())</p></li>
 <li><p><strong>packet_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The index of the packet in the fcio stream. Incremented by
 fc_streamer</p></li>
-<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- verbosity level for packet decoding</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -237,28 +239,86 @@ fc_config = FCConfigDecoder.decode_config(fcio)</p>
 
 </section>
 <section id="module-pygama.raw.fc.fc_status_decoder">
-<span id="pygama-raw-fc-fc-status-decoder-module"></span><h2>pygama.raw.fc.fc_status_decoder module<a class="headerlink" href="#module-pygama.raw.fc.fc_status_decoder" title="Permalink to this headline"></a></h2>
+<span id="pygama-raw-fc-fc-status-decoder-module"></span><h2>pygama.raw.fc.fc_status_decoder module<a class="headerlink" href="#module-pygama.raw.fc.fc_status_decoder" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_status_decoder.FCStatusDecoder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.raw.fc.fc_status_decoder.</span></span><span class="sig-name descname"><span class="pre">FCStatusDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_status_decoder.FCStatusDecoder" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="pygama.raw.html#pygama.raw.data_decoder.DataDecoder" title="pygama.raw.data_decoder.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.raw.data_decoder.DataDecoder</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="pygama.raw.html#pygama.raw.data_decoder.DataDecoder" title="pygama.raw.data_decoder.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataDecoder</span></code></a></p>
 <p>decode FlashCam digitizer status data.</p>
+<p>DOCME</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_status_decoder.FCStatusDecoder._abc_impl">
-<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pygama.raw.fc.fc_status_decoder.FCStatusDecoder._abc_impl" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pygama.raw.fc.fc_status_decoder.FCStatusDecoder._abc_impl" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pygama.raw.fc.fc_status_decoder.FCStatusDecoder.decode_packet">
-<span class="sig-name descname"><span class="pre">decode_packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_rb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_status_decoder.FCStatusDecoder.decode_packet" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">decode_packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_rb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_status_decoder.FCStatusDecoder.decode_packet" title="Permalink to this definition"></a></dt>
 <dd><p>access FC status (temp., log, ...)</p>
 </dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="pygama-raw-fc-fc-streamer-module">
-<h2>pygama.raw.fc.fc_streamer module<a class="headerlink" href="#pygama-raw-fc-fc-streamer-module" title="Permalink to this headline"></a></h2>
+<section id="module-pygama.raw.fc.fc_streamer">
+<span id="pygama-raw-fc-fc-streamer-module"></span><h2>pygama.raw.fc.fc_streamer module<a class="headerlink" href="#module-pygama.raw.fc.fc_streamer" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pygama.raw.fc.fc_streamer.FCStreamer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.raw.fc.fc_streamer.</span></span><span class="sig-name descname"><span class="pre">FCStreamer</span></span><a class="headerlink" href="#pygama.raw.fc.fc_streamer.FCStreamer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pygama.raw.html#pygama.raw.data_streamer.DataStreamer" title="pygama.raw.data_streamer.DataStreamer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataStreamer</span></code></a></p>
+<p>decode FlashCam data, using the fcutils package to handle file access,
+and the FlashCam DataDecoders to save the results and write to output.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pygama.raw.fc.fc_streamer.FCStreamer._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pygama.raw.fc.fc_streamer.FCStreamer._abc_impl" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.raw.fc.fc_streamer.FCStreamer.close_stream">
+<span class="sig-name descname"><span class="pre">close_stream</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_streamer.FCStreamer.close_stream" title="Permalink to this definition"></a></dt>
+<dd><p>close this data stream. needs to be implemented in derived class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.raw.fc.fc_streamer.FCStreamer.get_decoder_list">
+<span class="sig-name descname"><span class="pre">get_decoder_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_streamer.FCStreamer.get_decoder_list" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of decoder objects for this data stream.
+Needs to be overloaded. Gets called during open_stream().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.raw.fc.fc_streamer.FCStreamer.open_stream">
+<span class="sig-name descname"><span class="pre">open_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rb_lib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'any_full'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_stream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_streamer.FCStreamer.open_stream" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the FC data stream</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcio_filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- the FCIO filename</p></li>
+<li><p><strong>rb_lib</strong> (<a class="reference internal" href="pygama.raw.html#pygama.raw.raw_buffer.RawBufferLibrary" title="pygama.raw.raw_buffer.RawBufferLibrary"><em>RawBufferLibrary</em></a>) -- library of buffers for this stream</p></li>
+<li><p><strong>buffer_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- length of tables to be read out in read_chunk</p></li>
+<li><p><strong>chunk_mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- DOCME</p></li>
+<li><p><strong>out_stream</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) -- DOCME</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>header_data</strong> -- a list of length 1 containing the raw buffer holding the fc_config table</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>(<a class="reference internal" href="pygama.raw.html#pygama.raw.raw_buffer.RawBuffer" title="pygama.raw.raw_buffer.RawBuffer">RawBuffer</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.raw.fc.fc_streamer.FCStreamer.read_packet">
+<span class="sig-name descname"><span class="pre">read_packet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.raw.fc.fc_streamer.FCStreamer.read_packet" title="Permalink to this definition"></a></dt>
+<dd><p>Read a packet of data.</p>
+<p>Data written to self.rb_lib.
+Updates self.n_bytes_read</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 

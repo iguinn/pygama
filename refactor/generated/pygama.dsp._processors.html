@@ -7,6 +7,7 @@
   <title>pygama.dsp._processors package &mdash; pygama  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -14,7 +15,11 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -40,31 +45,28 @@
     
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manuals/index.html">User Manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials (Jupyter notebooks)</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="pygama.html">Package API reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="pygama.analysis.html">pygama.analysis package</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="pygama.dsp.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#pygama-dsp-build-dsp-module">pygama.dsp.build_dsp module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#module-pygama.dsp.errors">pygama.dsp.errors module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#module-pygama.dsp.processing_chain">pygama.dsp.processing_chain module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pygama.dsp.html#pygama-dsp-processors-module">pygama.dsp.processors module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html">pygama package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.flow.html">pygama.flow package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.hit.html">pygama.hit package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.lgdo.html">pygama.lgdo package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.math.html">pygama.math package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.pargen.html">pygama.pargen package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.raw.html">pygama.raw package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.vis.html">pygama.vis package</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.flow.html">pygama.flow package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.hit.html">pygama.hit package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.lgdo.html">pygama.lgdo package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.math.html">pygama.math package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.pargen.html">pygama.pargen package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.raw.html">pygama.raw package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pygama.vis.html">pygama.vis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.html#module-pygama.cli">pygama.cli module</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer's guide</a></li>
 </ul>
 
     <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
@@ -96,6 +98,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">pygama</a> &raquo;</li>
           <li><a href="pygama.html">pygama package</a> &raquo;</li>
           <li><a href="pygama.dsp.html">pygama.dsp package</a> &raquo;</li>
       <li>pygama.dsp._processors package</li>
@@ -109,15 +112,13 @@
            <div itemprop="articleBody">
              
   <section id="module-pygama.dsp._processors">
-<span id="pygama-dsp-processors-package"></span><h1>pygama.dsp._processors package<a class="headerlink" href="#module-pygama.dsp._processors" title="Permalink to this headline"></a></h1>
+<span id="pygama-dsp-processors-package"></span><h1>pygama.dsp._processors package<a class="headerlink" href="#module-pygama.dsp._processors" title="Permalink to this heading"></a></h1>
+<p>Package documentation</p>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
-</section>
-<section id="pygama-dsp-processors-wiener-filter-module">
-<h2>pygama.dsp._processors.Wiener_filter module<a class="headerlink" href="#pygama-dsp-processors-wiener-filter-module" title="Permalink to this headline"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
 <section id="module-pygama.dsp._processors.bl_subtract">
-<span id="pygama-dsp-processors-bl-subtract-module"></span><h2>pygama.dsp._processors.bl_subtract module<a class="headerlink" href="#module-pygama.dsp._processors.bl_subtract" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-bl-subtract-module"></span><h2>pygama.dsp._processors.bl_subtract module<a class="headerlink" href="#module-pygama.dsp._processors.bl_subtract" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.bl_subtract.bl_subtract">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.bl_subtract.</span></span><span class="sig-name descname"><span class="pre">bl_subtract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_baseline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.bl_subtract.bl_subtract" title="Permalink to this definition"></a></dt>
@@ -126,57 +127,53 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>a_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The baseline value to subtract</p></li>
+<li><p><strong>a_baseline</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The baseline value to subtract</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The output waveform with the baseline subtracted</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_bl&quot;</strong> -- &quot;function&quot;: &quot;bl_subtract&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;baseline&quot;, &quot;wf_bl&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;waveform&quot;, &quot;baseline&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_bl&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bl_subtract&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;baseline&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_bl&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;baseline&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.convolutions">
-<span id="pygama-dsp-processors-convolutions-module"></span><h2>pygama.dsp._processors.convolutions module<a class="headerlink" href="#module-pygama.dsp._processors.convolutions" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-convolutions-module"></span><h2>pygama.dsp._processors.convolutions module<a class="headerlink" href="#module-pygama.dsp._processors.convolutions" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.convolutions.cusp_filter">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.convolutions.</span></span><span class="sig-name descname"><span class="pre">cusp_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.convolutions.cusp_filter" title="Permalink to this definition"></a></dt>
 <dd><p>Apply a CUSP filter to the waveform.  Note that it is composed of a
 factory function that is called using the init_args argument and that
 the function the waveforms are passed to using args.</p>
-<dl class="simple">
-<dt>length: int</dt><dd><p>The length of the filter to be convolved</p>
-</dd>
-<dt>sigma<span class="classifier">float</span></dt><dd><p>The curvature of the rising and falling part of the kernel</p>
-</dd>
-<dt>flat<span class="classifier">int</span></dt><dd><p>The length of the flat section</p>
-</dd>
-<dt>decay<span class="classifier">int</span></dt><dd><p>The decay constant of the exponential to be convolved</p>
-</dd>
-</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>w_out</strong> (<em>array-like</em>) -- The filtered waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_cusp&quot;</strong> -- &quot;function&quot;: &quot;cusp_filter&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_bl&quot;, &quot;wf_cusp(101,f)&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_bl&quot;],
-&quot;init_args&quot;: [&quot;len(wf_bl)-100&quot;, &quot;40*us&quot;, &quot;3*us&quot;, &quot;45*us&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the filter to be convolved</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The curvature of the rising and falling part of the kernel</p></li>
+<li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the flat section</p></li>
+<li><p><strong>decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The decay constant of the exponential to be convolved</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_cusp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cusp_filter&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_cusp(101,f)&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;init_args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;len(wf_bl)-100&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;40*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;3*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;45*us&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -185,31 +182,27 @@ the function the waveforms are passed to using args.</p>
 <dd><p>Apply a modified, asymmetric trapezoidal filter to the waveform.  Note
 that it is composed of a factory function that is called using the init_args
 argument and that the function the waveforms are passed to using args.</p>
-<dl class="simple">
-<dt>rise: int</dt><dd><p>The length of the rise section.  This is the linearly increasing
-section of the filter that performs a weighted average.</p>
-</dd>
-<dt>fall: int</dt><dd><p>The length of the fall section.  This is the simple averaging part
-of the filter.</p>
-</dd>
-</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>w_out</strong> (<em>array-like</em>) -- The filtered waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_t0_filter&quot;</strong> -- &quot;function&quot;: &quot;t0_filter&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_pz&quot;, &quot;wf_t0_filter(3748,f)&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_pz&quot;],
-&quot;init_args&quot;: [&quot;128*ns&quot;, &quot;2*us&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
+<li><p><strong>rise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the rise section.  This is the linearly increasing
+section of the filter that performs a weighted average.</p></li>
+<li><p><strong>fall</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the fall section.  This is the simple averaging part
+of the filter.</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_t0_filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;t0_filter&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_t0_filter(3748,f)&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;init_args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;128*ns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;2*us&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -218,38 +211,32 @@ of the filter.</p>
 <dd><p>Apply a ZAC (Zero Area CUSP) filter to the waveform.  Note that it is
 composed of a factory function that is called using the init_args
 argument and that the function the waveforms are passed to using args.</p>
-<dl class="simple">
-<dt>length: int</dt><dd><p>The length of the filter to be convolved</p>
-</dd>
-<dt>sigma<span class="classifier">float</span></dt><dd><p>The curvature of the rising and falling part of the kernel</p>
-</dd>
-<dt>flat<span class="classifier">int</span></dt><dd><p>The length of the flat section</p>
-</dd>
-<dt>decay<span class="classifier">int</span></dt><dd><p>The decay constant of the exponential to be convolved</p>
-</dd>
-</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>w_out</strong> (<em>array-like</em>) -- The filtered waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_zac&quot;</strong> -- &quot;function&quot;: &quot;zac_filter&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_bl&quot;, &quot;wf_zac(101,f)&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_bl&quot;],
-&quot;init_args&quot;: [&quot;len(wf_bl)-100&quot;, &quot;40*us&quot;, &quot;3*us&quot;, &quot;45*us&quot;],</p></li>
-<li><p><strong>}</strong> -- </p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the filter to be convolved</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The curvature of the rising and falling part of the kernel</p></li>
+<li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the flat section</p></li>
+<li><p><strong>decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The decay constant of the exponential to be convolved</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_zac&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zac_filter&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_zac(101,f)&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;init_args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;len(wf_bl)-100&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;40*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;3*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;45*us&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.fftw">
-<span id="pygama-dsp-processors-fftw-module"></span><h2>pygama.dsp._processors.fftw module<a class="headerlink" href="#module-pygama.dsp._processors.fftw" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-fftw-module"></span><h2>pygama.dsp._processors.fftw module<a class="headerlink" href="#module-pygama.dsp._processors.fftw" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.fftw.dft">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.fftw.</span></span><span class="sig-name descname"><span class="pre">dft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buf_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.fftw.dft" title="Permalink to this definition"></a></dt>
@@ -313,7 +300,7 @@ input/outputs are:
 
 </section>
 <section id="module-pygama.dsp._processors.fixed_time_pickoff">
-<span id="pygama-dsp-processors-fixed-time-pickoff-module"></span><h2>pygama.dsp._processors.fixed_time_pickoff module<a class="headerlink" href="#module-pygama.dsp._processors.fixed_time_pickoff" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-fixed-time-pickoff-module"></span><h2>pygama.dsp._processors.fixed_time_pickoff module<a class="headerlink" href="#module-pygama.dsp._processors.fixed_time_pickoff" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.fixed_time_pickoff.fixed_time_pickoff">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.fixed_time_pickoff.</span></span><span class="sig-name descname"><span class="pre">fixed_time_pickoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.fixed_time_pickoff.fixed_time_pickoff" title="Permalink to this definition"></a></dt>
@@ -325,76 +312,78 @@ provided index is out of range, return NaN.</p>
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
 <li><p><strong>t_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The waveform index to pick off</p></li>
 <li><p><strong>a_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output pick-off value</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;trapEftp&quot;</strong> -- &quot;function&quot;: &quot;fixed_time_pickoff&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_trap&quot;, &quot;tp_0+10*us&quot;, &quot;trapEftp&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_trap&quot;, &quot;tp_0&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;trapEftp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fixed_time_pickoff&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_trap&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_0+10*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;trapEftp&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_trap&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_0&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.gaussian_filter1d">
-<span id="pygama-dsp-processors-gaussian-filter1d-module"></span><h2>pygama.dsp._processors.gaussian_filter1d module<a class="headerlink" href="#module-pygama.dsp._processors.gaussian_filter1d" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-gaussian-filter1d-module"></span><h2>pygama.dsp._processors.gaussian_filter1d module<a class="headerlink" href="#module-pygama.dsp._processors.gaussian_filter1d" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.gaussian_filter1d.gaussian_filter1d">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.gaussian_filter1d.</span></span><span class="sig-name descname"><span class="pre">gaussian_filter1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.gaussian_filter1d.gaussian_filter1d" title="Permalink to this definition"></a></dt>
-<dd><p>1-D Gaussian filter.
-:param %(input)s:
-:param sigma: standard deviation for Gaussian kernel
-:type sigma: scalar
-:param truncate: Truncate the filter at this many standard deviations.</p>
-<blockquote>
-<div><p>Default is 4.0.</p>
-</div></blockquote>
+<dd><p>1-D Gaussian filter.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>gaussian_filter1d</strong></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>%</strong><strong>(</strong><strong>input</strong><strong>)</strong><strong>s</strong> -- </p></li>
+<li><p><strong>sigma</strong> (<em>scalar</em>) -- standard deviation for Gaussian kernel</p></li>
+<li><p><strong>truncate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) -- Truncate the filter at this many standard deviations.
+Default is 4.0.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ndarray</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gaussian_filter1d</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.get_multi_local_extrema">
-<span id="pygama-dsp-processors-get-multi-local-extrema-module"></span><h2>pygama.dsp._processors.get_multi_local_extrema module<a class="headerlink" href="#module-pygama.dsp._processors.get_multi_local_extrema" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-get-multi-local-extrema-module"></span><h2>pygama.dsp._processors.get_multi_local_extrema module<a class="headerlink" href="#module-pygama.dsp._processors.get_multi_local_extrema" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.get_multi_local_extrema.get_multi_local_extrema">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.get_multi_local_extrema.</span></span><span class="sig-name descname"><span class="pre">get_multi_local_extrema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_delta_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vt_max_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vt_min_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_min_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.get_multi_local_extrema.get_multi_local_extrema" title="Permalink to this definition"></a></dt>
 <dd><p>Get lists of indices of the local maxima and minima of data
 The &quot;local&quot; extrema are those maxima / minima that have heights / depths of
 at least a_delta_in.
-Converted from MATLAB script at: <a class="reference external" href="http://billauer.co.il/peakdet.html">http://billauer.co.il/peakdet.html</a>
-:param w_in: The array of data within which extrema will be found
-:type w_in: array-like
-:param a_delta_in: The absolute level by which data must vary (in one direction) about an</p>
-<blockquote>
-<div><p>extremum in order for it to be tagged</p>
-</div></blockquote>
+Converted from MATLAB script at: <a class="reference external" href="http://billauer.co.il/peakdet.html">http://billauer.co.il/peakdet.html</a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p><strong>vt_max_out, vt_min_out</strong> (<em>array-like, array-like</em>) -- Arrays of fixed length (padded with nans) that hold the indices of
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w_in</strong> (<em>array-like</em>) -- The array of data within which extrema will be found</p></li>
+<li><p><strong>a_delta_in</strong> (<em>scalar</em>) -- The absolute level by which data must vary (in one direction) about an
+extremum in order for it to be tagged</p></li>
+<li><p><strong>vt_max_out</strong> (<em>array-like</em><em>, </em><em>array-like</em>) -- Arrays of fixed length (padded with nans) that hold the indices of
 the identified local maxima and minima</p></li>
-<li><p><strong>n_max_out, n_min_out</strong> (<em>scalar, scalar</em>) -- The number of maxima and minima found in a waveform</p></li>
+<li><p><strong>vt_min_out</strong> (<em>array-like</em><em>, </em><em>array-like</em>) -- Arrays of fixed length (padded with nans) that hold the indices of
+the identified local maxima and minima</p></li>
+<li><p><strong>n_max_out</strong> (<em>scalar</em><em>, </em><em>scalar</em>) -- The number of maxima and minima found in a waveform</p></li>
+<li><p><strong>n_min_out</strong> (<em>scalar</em><em>, </em><em>scalar</em>) -- The number of maxima and minima found in a waveform</p></li>
 <li><p><strong>flag_out</strong> (<em>scalar</em>) -- Returns 1 if there is only one maximum and it is a simple waveform,
 Returns 0 if there are no peaks, or multiple peaks in a waveform</p></li>
 </ul>
-</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.linear_slope_fit">
-<span id="pygama-dsp-processors-linear-slope-fit-module"></span><h2>pygama.dsp._processors.linear_slope_fit module<a class="headerlink" href="#module-pygama.dsp._processors.linear_slope_fit" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-linear-slope-fit-module"></span><h2>pygama.dsp._processors.linear_slope_fit module<a class="headerlink" href="#module-pygama.dsp._processors.linear_slope_fit" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.linear_slope_fit.linear_slope_fit">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.linear_slope_fit.</span></span><span class="sig-name descname"><span class="pre">linear_slope_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.linear_slope_fit.linear_slope_fit" title="Permalink to this definition"></a></dt>
@@ -405,41 +394,28 @@ using linear regression.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>a_mean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The mean of the waveform</p></li>
+<li><p><strong>mean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The mean of the waveform</p></li>
 <li><p><strong>stdev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The standard deviation of the waveform</p></li>
 <li><p><strong>slope</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The slope of the linear fit</p></li>
 <li><p><strong>intercept</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The intercept of the linear fit</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;bl_mean</strong> -- &quot;function&quot;: &quot;linear_slope_fit&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_blsub[0:1650]&quot;, &quot;bl_mean&quot;, &quot;bl_std&quot;, &quot;bl_slope&quot;, &quot;bl_intercept&quot;],
-&quot;unit&quot;: [&quot;ADC&quot;, &quot;ADC&quot;, &quot;ADC&quot;, &quot;ADC&quot;],
-&quot;prereqs&quot;: [&quot;wf_blsub&quot;]</p></li>
-<li><p><strong>bl_std</strong> -- &quot;function&quot;: &quot;linear_slope_fit&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_blsub[0:1650]&quot;, &quot;bl_mean&quot;, &quot;bl_std&quot;, &quot;bl_slope&quot;, &quot;bl_intercept&quot;],
-&quot;unit&quot;: [&quot;ADC&quot;, &quot;ADC&quot;, &quot;ADC&quot;, &quot;ADC&quot;],
-&quot;prereqs&quot;: [&quot;wf_blsub&quot;]</p></li>
-<li><p><strong>bl_slope</strong> -- &quot;function&quot;: &quot;linear_slope_fit&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_blsub[0:1650]&quot;, &quot;bl_mean&quot;, &quot;bl_std&quot;, &quot;bl_slope&quot;, &quot;bl_intercept&quot;],
-&quot;unit&quot;: [&quot;ADC&quot;, &quot;ADC&quot;, &quot;ADC&quot;, &quot;ADC&quot;],
-&quot;prereqs&quot;: [&quot;wf_blsub&quot;]</p></li>
-<li><p><strong>bl_intercept&quot;</strong> -- &quot;function&quot;: &quot;linear_slope_fit&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_blsub[0:1650]&quot;, &quot;bl_mean&quot;, &quot;bl_std&quot;, &quot;bl_slope&quot;, &quot;bl_intercept&quot;],
-&quot;unit&quot;: [&quot;ADC&quot;, &quot;ADC&quot;, &quot;ADC&quot;, &quot;ADC&quot;],
-&quot;prereqs&quot;: [&quot;wf_blsub&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;bl_mean, bl_std, bl_slope, bl_intercept&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;linear_slope_fit&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_blsub[0:1650]&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bl_mean&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bl_std&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bl_slope&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bl_intercept&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_blsub&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.log_check">
-<span id="pygama-dsp-processors-log-check-module"></span><h2>pygama.dsp._processors.log_check module<a class="headerlink" href="#module-pygama.dsp._processors.log_check" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-log-check-module"></span><h2>pygama.dsp._processors.log_check module<a class="headerlink" href="#module-pygama.dsp._processors.log_check" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.log_check.log_check">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.log_check.</span></span><span class="sig-name descname"><span class="pre">log_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_log</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.log_check.log_check" title="Permalink to this definition"></a></dt>
@@ -450,22 +426,24 @@ are positive; otherwise, return NaN.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
 <li><p><strong>w_log</strong> (<em>array-like</em>) -- The output waveform with logged values</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_logged&quot;</strong> -- &quot;function&quot;: &quot;log_check&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_blsub[2100:]&quot;, &quot;wf_logged&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_blsub&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_logged&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log_check&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_blsub[2100:]&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_logged&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_blsub&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.min_max">
-<span id="pygama-dsp-processors-min-max-module"></span><h2>pygama.dsp._processors.min_max module<a class="headerlink" href="#module-pygama.dsp._processors.min_max" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-min-max-module"></span><h2>pygama.dsp._processors.min_max module<a class="headerlink" href="#module-pygama.dsp._processors.min_max" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.min_max.min_max">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.min_max.</span></span><span class="sig-name descname"><span class="pre">min_max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.min_max.min_max" title="Permalink to this definition"></a></dt>
@@ -480,135 +458,133 @@ in the waveform will be returned.</p>
 <li><p><strong>t_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The index of the maximum value</p></li>
 <li><p><strong>a_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The minimum value</p></li>
 <li><p><strong>a_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The maximum value</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;tp_min</strong> -- &quot;function&quot;: &quot;min_max&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;tp_min&quot;, &quot;tp_max&quot;, &quot;wf_min&quot;, &quot;wf_max&quot;],
-&quot;unit&quot;: [&quot;ns&quot;, &quot;ns&quot;, &quot;ADC&quot;, &quot;ADC&quot;],
-&quot;prereqs&quot;: [&quot;waveform&quot;]</p></li>
-<li><p><strong>tp_max</strong> -- &quot;function&quot;: &quot;min_max&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;tp_min&quot;, &quot;tp_max&quot;, &quot;wf_min&quot;, &quot;wf_max&quot;],
-&quot;unit&quot;: [&quot;ns&quot;, &quot;ns&quot;, &quot;ADC&quot;, &quot;ADC&quot;],
-&quot;prereqs&quot;: [&quot;waveform&quot;]</p></li>
-<li><p><strong>wf_min</strong> -- &quot;function&quot;: &quot;min_max&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;tp_min&quot;, &quot;tp_max&quot;, &quot;wf_min&quot;, &quot;wf_max&quot;],
-&quot;unit&quot;: [&quot;ns&quot;, &quot;ns&quot;, &quot;ADC&quot;, &quot;ADC&quot;],
-&quot;prereqs&quot;: [&quot;waveform&quot;]</p></li>
-<li><p><strong>wf_max&quot;</strong> -- &quot;function&quot;: &quot;min_max&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;tp_min&quot;, &quot;tp_max&quot;, &quot;wf_min&quot;, &quot;wf_max&quot;],
-&quot;unit&quot;: [&quot;ns&quot;, &quot;ns&quot;, &quot;ADC&quot;, &quot;ADC&quot;],
-&quot;prereqs&quot;: [&quot;waveform&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;tp_min, tp_max, wf_min, wf_max&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;min_max&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_min&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_max&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_min&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_max&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.moving_windows">
-<span id="pygama-dsp-processors-moving-windows-module"></span><h2>pygama.dsp._processors.moving_windows module<a class="headerlink" href="#module-pygama.dsp._processors.moving_windows" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-moving-windows-module"></span><h2>pygama.dsp._processors.moving_windows module<a class="headerlink" href="#module-pygama.dsp._processors.moving_windows" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.moving_windows.avg_current">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.moving_windows.</span></span><span class="sig-name descname"><span class="pre">avg_current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.moving_windows.avg_current" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the derivative of the waveform, averaged across the specified
-number of samples.</p>
+<dd><p>Calculate the derivative of a WF, averaged across n samples. Dimension of
+deriv should be len(wf) - n</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the moving window</p></li>
-<li><p><strong>w_out</strong> (<em>array-like</em>) -- The output derivative</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;curr&quot;</strong> -- &quot;function&quot;: &quot;avg_current&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_pz&quot;, 1, &quot;curr(len(wf_pz)-1, f)&quot;],
-&quot;unit&quot;: &quot;ADC/sample&quot;,
-&quot;prereqs&quot;: [&quot;wf_pz&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- Length of the moving window to be applied</p></li>
+<li><p><strong>w_out</strong> (<em>array-like</em>) -- Output waveform after derivation</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;curr&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;avg_current&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;curr(len(wf_pz)-1, f)&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC/sample&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.moving_windows.moving_window_left">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.moving_windows.</span></span><span class="sig-name descname"><span class="pre">moving_window_left</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.moving_windows.moving_window_left" title="Permalink to this definition"></a></dt>
-<dd><p>Apply a moving-average window to the waveform from the left.</p>
+<dd><p>Applies a moving average window to the waveform from the left, assumes that the baseline is at 0.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the moving window</p></li>
-<li><p><strong>w_out</strong> (<em>array-like</em>) -- The windowed waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_mw&quot;</strong> -- &quot;function&quot;: &quot;moving_window_left&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_pz&quot;, &quot;96*ns&quot;, &quot;wf_mw&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_pz&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- Length of the moving window to be applied</p></li>
+<li><p><strong>w_out</strong> (<em>array-like</em>) -- Output waveform after moving window applied</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_mw&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;moving_window_left&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;96*ns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_mw&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.moving_windows.moving_window_multi">
-<span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.moving_windows.</span></span><span class="sig-name descname"><span class="pre">moving_window_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_mw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.moving_windows.moving_window_multi" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.moving_windows.</span></span><span class="sig-name descname"><span class="pre">moving_window_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_mw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mw_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.moving_windows.moving_window_multi" title="Permalink to this definition"></a></dt>
 <dd><p>Apply a series of moving-average windows to the waveform, alternating
 its application between the left and the right.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the moving window</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- Length of the moving window to be applied</p></li>
 <li><p><strong>num_mw</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of moving windows</p></li>
+<li><p><strong>mw_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- 0 = alternate moving windows right and left
+1 = only left
+2 = only right</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The windowed waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;curr_av&quot;</strong> -- &quot;function&quot;: &quot;moving_window_multi&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;curr&quot;, &quot;96*ns&quot;, &quot;3&quot;, &quot;curr_av&quot;],
-&quot;unit&quot;: &quot;ADC/sample&quot;,
-&quot;prereqs&quot;: [&quot;curr&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;curr_av&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;moving_window_multi&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;curr&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;96*ns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;3&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;curr_av&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC/sample&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;curr&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.moving_windows.moving_window_right">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.moving_windows.</span></span><span class="sig-name descname"><span class="pre">moving_window_right</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.moving_windows.moving_window_right" title="Permalink to this definition"></a></dt>
-<dd><p>Apply a moving-average window to the waveform from the left.</p>
+<dd><p>Applies a moving average window to the waveform from the right.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The length of the moving window</p></li>
-<li><p><strong>w_out</strong> (<em>array-like</em>) -- The windowed waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_mw&quot;</strong> -- &quot;function&quot;: &quot;moving_window_right&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_pz&quot;, &quot;96*ns&quot;, &quot;wf_mw&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_pz&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- Length of the moving window to be applied</p></li>
+<li><p><strong>w_out</strong> (<em>array-like</em>) -- Output waveform after moving window applied</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_mw&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;moving_window_right&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;96*ns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_mw&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.multi_a_filter">
-<span id="pygama-dsp-processors-multi-a-filter-module"></span><h2>pygama.dsp._processors.multi_a_filter module<a class="headerlink" href="#module-pygama.dsp._processors.multi_a_filter" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-multi-a-filter-module"></span><h2>pygama.dsp._processors.multi_a_filter module<a class="headerlink" href="#module-pygama.dsp._processors.multi_a_filter" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.multi_a_filter.multi_a_filter">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.multi_a_filter.</span></span><span class="sig-name descname"><span class="pre">multi_a_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vt_maxs_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">va_max_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.multi_a_filter.multi_a_filter" title="Permalink to this definition"></a></dt>
@@ -618,20 +594,15 @@ its application between the left and the right.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The array of data within which amplitudes of extrema will be found</p></li>
 <li><p><strong>vt_maxs_in</strong> (<em>array-like</em>) -- The array of max positions for each wf</p></li>
+<li><p><strong>va_max_out</strong> (<em>array-like</em>) -- An array (in-place filled) of the amplitudes of the maximums of the waveform</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>va_max_out</strong> -- An array of the amplitudes of the maximums of the waveform</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array-like</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.multi_t_filter">
-<span id="pygama-dsp-processors-multi-t-filter-module"></span><h2>pygama.dsp._processors.multi_t_filter module<a class="headerlink" href="#module-pygama.dsp._processors.multi_t_filter" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-multi-t-filter-module"></span><h2>pygama.dsp._processors.multi_t_filter module<a class="headerlink" href="#module-pygama.dsp._processors.multi_t_filter" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.multi_t_filter.multi_t_filter">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.multi_t_filter.</span></span><span class="sig-name descname"><span class="pre">multi_t_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_threshold_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vt_max_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vt_min_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.multi_t_filter.multi_t_filter" title="Permalink to this definition"></a></dt>
@@ -640,22 +611,17 @@ Is built to handle afterpulses/delayed cross talk and trains of pulses.
 The multi_t_filter works by calling the vectorized functions
 &quot;get_multi_local_extrema&quot; which returns a list of the maxima and minima in a waveform,
 and then the list of maxima is fed into &quot;time_point_thresh&quot; which returns
-the final times that waveform is less than a specified threshold.
-:param w_in: The array of data within which the list of tp0s will be found
-:type w_in: array-like
-:param a_threshold_in: Threshold to search for using time_point_thresh
-:type a_threshold_in: scalar
-:param vt_maxs_in: The array of max positions for each wf
-:type vt_maxs_in: array-like
-:param vt_mins_in: The array of min positions for each wf
-:type vt_mins_in: array-like</p>
+the final times that waveform is less than a specified threshold.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>t_out</strong> -- Array of fixed length (padded with nans) that hold the indices of
-the identified initial rise times of peaks in the signal</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>array-like</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w_in</strong> (<em>array-like</em>) -- The array of data within which the list of tp0s will be found</p></li>
+<li><p><strong>a_threshold_in</strong> (<em>scalar</em>) -- Threshold to search for using time_point_thresh</p></li>
+<li><p><strong>vt_max_in</strong> (<em>array-like</em>) -- The array of max positions for each wf</p></li>
+<li><p><strong>vt_min_in</strong> (<em>array-like</em>) -- The array of min positions for each wf</p></li>
+<li><p><strong>t_out</strong> (<em>array-like</em>) -- Output array of fixed length (padded with nans) that hold the indices of
+the identified initial rise times of peaks in the signal</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -663,30 +629,29 @@ the identified initial rise times of peaks in the signal</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.multi_t_filter.remove_duplicates">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.multi_t_filter.</span></span><span class="sig-name descname"><span class="pre">remove_duplicates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vt_min_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.multi_t_filter.remove_duplicates" title="Permalink to this definition"></a></dt>
-<dd><p>time_point_thresh has issues with afterpulsing in waveforms that causes
-an aferpulse peak's tp0 to be sent to 0 or the same index as the tp0 for the first pulse.
-This only happens when the relative minimum between the first pulse and
-the afterpulse is greater than the threshold. So, we sweep through the array again
-to ensure there are no duplicate indices. If there are duplicate indicies caused by a
-misidentified tp0 of an afterpulse, we replace its index by that of the corresponding minimum
-found using the get_multi_local_extrema function. It also checks to make sure that the maximum of a waveform
-isn't right at index 0.
-----------
-t_in : array-like</p>
-<blockquote>
-<div><p>The array of indices that we want to remove duplicates from</p>
-</div></blockquote>
-<dl class="simple">
-<dt>vt_min_in<span class="classifier">array-like</span></dt><dd><p>List of indicies of minima that we want to replace duplicates in t_out with</p>
-</dd>
-<dt>t_out: array-like</dt><dd><p>The array we want to return that will have no duplicate indices in it</p>
+<dd><p>time_point_thresh has issues with afterpulsing in waveforms that causes an
+aferpulse peak's tp0 to be sent to 0 or the same index as the tp0 for the
+first pulse.  This only happens when the relative minimum between the first
+pulse and the afterpulse is greater than the threshold. So, we sweep
+through the array again to ensure there are no duplicate indices. If there
+are duplicate indices caused by a misidentified tp0 of an afterpulse, we
+replace its index by that of the corresponding minimum found using the
+get_multi_local_extrema function. It also checks to make sure that the
+maximum of a waveform isn't right at index 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_in</strong> (<em>array-like</em>) -- The array of indices that we want to remove duplicates from</p></li>
+<li><p><strong>vt_min_in</strong> (<em>array-like</em>) -- List of indices of minima that we want to replace duplicates in t_out with</p></li>
+<li><p><strong>t_out</strong> (<em>array-like</em>) -- The array we want to return that will have no duplicate indices in it</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.optimize">
-<span id="pygama-dsp-processors-optimize-module"></span><h2>pygama.dsp._processors.optimize module<a class="headerlink" href="#module-pygama.dsp._processors.optimize" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-optimize-module"></span><h2>pygama.dsp._processors.optimize module<a class="headerlink" href="#module-pygama.dsp._processors.optimize" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pygama.dsp._processors.optimize.Model">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.optimize.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.optimize.Model" title="Permalink to this definition"></a></dt>
@@ -710,17 +675,19 @@ which to optimize the pole-zero cancellation</p></li>
 which to optimize the pole-zero cancellation</p></li>
 <li><p><strong>p0_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The initial guess of the optimal time constant</p></li>
 <li><p><strong>val0_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output value of the best-fit time constant</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;tau0&quot;</strong> -- &quot;function&quot;: &quot;optimize_1pz&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;baseline&quot;, &quot;0&quot;, &quot;20*us&quot;, &quot;500*us&quot;, &quot;tau0&quot;],
-&quot;prereqs&quot;: [&quot;waveform&quot;, &quot;baseline&quot;],
-&quot;unit&quot;: &quot;us&quot;</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;tau0&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optimize_1pz&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;baseline&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;20*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;500*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tau0&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;baseline&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -743,32 +710,24 @@ which to optimize the pole-zero cancellation</p></li>
 <li><p><strong>val0_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output value of the best-fit, longer time constant</p></li>
 <li><p><strong>val1_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output value of the best-fit, shorter time constant</p></li>
 <li><p><strong>val2_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output value of the best-fit fraction</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;tau1</strong> -- &quot;function&quot;: &quot;optimize_2pz&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;baseline&quot;, &quot;0&quot;, &quot;20*us&quot;, &quot;500*us&quot;, &quot;20*us&quot;, &quot;0.02&quot;, &quot;tau1&quot;, &quot;tau2&quot;, &quot;frac&quot;],
-&quot;prereqs&quot;: [&quot;waveform&quot;, &quot;baseline&quot;],
-&quot;unit&quot;: &quot;us&quot;</p></li>
-<li><p><strong>tau2</strong> -- &quot;function&quot;: &quot;optimize_2pz&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;baseline&quot;, &quot;0&quot;, &quot;20*us&quot;, &quot;500*us&quot;, &quot;20*us&quot;, &quot;0.02&quot;, &quot;tau1&quot;, &quot;tau2&quot;, &quot;frac&quot;],
-&quot;prereqs&quot;: [&quot;waveform&quot;, &quot;baseline&quot;],
-&quot;unit&quot;: &quot;us&quot;</p></li>
-<li><p><strong>frac&quot;</strong> -- &quot;function&quot;: &quot;optimize_2pz&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;baseline&quot;, &quot;0&quot;, &quot;20*us&quot;, &quot;500*us&quot;, &quot;20*us&quot;, &quot;0.02&quot;, &quot;tau1&quot;, &quot;tau2&quot;, &quot;frac&quot;],
-&quot;prereqs&quot;: [&quot;waveform&quot;, &quot;baseline&quot;],
-&quot;unit&quot;: &quot;us&quot;</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;tau1, tau2, frac&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optimize_2pz&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;baseline&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;20*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;500*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;20*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.02&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tau1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tau2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;frac&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;baseline&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.param_lookup">
-<span id="pygama-dsp-processors-param-lookup-module"></span><h2>pygama.dsp._processors.param_lookup module<a class="headerlink" href="#module-pygama.dsp._processors.param_lookup" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-param-lookup-module"></span><h2>pygama.dsp._processors.param_lookup module<a class="headerlink" href="#module-pygama.dsp._processors.param_lookup" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.param_lookup.param_lookup">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.param_lookup.</span></span><span class="sig-name descname"><span class="pre">param_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.param_lookup.param_lookup" title="Permalink to this definition"></a></dt>
@@ -779,12 +738,12 @@ param_dict.  If there is no key, use default_val instead.</p>
 
 </section>
 <section id="module-pygama.dsp._processors.pole_zero">
-<span id="pygama-dsp-processors-pole-zero-module"></span><h2>pygama.dsp._processors.pole_zero module<a class="headerlink" href="#module-pygama.dsp._processors.pole_zero" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-pole-zero-module"></span><h2>pygama.dsp._processors.pole_zero module<a class="headerlink" href="#module-pygama.dsp._processors.pole_zero" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.pole_zero.double_pole_zero">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.pole_zero.</span></span><span class="sig-name descname"><span class="pre">double_pole_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_tau1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_tau2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.pole_zero.double_pole_zero" title="Permalink to this definition"></a></dt>
 <dd><p>Apply a double pole-zero cancellation using the provided time
-constant to the waveform.</p>
+constants to the waveform.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -793,17 +752,34 @@ constant to the waveform.</p>
 <li><p><strong>t_tau2</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The time constant of the second exponential to be deconvolved</p></li>
 <li><p><strong>frac</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The fraction which the second exponential contributes</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The pole-zero cancelled waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_pz&quot;</strong> -- &quot;function&quot;: &quot;double_pole_zero&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_bl&quot;, &quot;400*us&quot;, &quot;20*us&quot;, &quot;0.02&quot;, &quot;wf_pz&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_bl&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_pz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;double_pole_zero&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;400*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;20*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.02&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_pz&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This algorithm is an IIR filter to deconvolve the function</p>
+<div class="math notranslate nohighlight">
+\[s(t) = A[frac*\exp\left(-\frac{t}{t_{tau2}}\right) + (1-frac)*\exp\left(-\frac{t}{t_{tau1}}\right)]\]</div>
+<p>into a single step function of amplitude A.
+This filter is derived by z-transforming the input (<span class="math notranslate nohighlight">\(s(t)\)</span>) and output (step function)
+signals, and then determining the transfer function. For shorthand, define <span class="math notranslate nohighlight">\(a=\exp\left(-\frac{1}{t_{tau1}}\right)\)</span>
+and <span class="math notranslate nohighlight">\(b=\exp\left(-\frac{1}{t_{tau2}}\right)\)</span>, the transfer function is then:</p>
+<div class="math notranslate nohighlight">
+\[H(z) =  \frac{1-(a+b)z^{-1}+abz^{-2}}{1+(fb-fa-b-1)z^{-1}-(fb-fa-b)z^{-2}}\]</div>
+<p>By equating the transfer function to the ratio of output to input waveforms <span class="math notranslate nohighlight">\(H(z) = \frac{w_{out}(z)}{w_{in}(z)}\)</span>
+and then taking the inverse z-transform yields the filter as run in the function, where f is the frac parameter:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}w_{out}[n] = &amp;w_{in}[n]-(a+b)w_{in}[n-1]+(ab)w_{in}[n-2]\\
+&amp;-(fb-fa-b-1)w_{out}[n-1]+(fb-fa-b)w_{out}[n-2]\end{split}\]</div>
 </dd></dl>
 
 <dl class="py function">
@@ -817,22 +793,24 @@ constant to the waveform.</p>
 <li><p><strong>w_in</strong> (<em>array-like</em>) -- The input waveform</p></li>
 <li><p><strong>t_tau</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The time constant of the exponential to be deconvolved</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The pole-zero cancelled waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_pz&quot;</strong> -- &quot;function&quot;: &quot;pole_zero&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_bl&quot;, &quot;400*us&quot;, &quot;wf_pz&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_bl&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_pz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pole_zero&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;400*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_pz&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.presum">
-<span id="pygama-dsp-processors-presum-module"></span><h2>pygama.dsp._processors.presum module<a class="headerlink" href="#module-pygama.dsp._processors.presum" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-presum-module"></span><h2>pygama.dsp._processors.presum module<a class="headerlink" href="#module-pygama.dsp._processors.presum" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.presum.presum">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.presum.</span></span><span class="sig-name descname"><span class="pre">presum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.presum.presum" title="Permalink to this definition"></a></dt>
@@ -851,7 +829,7 @@ will be omitted.</p>
 
 </section>
 <section id="module-pygama.dsp._processors.pulse_injector">
-<span id="pygama-dsp-processors-pulse-injector-module"></span><h2>pygama.dsp._processors.pulse_injector module<a class="headerlink" href="#module-pygama.dsp._processors.pulse_injector" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-pulse-injector-module"></span><h2>pygama.dsp._processors.pulse_injector module<a class="headerlink" href="#module-pygama.dsp._processors.pulse_injector" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.pulse_injector.inject_exp_pulse">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.pulse_injector.</span></span><span class="sig-name descname"><span class="pre">inject_exp_pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wf_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.pulse_injector.inject_exp_pulse" title="Permalink to this definition"></a></dt>
@@ -866,7 +844,7 @@ will be omitted.</p>
 
 </section>
 <section id="module-pygama.dsp._processors.saturation">
-<span id="pygama-dsp-processors-saturation-module"></span><h2>pygama.dsp._processors.saturation module<a class="headerlink" href="#module-pygama.dsp._processors.saturation" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-saturation-module"></span><h2>pygama.dsp._processors.saturation module<a class="headerlink" href="#module-pygama.dsp._processors.saturation" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.saturation.saturation">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.saturation.</span></span><span class="sig-name descname"><span class="pre">saturation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bit_depth_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_lo_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_hi_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.saturation.saturation" title="Permalink to this definition"></a></dt>
@@ -880,27 +858,24 @@ on the bit depth.</p>
 <li><p><strong>bit_depth_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The bit depth of the analog-to-digital converter</p></li>
 <li><p><strong>n_lo_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The output number of samples at the minimum</p></li>
 <li><p><strong>n_hi_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The output number of samples at the maximum</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;sat_lo</strong> -- &quot;function&quot;: &quot;saturation&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;16&quot;, &quot;sat_lo&quot;, &quot;sat_hi&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;waveform&quot;]</p></li>
-<li><p><strong>sat_hi&quot;</strong> -- &quot;function&quot;: &quot;saturation&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;16&quot;, &quot;sat_lo&quot;, &quot;sat_hi&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;waveform&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;sat_lo, sat_hi&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;saturation&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;16&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sat_lo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sat_hi&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.soft_pileup_corr">
-<span id="pygama-dsp-processors-soft-pileup-corr-module"></span><h2>pygama.dsp._processors.soft_pileup_corr module<a class="headerlink" href="#module-pygama.dsp._processors.soft_pileup_corr" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-soft-pileup-corr-module"></span><h2>pygama.dsp._processors.soft_pileup_corr module<a class="headerlink" href="#module-pygama.dsp._processors.soft_pileup_corr" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.soft_pileup_corr.soft_pileup_corr">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.soft_pileup_corr.</span></span><span class="sig-name descname"><span class="pre">soft_pileup_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.soft_pileup_corr.soft_pileup_corr" title="Permalink to this definition"></a></dt>
@@ -915,17 +890,19 @@ entire waveform.</p>
 to fit to an exponential</p></li>
 <li><p><strong>tau_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The fixed, exponential time constant</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The output waveform with the exponential subtracted</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_bl&quot;</strong> -- &quot;function&quot;: &quot;soft_pileup_corr&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;1000&quot;, &quot;500*us&quot;, &quot;wf_bl&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;waveform&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_bl&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;soft_pileup_corr&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;1000&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;500*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_bl&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -943,32 +920,24 @@ to fit to an exponential</p></li>
 <li><p><strong>tau_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The fixed, exponential time constant</p></li>
 <li><p><strong>B_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The fixed, exponential constant</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The output waveform with the exponential subtracted</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_bl&quot;</strong> -- &quot;function&quot;: &quot;soft_pileup_corr_bl&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;waveform&quot;, &quot;1000&quot;, &quot;500*us&quot;, &quot;baseline&quot;, &quot;wf_bl&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;waveform&quot;, &quot;baseline&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
-</dd></dl>
-
-</section>
-<section id="module-pygama.dsp._processors.template">
-<span id="pygama-dsp-processors-template-module"></span><h2>pygama.dsp._processors.template module<a class="headerlink" href="#module-pygama.dsp._processors.template" title="Permalink to this headline"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="pygama.dsp._processors.template.the_processor_template">
-<span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.template.</span></span><span class="sig-name descname"><span class="pre">the_processor_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.template.the_processor_template" title="Permalink to this definition"></a></dt>
-<dd><p>Add here a complete description of what the processor does, including the
-meaning of input and output variables</p>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_bl&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;soft_pileup_corr_bl&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;1000&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;500*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;baseline&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_bl&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;baseline&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.time_point_thresh">
-<span id="pygama-dsp-processors-time-point-thresh-module"></span><h2>pygama.dsp._processors.time_point_thresh module<a class="headerlink" href="#module-pygama.dsp._processors.time_point_thresh" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-time-point-thresh-module"></span><h2>pygama.dsp._processors.time_point_thresh module<a class="headerlink" href="#module-pygama.dsp._processors.time_point_thresh" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.time_point_thresh.time_point_thresh">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.time_point_thresh.</span></span><span class="sig-name descname"><span class="pre">time_point_thresh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">walk_forward</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.time_point_thresh.time_point_thresh" title="Permalink to this definition"></a></dt>
@@ -982,22 +951,24 @@ walking either forward or backward from the starting index.</p>
 <li><p><strong>t_start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The starting index</p></li>
 <li><p><strong>walk_forward</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The backward (0) or forward (1) search direction</p></li>
 <li><p><strong>t_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The index where the waveform value crosses the threshold</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;tp_0&quot;</strong> -- &quot;function&quot;: &quot;time_point_thresh&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_atrap&quot;, &quot;bl_std&quot;, &quot;tp_start&quot;, 0, &quot;tp_0&quot;],
-&quot;unit&quot;: &quot;ns&quot;,
-&quot;prereqs&quot;: [&quot;wf_atrap&quot;, &quot;bl_std&quot;, &quot;tp_start&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;tp_0&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;time_point_thresh&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_atrap&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bl_std&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_start&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_0&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ns&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_atrap&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bl_std&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_start&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
 <section id="module-pygama.dsp._processors.trap_filters">
-<span id="pygama-dsp-processors-trap-filters-module"></span><h2>pygama.dsp._processors.trap_filters module<a class="headerlink" href="#module-pygama.dsp._processors.trap_filters" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-trap-filters-module"></span><h2>pygama.dsp._processors.trap_filters module<a class="headerlink" href="#module-pygama.dsp._processors.trap_filters" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.trap_filters.asym_trap_filter">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.trap_filters.</span></span><span class="sig-name descname"><span class="pre">asym_trap_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rise</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fall</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.trap_filters.asym_trap_filter" title="Permalink to this definition"></a></dt>
@@ -1011,17 +982,19 @@ by the number of samples averaged in the rise and fall sections.</p>
 <li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The delay between the rise and fall sections</p></li>
 <li><p><strong>fall</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples averaged in the fall section</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The normalized, filtered waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_af&quot;</strong> -- &quot;function&quot;: &quot;asym_trap_filter&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_pz&quot;, &quot;128*ns&quot;, &quot;64*ns&quot;, &quot;2*us&quot;, &quot;wf_af&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_pz&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_af&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;asym_trap_filter&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;128*ns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;64*ns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;2*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_af&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -1035,17 +1008,19 @@ by the number of samples averaged in the rise and fall sections.</p>
 <li><p><strong>rise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples averaged in the rise and fall sections</p></li>
 <li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The delay between the rise and fall sections</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The filtered waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_tf&quot;</strong> -- &quot;function&quot;: &quot;trap_filter&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_pz&quot;, &quot;10*us&quot;, &quot;3*us&quot;, &quot;wf_tf&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_pz&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_tf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;trap_filter&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;10*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;3*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_tf&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -1060,17 +1035,19 @@ by the number of samples averaged in the rise and fall sections.</p>
 <li><p><strong>rise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The number of samples averaged in the rise and fall sections</p></li>
 <li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The delay between the rise and fall sections</p></li>
 <li><p><strong>w_out</strong> (<em>array-like</em>) -- The normalized, filtered waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;wf_tf&quot;</strong> -- &quot;function&quot;: &quot;trap_norm&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_pz&quot;, &quot;10*us&quot;, &quot;3*us&quot;, &quot;wf_tf&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_pz&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_tf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;trap_norm&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;10*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;3*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_tf&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -1087,22 +1064,72 @@ in the rise and fall sections.</p>
 <li><p><strong>flat</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) -- The delay between the rise and fall sections</p></li>
 <li><p><strong>t_pickoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The waveform index to pick off</p></li>
 <li><p><strong>a_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- The output pick-off value of the filtered waveform</p></li>
-<li><p><strong>Example</strong> (<em>Processing Chain</em>) -- </p></li>
-<li><p><strong>------------------------</strong> -- </p></li>
-<li><p><strong>&quot;ct_corr&quot;</strong> -- &quot;function&quot;: &quot;trap_pickoff&quot;,
-&quot;module&quot;: &quot;pygama.dsp.processors&quot;,
-&quot;args&quot;: [&quot;wf_pz&quot;, &quot;1.5*us&quot;, 0, &quot;tp_0&quot;, &quot;ct_corr&quot;],
-&quot;unit&quot;: &quot;ADC&quot;,
-&quot;prereqs&quot;: [&quot;wf_pz&quot;, &quot;tp_0&quot;]</p></li>
-<li><p><strong>}</strong> -- </p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;ct_corr&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;trap_pickoff&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;1.5*us&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ct_corr&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ADC&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_pz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tp_0&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-pygama.dsp._processors.upsampler">
+<span id="pygama-dsp-processors-upsampler-module"></span><h2>pygama.dsp._processors.upsampler module<a class="headerlink" href="#module-pygama.dsp._processors.upsampler" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.dsp._processors.upsampler.upsampler">
+<span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.upsampler.</span></span><span class="sig-name descname"><span class="pre">upsampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upsample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.upsampler.upsampler" title="Permalink to this definition"></a></dt>
+<dd><p>Upsamples the waveform by the number specified,
+a series of moving windows should be applied afterwards for smoothing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w_in</strong> (<em>array-like</em>) -- waveform to upsample.</p></li>
+<li><p><strong>upsample</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) -- Number of samples to increase each sample to.</p></li>
+<li><p><strong>w_out</strong> (<em>array-like</em>) -- Output array for upsampled waveform</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
+<section id="module-pygama.dsp._processors.wiener_filter">
+<span id="pygama-dsp-processors-wiener-filter-module"></span><h2>pygama.dsp._processors.wiener_filter module<a class="headerlink" href="#module-pygama.dsp._processors.wiener_filter" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.dsp._processors.wiener_filter.wiener_filter">
+<span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.wiener_filter.</span></span><span class="sig-name descname"><span class="pre">wiener_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name_array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.wiener_filter.wiener_filter" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a wiener filter to the waveform.</p>
+<p>Note that this convolution is performed in the frequency domain</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_name_array</strong> (<em>string</em>) -- Array with path to an lh5 file containing the time domain version
+of the superpulse in one column and noise waveform in another,
+the superpulse group must be titled 'spms/processed/superpulse' and
+the noise waveform must be called 'spms/processed/noise_wf'</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;wf_wiener&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wiener_filter&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pygama.dsp.processors&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl_fft&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wf_wiener(2000,f)&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dB&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;prereqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;wf_bl_fft&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;init_args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/path/to/file/wiener.lh5&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
 <section id="module-pygama.dsp._processors.windower">
-<span id="pygama-dsp-processors-windower-module"></span><h2>pygama.dsp._processors.windower module<a class="headerlink" href="#module-pygama.dsp._processors.windower" title="Permalink to this headline"></a></h2>
+<span id="pygama-dsp-processors-windower-module"></span><h2>pygama.dsp._processors.windower module<a class="headerlink" href="#module-pygama.dsp._processors.windower" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.dsp._processors.windower.windower">
 <span class="sig-prename descclassname"><span class="pre">pygama.dsp._processors.windower.</span></span><span class="sig-name descname"><span class="pre">windower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp._processors.windower.windower" title="Permalink to this definition"></a></dt>
