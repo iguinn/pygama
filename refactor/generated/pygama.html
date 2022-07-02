@@ -163,7 +163,6 @@ Check out the <a class="reference external" href="https://legend-exp.github.io/p
 <li class="toctree-l1"><a class="reference internal" href="pygama.hit.html">pygama.hit package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pygama.hit.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pygama.hit.html#module-pygama.hit.build_hit">pygama.hit.build_hit module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pygama.hit.html#module-pygama.hit.hit_to_evt">pygama.hit.hit_to_evt module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pygama.lgdo.html">pygama.lgdo package</a><ul>
@@ -244,20 +243,45 @@ Check out the <a class="reference external" href="https://legend-exp.github.io/p
 </section>
 <section id="module-pygama.cli">
 <span id="pygama-cli-module"></span><h2>pygama.cli module<a class="headerlink" href="#module-pygama.cli" title="Permalink to this heading"></a></h2>
+<p>pygama's command line interface utilities.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.cli.add_build_dsp_parser">
+<span class="sig-prename descclassname"><span class="pre">pygama.cli.</span></span><span class="sig-name descname"><span class="pre">add_build_dsp_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subparsers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.cli.add_build_dsp_parser" title="Permalink to this definition"></a></dt>
+<dd><p>Configure <a class="reference internal" href="pygama.dsp.html#pygama.dsp.build_dsp.build_dsp" title="pygama.dsp.build_dsp.build_dsp"><code class="xref py py-func docutils literal notranslate"><span class="pre">dsp.build_dsp.build_dsp()</span></code></a> command line interface</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.cli.add_build_raw_parser">
+<span class="sig-prename descclassname"><span class="pre">pygama.cli.</span></span><span class="sig-name descname"><span class="pre">add_build_raw_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subparsers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.cli.add_build_raw_parser" title="Permalink to this definition"></a></dt>
+<dd><p>Configure <a class="reference internal" href="pygama.raw.html#pygama.raw.build_raw.build_raw" title="pygama.raw.build_raw.build_raw"><code class="xref py py-func docutils literal notranslate"><span class="pre">raw.build_raw.build_raw()</span></code></a> command line interface</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.cli.build_dsp_cli">
 <span class="sig-prename descclassname"><span class="pre">pygama.cli.</span></span><span class="sig-name descname"><span class="pre">build_dsp_cli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.cli.build_dsp_cli" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Passes command line arguments to <a class="reference internal" href="pygama.dsp.html#pygama.dsp.build_dsp.build_dsp" title="pygama.dsp.build_dsp.build_dsp"><code class="xref py py-func docutils literal notranslate"><span class="pre">dsp.build_dsp.build_dsp()</span></code></a>.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.cli.build_raw_cli">
 <span class="sig-prename descclassname"><span class="pre">pygama.cli.</span></span><span class="sig-name descname"><span class="pre">build_raw_cli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.cli.build_raw_cli" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Passes command line arguments to <a class="reference internal" href="pygama.raw.html#pygama.raw.build_raw.build_raw" title="pygama.raw.build_raw.build_raw"><code class="xref py py-func docutils literal notranslate"><span class="pre">raw.build_raw.build_raw()</span></code></a>.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pygama.cli.pygama_cli">
 <span class="sig-prename descclassname"><span class="pre">pygama.cli.</span></span><span class="sig-name descname"><span class="pre">pygama_cli</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.cli.pygama_cli" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>pygama's command line interface.</p>
+<p>Defines the command line interface (CLI) of the package, which exposes some
+of the most used functions to the console.  This function is added to the
+<code class="docutils literal notranslate"><span class="pre">entry_points.console_scripts</span></code> list and defines the <code class="docutils literal notranslate"><span class="pre">pygama</span></code> executable
+(see <code class="docutils literal notranslate"><span class="pre">setuptools</span></code>' documentation). To learn more about the CLI, have a
+look at the help section:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pygama --help
+<span class="gp">$ </span>pygama build-raw --help  <span class="c1"># help section for a specific sub-command</span>
+</pre></div>
+</div>
+</dd></dl>
 
 </section>
 </section>

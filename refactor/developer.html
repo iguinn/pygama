@@ -254,25 +254,35 @@ documentation is also deployed to the <em>pygama</em> website.</p>
 <h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this heading"></a></h2>
 <p>Collaborators with push access to the GitHub repository that wish to release a
 new project version must implement the following procedures:</p>
-<ul class="simple">
+<ul>
 <li><p><a class="reference external" href="https://semver.org">Semantic versioning</a> is adopted. The version string
 uses the <code class="docutils literal notranslate"><span class="pre">MAJOR.MINOR.PATCH</span></code> format.</p></li>
 <li><p>To release a new <strong>minor</strong> or <strong>major version</strong>, the following procedure
 should be followed:</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>A new branch with name <code class="docutils literal notranslate"><span class="pre">releases/vMAJOR.MINOR</span></code> (note the <code class="docutils literal notranslate"><span class="pre">v</span></code>) containing
 the code at the intended stage is created</p></li>
 <li><p>The commit is tagged with a descriptive message: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span> <span class="pre">vMAJOR.MINOR.0</span>
 <span class="pre">-m</span> <span class="pre">'short</span> <span class="pre">descriptive</span> <span class="pre">message</span> <span class="pre">here'</span></code> (note the <code class="docutils literal notranslate"><span class="pre">v</span></code>)</p></li>
-<li><p>Changes are pushed to the remote: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--tags</span> <span class="pre">origin</span> <span class="pre">releases/vMAJOR.MINOR</span></code></p></li>
+<li><p>Changes are pushed to the remote:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git push origin releases/vMAJOR.MINOR
+<span class="gp">$ </span>git push origin refs/tags/vMAJOR.MINOR.0
+</pre></div>
+</div>
+</li>
 </ol>
 </li>
 <li><p>To release a new <strong>patch version</strong>, the following procedure should be followed:</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>A commit with the patch is created on the relevant release branch
 <code class="docutils literal notranslate"><span class="pre">releases/vMAJOR.MINOR</span></code></p></li>
 <li><p>The commit is tagged: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span> <span class="pre">vMAJOR.MINOR.PATCH</span></code> (note the <code class="docutils literal notranslate"><span class="pre">v</span></code>)</p></li>
-<li><p>Changes are pushed to the remote: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--tags</span> <span class="pre">origin</span> <span class="pre">releases/vMAJOR.MINOR</span></code></p></li>
+<li><p>Changes are pushed to the remote:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git push origin releases/vMAJOR.MINOR
+<span class="gp">$ </span>git push origin refs/tags/vMAJOR.MINOR.PATCH
+</pre></div>
+</div>
+</li>
 </ol>
 </li>
 </ul>
