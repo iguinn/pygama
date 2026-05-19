@@ -7,7 +7,8 @@ import awkward as ak
 import hist
 import numpy as np
 import pandas as pd
-from legendmeta.query import parse_query_paths, query_meta, query_runs
+from . import query_meta, query_runs
+from .utils import parse_query_paths
 
 from . import build_iterator
 

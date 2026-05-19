@@ -7,7 +7,8 @@ import awkward as ak
 import numpy as np
 import pandas as pd
 from dbetto import Props
-from legendmeta.query import _format_vars, parse_query_paths, query_runs
+from . import query_runs
+from .utils import format_vars, parse_query_paths
 from lh5 import LH5Iterator
 
 
@@ -162,7 +163,7 @@ def query_evt(
 
         # keep only tiers with no channel information
         tab_name = tables[tier]
-        if len(_format_vars(tab_name)) > 0:
+        if len(format_vars(tab_name)) > 0:
             continue
 
         # broadcast groups and run_records

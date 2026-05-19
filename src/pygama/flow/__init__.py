@@ -50,7 +50,6 @@ A template for a minimal `dataflow-config.yaml` file::
     query:
         cycle_def: experiment-period-run-datatype-starttime # REQUIRED: hyphen-separated-list-of-fields-in-cycle-name; these will be columns of run db
         metadata: LegendMetadata # REQUIRED: name of metadata class (e.g. LegendMetadata)
-        rundb_tier: # tier to use to populate run DB; default to "raw"
         ignored_cycles: dataprod/config/ignored_cycles # path in metadata to list of cycles to skip; by default do not ignore any
         tiers: ["raw", "dsp", "hit", "evt"] # list of tiers TLAs to use from paths for parameter and data queries; default use all
         chan_db: # path in metadata to list of channels for a given run. Use format string syntax, which may refer to any values in the run DB (i.e. cycle_def fields, cycle name, and relative path). If no value was provided, call "metadata.channelmap(on = starttime)", where "starttime" is drawn from the run db
@@ -75,8 +74,8 @@ be provided with most dataprods! If you set the environment variable $REFPROD th
 the file will automatically be accessed from the referenced directory!
 """
 
-from legendmeta.query import query_meta, query_runs
-
+from .query_runs import query_runs
+from .query_meta import query_meta
 from .build_iterator import build_iterator
 from .query_data import query_data
 from .query_evt import query_evt

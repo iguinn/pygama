@@ -6,7 +6,8 @@ import awkward as ak
 import numpy as np
 import pandas as pd
 from dbetto import Props
-from legendmeta.query import _format_vars, parse_query_paths, query_meta
+from . import query_meta
+from .utils import format_vars, parse_query_paths
 from lh5 import LH5Iterator
 
 
@@ -100,7 +101,7 @@ def build_iterator(
 
     gp_fields = {}
     for tier, tb in tables.items():
-        fields = [parse_query_paths(f, fullmatch=True) for f in _format_vars(tb)]
+        fields = [parse_query_paths(f, fullmatch=True) for f in format_vars(tb)]
         meta_fields |= {f for f, _, path in fields if path[0] == "@"}
         gp_fields[tier] = fields
 

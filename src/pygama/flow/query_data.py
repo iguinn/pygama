@@ -5,7 +5,7 @@ from pathlib import Path
 import awkward as ak
 import numpy as np
 import pandas as pd
-from legendmeta.query import parse_query_paths
+from .utils import parse_query_paths
 
 from . import build_iterator
 
