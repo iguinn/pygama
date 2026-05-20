@@ -1,11 +1,15 @@
 from collections.abc import Collection, Mapping
 from concurrent.futures import Executor, ProcessPoolExecutor
+from contextlib import nullcontext
 from pathlib import Path
 
 import awkward as ak
 import numpy as np
 import pandas as pd
+
 from .utils import parse_query_paths
+from rich.console import Console
+from rich.status import Status
 
 from . import build_iterator
 
@@ -22,6 +26,7 @@ def query_data(
     processes: Executor | int = None,
     executor: Executor = None,
     library: str = None,
+    progress: Status | Console | bool = True,
     **kwargs,
 ):
     """
@@ -126,6 +131,10 @@ def query_data(
     library
         format of returned table. Can be ``ak`` (default), ``pd`` or ``np``
 
+    progress:
+        if ``True`` draw progress bar; can also provide a :class:`rich.Status`
+        or:class:`rich.Console`
+
     kwargs
         see :meth:`build_iterator`, :meth:`query_meta` and :meth:`query_runs`
     """
@@ -139,32 +148,51 @@ def query_data(
     if executor is None and isinstance(processes, int):
         executor = ProcessPoolExecutor(processes)
 
-    lh5_it, alias_map = build_iterator(
-        {f for f, _, _ in field_info + entries_fields},
-        runs,
-        channels,
-        dataflow_config=dataflow_config,
-        return_alias_map=True,
-        processes=processes,
-        executor=executor,
-        **kwargs,
-    )
+    # set up the status bar
+    if isinstance(progress, Status):
+        progress.update("Querying runs...")
+        # if it's already started, don't restart it
+        if progress._live.is_started:
+            progress = nullcontext(enter_result=progress)
+    elif isinstance(progress, Console):
+        progress = progress.status("Querying runs...", spinner="betaWave")
+    elif progress:
+        progress = Status("Querying runs...", spinner="betaWave")
+    else:
+        progress = nullcontext(enter_result=None)
 
-    fields = {}
-    for _, alias, path in field_info:
-        if path in alias_map:
-            fields[alias_map[path]] = None
-        else:
-            fields[path] = alias
+    with progress as status:
+        lh5_it, alias_map = build_iterator(
+            {f for f, _, _ in field_info + entries_fields},
+            runs,
+            channels,
+            dataflow_config=dataflow_config,
+            return_alias_map=True,
+            processes=processes,
+            executor=executor,
+            progress=status,
+            **kwargs,
+        )
 
-    ret = lh5_it.query(
-        entries,
-        fields=fields if not return_query_vals else None,
-        processes=processes,
-        executor=executor,
-        library=library,
-    )
+        fields = {}
+        for _, alias, path in field_info:
+            if path in alias_map:
+                fields[alias_map[path]] = None
+            else:
+                fields[path] = alias
 
-    if return_alias_map:
-        return ret, alias_map
-    return ret
+        if status:
+            status.update("Querying data...", spinner="betaWave")
+
+        ret = lh5_it.query(
+            entries,
+            fields=fields if not return_query_vals else None,
+            processes=processes,
+            executor=executor,
+            library=library,
+            progress=status.console if status else None,
+        )
+
+        if return_alias_map:
+            return ret, alias_map
+        return ret

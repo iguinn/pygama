@@ -1,5 +1,6 @@
 from collections.abc import Collection, Mapping
 from concurrent.futures import Executor, ProcessPoolExecutor
+from contextlib import nullcontext
 from inspect import signature
 from pathlib import Path
 
@@ -9,6 +10,8 @@ import numpy as np
 import pandas as pd
 from . import query_meta, query_runs
 from .utils import parse_query_paths
+from rich.console import Console
+from rich.status import Status
 
 from . import build_iterator
 
@@ -22,6 +25,7 @@ def query_hist(
     dataflow_config: Path | str | Mapping = "$REFPROD/dataflow-config.yaml",
     processes: Executor | int = None,
     executor: Executor = None,
+    progress: Status | Console | bool = True,
     **kwargs,
 ):
     """
@@ -125,6 +129,10 @@ def query_hist(
         If ``None``, create a :class:`concurrent.futures.`ProcessPoolExecutor`
         with number of processes equal to ``processes``.
 
+    progress:
+        if ``True`` draw progress bar; can also provide a :class:`rich.Status`
+        or:class:`rich.Console`
+
     kwargs
         see :meth:build_iterator, :meth:query_meta, :meth:query_runs, and :meth:Hist
     """
@@ -150,44 +158,62 @@ def query_hist(
     if executor is None and isinstance(processes, int):
         executor = ProcessPoolExecutor(processes)
 
-    # split kwargs up based on which function they should feed into
-    bi_kwargs = {}
-    hist_kwargs = {}
-    for k in kwargs:
-        if (
-            k in signature(build_iterator).parameters
-            or k in signature(query_meta).parameters
-            or k in signature(query_runs).parameters
-        ):
-            bi_kwargs[k] = kwargs[k]
-        else:
-            hist_kwargs[k] = kwargs[k]
+    # set up the status bar
+    if isinstance(progress, Status):
+        progress.update("Querying runs...")
+        # if it's already started, don't restart it
+        if progress._live.is_started:
+            progress = nullcontext(enter_result=progress)
+    elif isinstance(progress, Console):
+        progress = progress.status("Querying runs...", spinner="betaWave")
+    elif progress:
+        progress = Status("Querying runs...", spinner="betaWave")
+    else:
+        progress = nullcontext(enter_result=None)
 
-    lh5_it, alias_map = build_iterator(
-        {f for f, _, _ in field_info + entries_fields},
-        runs,
-        channels,
-        dataflow_config=dataflow_config,
-        return_alias_map=True,
-        processes=processes,
-        executor=executor,
-        **bi_kwargs,
-    )
+    with progress as status:
+        # split kwargs up based on which function they should feed into
+        bi_kwargs = {}
+        hist_kwargs = {}
+        for k in kwargs:
+            if (
+                k in signature(build_iterator).parameters
+                or k in signature(query_meta).parameters
+                or k in signature(query_runs).parameters
+            ):
+                bi_kwargs[k] = kwargs[k]
+            else:
+                hist_kwargs[k] = kwargs[k]
 
-    for (_, alias, path), a in zip(field_info, ax):
-        # add lh5 fields to alias map
-        if not path in alias_map:
-            alias_map[path] = alias if alias is not None else path
-        if not a.label:
-            a.label = alias_map.get(path)
+        lh5_it, alias_map = build_iterator(
+            {f for f, _, _ in field_info + entries_fields},
+            runs,
+            channels,
+            dataflow_config=dataflow_config,
+            return_alias_map=True,
+            processes=processes,
+            executor=executor,
+            **bi_kwargs,
+        )
 
-    ret = lh5_it.hist(
-        ax,
-        where=entries,
-        keys=[alias_map[path] for _, _, path in field_info],
-        processes=processes,
-        executor=executor,
-        **hist_kwargs,
-    )
+        for (_, alias, path), a in zip(field_info, ax):
+            # add lh5 fields to alias map
+            if not path in alias_map:
+                alias_map[path] = alias if alias is not None else path
+            if not a.label:
+                a.label = alias_map.get(path)
+
+        if status:
+            status.update("Querying data...", spinner="betaWave")
+
+        ret = lh5_it.hist(
+            ax,
+            where=entries,
+            keys=[alias_map[path] for _, _, path in field_info],
+            processes=processes,
+            executor=executor,
+            progress=status.console if status else None,
+            **hist_kwargs,
+        )
 
     return ret

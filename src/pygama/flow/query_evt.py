@@ -1,6 +1,7 @@
 import os
 from collections.abc import Collection, Mapping
 from concurrent.futures import Executor, ProcessPoolExecutor
+from contextlib import nullcontext
 from pathlib import Path
 
 import awkward as ak
@@ -10,7 +11,8 @@ from dbetto import Props
 from . import query_runs
 from .utils import format_vars, parse_query_paths
 from lh5 import LH5Iterator
-
+from rich.console import Console
+from rich.status import Status
 
 def query_evt(
     fields: Collection[str],
@@ -24,6 +26,7 @@ def query_evt(
     processes: Executor | int = None,
     executor: Executor = None,
     library: str = None,
+    progress: Status | Console | bool = True,
     **kwargs,
 ):
     """
@@ -104,6 +107,10 @@ def query_evt(
     library
         format of returned table. Can be ``ak`` (default), ``pd`` or ``np``
 
+    progress:
+        if ``True`` draw progress bar; can also provide a :class:`rich.Status`
+        or:class:`rich.Console`
+
     kwargs
         see :meth:`query_runs`
     """
@@ -129,76 +136,98 @@ def query_evt(
     if executor is None and isinstance(processes, int):
         executor = ProcessPoolExecutor(processes)
 
-    # Query (or convert) run_records
-    if runs is None or isinstance(runs, str):
-        run_records = query_runs(
-            runs,
-            dataflow_config=df_config,
-            **kwargs,
-        )
+    # set up the status bar
+    if isinstance(progress, Status):
+        progress.update("Querying runs...")
+        # if it's already started, don't restart it
+        if progress._live.is_started:
+            progress = nullcontext(enter_result=progress)
+    elif isinstance(progress, Console):
+        progress = progress.status("Querying runs...", spinner="betaWave")
+    elif progress:
+        progress = Status("Querying runs...", spinner="betaWave")
     else:
-        run_records = ak.Array(runs)
-    if len(run_records) == 0:
-        msg = "no run records were found"
-        raise ValueError(msg)
+        progress = nullcontext(enter_result=None)
 
-    if tiers is None:
-        tiers = query_config.get("tiers", [])
-
-    if tables is None:
-        if "tables" not in query_config:
-            msg = "tables not found in dataflow_config; either provide as kwarg or add to config"
+    with progress as status:
+        # Query (or convert) run_records
+        if runs is None or isinstance(runs, str):
+            run_records = query_runs(
+                runs,
+                dataflow_config=df_config,
+                progress = status,
+                tiers = tiers
+                **kwargs,
+            )
+        else:
+            run_records = ak.Array(runs)
+        if len(run_records) == 0:
+            msg = "no run records were found"
             raise ValueError(msg)
-        tables = query_config["tables"]
 
-    events_fields = parse_query_paths(events)
+        if status:
+            status.update("Building iterator...", spinner="betaWave")
 
-    lh5_it = None
-    for tier_key, tier_dir in df_paths.items():
-        if not tier_key[:5] == "tier_":
-            continue
-        tier = tier_key[5:]
-        if tiers and tier not in tiers:
-            continue
+        if tables is None:
+            if "tables" not in query_config:
+                msg = "tables not found in dataflow_config; either provide as kwarg or add to config"
+                raise ValueError(msg)
+            tables = query_config["tables"]
 
-        # keep only tiers with no channel information
-        tab_name = tables[tier]
-        if len(format_vars(tab_name)) > 0:
-            continue
+        events_fields = parse_query_paths(events)
 
-        # broadcast groups and run_records
-        lh5_files, groups, run_records = ak.broadcast_arrays(
-            [
-                [f"{relpath}/{cycle}-tier_{tier}.lh5"]
-                for relpath, cycle in zip(run_records["relpath"], run_records["cycle"])
-            ],
-            [tab_name],
-            run_records,
+        lh5_it = None
+        for tier_key, tier_dir in df_paths.items():
+            if not tier_key[:5] == "tier_":
+                continue
+            tier = tier_key[5:]
+            if tiers and tier not in tiers:
+                continue
+
+            # keep only tiers with no channel information
+            tab_name = tables[tier]
+            if len(format_vars(tab_name)) > 0:
+                continue
+
+            # broadcast groups and run_records
+            lh5_files, groups, run_records = ak.broadcast_arrays(
+                [
+                    [f"{relpath}/{cycle}-tier_{tier}.lh5"]
+                    for relpath, cycle in zip(run_records["relpath"], run_records["cycle"])
+                ],
+                [tab_name],
+                run_records,
+            )
+
+            new_it = LH5Iterator(
+                ak.to_list(lh5_files),
+                ak.to_list(groups),
+                base_path=tier_dir,
+                group_data=run_records if lh5_it is None else None,
+            )
+
+            # only include if files exist and are required for some fields
+            new_it.reset_field_mask(all_paths, warn_missing=False)
+            if len(new_it.lh5_files) > 0 and len(new_it.field_mask) > 0:
+                if lh5_it is None:
+                    lh5_it = new_it
+                else:
+                    lh5_it.add_friend(new_it)
+
+        lh5_it.reset_field_mask(all_paths, warn_missing=True)
+
+        fields = {path: alias for _, alias, path in field_info}
+
+        if status:
+            status.update("Querying data...")
+
+        tb_out = lh5_it.query(
+            events,
+            fields=fields if not return_query_vals else None,
+            processes=processes,
+            executor=executor,
+            library=library,
+            progress=status.console if status else None,
         )
 
-        new_it = LH5Iterator(
-            ak.to_list(lh5_files),
-            ak.to_list(groups),
-            base_path=tier_dir,
-            group_data=run_records if lh5_it is None else None,
-        )
-
-        # only include if files exist and are required for some fields
-        new_it.reset_field_mask(all_paths, warn_missing=False)
-        if len(new_it.lh5_files) > 0 and len(new_it.field_mask) > 0:
-            if lh5_it is None:
-                lh5_it = new_it
-            else:
-                lh5_it.add_friend(new_it)
-
-    lh5_it.reset_field_mask(all_paths, warn_missing=True)
-
-    fields = {path: alias for _, alias, path in field_info}
-
-    return lh5_it.query(
-        events,
-        fields=fields if not return_query_vals else None,
-        processes=processes,
-        executor=executor,
-        library=library,
-    )
+        return tb_out

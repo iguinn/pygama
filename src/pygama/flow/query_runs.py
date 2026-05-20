@@ -2,8 +2,11 @@ import os
 import re
 from collections.abc import Collection, Mapping
 from concurrent.futures import Executor, ProcessPoolExecutor
+from contextlib import nullcontext
 from copy import copy
 from pathlib import Path
+from rich.console import Console
+from rich.status import Status
 
 import awkward as ak
 import numpy as np
@@ -24,6 +27,7 @@ def query_runs(
     processes: int | None = None,
     executor: Executor | None = None,
     library: str = "ak",
+    progress: Status | Console | bool = True,
 ):
     """
     Query runs and return a table containing one entry for each cycle and data
@@ -98,82 +102,89 @@ def query_runs(
 
     library
         format of returned table. Can be ``ak`` (default), ``pd`` or ``np``
+
+    progress:
+        if ``True`` draw progress spinner; can also provide a :class:`rich.Status`
+        or:class:`rich.Console`
     """
 
-    if isinstance(dataflow_config, (Path, str)):
-        df_config = Props.read_from(
-            os.path.expandvars(dataflow_config), subst_pathvar=True
-        )
-    elif isinstance(dataflow_config, Mapping):
-        df_config = dataflow_config
+    # set up the status bar
+    if isinstance(progress, Status):
+        progress.update("Querying runs...")
+        # if it's already started, don't restart it
+        if progress._live.is_started:
+            progress = nullcontext(enter_result=progress)
+    elif isinstance(progress, Console):
+        progress = progress.status("Querying runs...", spinner="betaWave")
+    elif progress:
+        progress = Status("Querying runs...", spinner="betaWave")
     else:
-        msg = "dataflow_config must be a str, Path, or Mapping"
-        raise ValueError(msg)
-    df_paths = df_config.get("paths")
-    query_config = df_config.get("query", {})
+        progress = nullcontext(enter_result=None)
 
-    if cycle_def is None:
-        if "cycle_def" not in query_config:
-            msg = "cycle_def must be provided either as kwarg or in dataflow_config"
-            raise ValueError(msg)
-        cycle_def = query_config["cycle_def"]
-
-    # turn tiers into list of tier-name/path pairs
-    if tiers is None:
-        tiers = query_config.get("tiers", ["raw"])
-    if isinstance(tiers, str):
-        tiers = [tiers]
-    if isinstance(tiers, Mapping):
-        tiers = [(f"tier_{t}", p) for t, p in tiers.items()]
-    else:
-        tiers = [(f"tier_{t}", df_paths[f"tier_{t}"]) for t in tiers]
-
-    if ignored_cycles is None:
-        ignored_cycles = query_config.get("ignored_cycles", None)
-
-    cwd = Path.cwd()
-
-    try:
-        os.chdir(tiers[0][1])
-
-        # Get list of removed cycles if it exists
-        if ignored_cycles is not None:
-            if isinstance(ignored_cycles, str):
-                ignored_cycles = [ignored_cycles]
-            meta = TextDB(df_paths["metadata"], lazy=True)
-            removed = set()
-            for iclist in ignored_cycles:
-                removed |= set(get_recursive(meta, iclist))
+    with progress as status:
+        if isinstance(dataflow_config, (Path, str)):
+            df_config = Props.read_from(
+                os.path.expandvars(dataflow_config), subst_pathvar=True
+            )
+        elif isinstance(dataflow_config, Mapping):
+            df_config = dataflow_config
         else:
-            removed = {}
+            msg = "dataflow_config must be a str, Path, or Mapping"
+            raise ValueError(msg)
+        df_paths = df_config.get("paths")
+        query_config = df_config.get("query", {})
 
-        col_names = cycle_def.split("-")
-        records = []
+        if cycle_def is None:
+            if "cycle_def" not in query_config:
+                msg = "cycle_def must be provided either as kwarg or in dataflow_config"
+                raise ValueError(msg)
+            cycle_def = query_config["cycle_def"]
 
-        if executor is None and processes:
-            executor = ProcessPoolExecutor(processes)
+        # turn tiers into list of tier-name/path pairs
+        if tiers is None:
+            tiers = query_config.get("tiers", ["raw"])
+        if isinstance(tiers, str):
+            tiers = [tiers]
+        if isinstance(tiers, Mapping):
+            tiers = [(f"tier_{t}", p) for t, p in tiers.items()]
+        else:
+            tiers = [(f"tier_{t}", df_paths[f"tier_{t}"]) for t in tiers]
 
-        for dirpath, dirnames, files in os.walk("."):
-            relpath = dirpath[2:]  # get rid of ./
+        if ignored_cycles is None:
+            ignored_cycles = query_config.get("ignored_cycles", None)
 
-            # Prune subdirectories that are not in all tiers
-            for subdir in copy(dirnames):
-                if not all(Path(p, relpath, subdir).is_dir() for _, p in tiers[1:]):
-                    dirnames.remove(subdir)
+        cwd = Path.cwd()
 
-            if executor is None:
-                records += _get_run_records_loop(
-                    files,
-                    relpath,
-                    col_names,
-                    tiers,
-                    removed,
-                    runs,
-                )
+        try:
+            os.chdir(tiers[0][1])
+
+            # Get list of removed cycles if it exists
+            if ignored_cycles is not None:
+                if isinstance(ignored_cycles, str):
+                    ignored_cycles = [ignored_cycles]
+                meta = TextDB(df_paths["metadata"], lazy=True)
+                removed = set()
+                for iclist in ignored_cycles:
+                    removed |= set(get_recursive(meta, iclist))
             else:
-                records.append(
-                    executor.submit(
-                        _get_run_records_loop,
+                removed = {}
+
+            col_names = cycle_def.split("-")
+            records = []
+
+            if executor is None and processes:
+                executor = ProcessPoolExecutor(processes)
+
+            for dirpath, dirnames, files in os.walk("."):
+                relpath = dirpath[2:]  # get rid of ./
+
+                # Prune subdirectories that are not in all tiers
+                for subdir in copy(dirnames):
+                    if not all(Path(p, relpath, subdir).is_dir() for _, p in tiers[1:]):
+                        dirnames.remove(subdir)
+
+                if executor is None:
+                    records += _get_run_records_loop(
                         files,
                         relpath,
                         col_names,
@@ -181,47 +192,58 @@ def query_runs(
                         removed,
                         runs,
                     )
+                else:
+                    records.append(
+                        executor.submit(
+                            _get_run_records_loop,
+                            files,
+                            relpath,
+                            col_names,
+                            tiers,
+                            removed,
+                            runs,
+                        )
+                    )
+
+            # Format and return results
+            if executor is not None:
+                records = [r for recs in records for r in recs.result()]
+            records.sort(
+                key=lambda rec: (
+                    rec[sort_by]
+                    if isinstance(sort_by, str)
+                    else [rec[sb] for sb in sort_by]
+                )
+            )
+            result = ak.Array(records)
+
+            if group_by is not None:
+                if isinstance(group_by, str):
+                    lengths = [np.cumsum(ak.run_lengths(result[group_by]))]
+                else:
+                    lengths = [np.cumsum(ak.run_lengths(result[f])) for f in group_by]
+                lengths = np.unique(np.concatenate([0, *lengths]))
+                result = ak.unflatten(result, lengths[1:] - lengths[:-1])
+                result = ak.Array(
+                    {
+                        f: ak.firsts(result[f])
+                        if ak.all(ak.all(result[f] == ak.firsts(result[f]), axis=1), axis=0)
+                        else result[f]
+                        for f in result.fields
+                    }
                 )
 
-        # Format and return results
-        if executor is not None:
-            records = [r for recs in records for r in recs.result()]
-        records.sort(
-            key=lambda rec: (
-                rec[sort_by]
-                if isinstance(sort_by, str)
-                else [rec[sb] for sb in sort_by]
-            )
-        )
-        result = ak.Array(records)
+            if library == "ak":
+                return result
+            if library == "pd":
+                return ak.to_dataframe(result)
+            if library == "np":
+                return ak.to_numpy(result)
+            msg = "library must be 'ak', 'pd' or 'np'"
+            raise ValueError(msg)
 
-        if group_by is not None:
-            if isinstance(group_by, str):
-                lengths = [np.cumsum(ak.run_lengths(result[group_by]))]
-            else:
-                lengths = [np.cumsum(ak.run_lengths(result[f])) for f in group_by]
-            lengths = np.unique(np.concatenate([0, *lengths]))
-            result = ak.unflatten(result, lengths[1:] - lengths[:-1])
-            result = ak.Array(
-                {
-                    f: ak.firsts(result[f])
-                    if ak.all(ak.all(result[f] == ak.firsts(result[f]), axis=1), axis=0)
-                    else result[f]
-                    for f in result.fields
-                }
-            )
-
-        if library == "ak":
-            return result
-        if library == "pd":
-            return ak.to_dataframe(result)
-        if library == "np":
-            return ak.to_numpy(result)
-        msg = "library must be 'ak', 'pd' or 'np'"
-        raise ValueError(msg)
-
-    finally:
-        os.chdir(cwd)
+        finally:
+            os.chdir(cwd)
 
 
 def _get_run_records_loop(
