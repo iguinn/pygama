@@ -36,16 +36,18 @@ of the above set of functions). Note that the `dataflow-config.yaml` need not co
 from an existing production; one can be modified to point towards additional paths
 as needed!
 
-A template for a minimal `dataflow-config.yaml` file::
+A template for a minimal `dataflow-config.yaml` file:
+  .. code-block:: yaml
+
     paths:
         metadata: $_/inputs # path to metadata root dir; usually $REFPROD/inputs
 
         tier_raw: $_/generated/tier/raw # path to raw tier root dir
-        tier_[tla]: $_/generated/tier/... # path to root dir for tier named TLA
+        tier_tla: $_/generated/tier/... # path to root dir for tier named TLA
         ...
 
-        par_[tla]: $_/generated/par/... # path to root dir for pargen database
-    ...
+        par_tla: $_/generated/par/... # path to root dir for pargen database
+        ...
 
     query:
         cycle_def: experiment-period-run-datatype-starttime # REQUIRED: hyphen-separated-list-of-fields-in-cycle-name; these will be columns of run db
@@ -55,7 +57,8 @@ A template for a minimal `dataflow-config.yaml` file::
         chan_db: # path in metadata to list of channels for a given run. Use format string syntax, which may refer to any values in the run DB (i.e. cycle_def fields, cycle name, and relative path). If no value was provided, call "metadata.channelmap(on = starttime)", where "starttime" is drawn from the run db
         par_db: #optional info for navigating par dbs. If missing use "par_db.on(starttime)[@chan.name]"
             cycle_entry: # sub-path to entry for cycle, using format string syntax, which may include values from run db; if missing or falsey, call .on
-            chan_entry: @chan.name # sub-sub-path to entry for channel, using format string syntax, which may include values from run or chan dbs; if missing or falsey, assume same values for all channels in a cycle (useful if only one channel per cycle...)
+            chan_entry: "@chan.name" # sub-sub-path to entry for channel, using format string syntax, which may include values from run or chan dbs; if missing or falsey, assume same values for all channels in a cycle (useful if only one channel per cycle...)
+
         meta_dbs: # optional list of metadata DBs
             name: # @name of db for access in query_meta
                 path: # metadata path to database
@@ -63,10 +66,11 @@ A template for a minimal `dataflow-config.yaml` file::
                 chan_entry: # sub-sub-path to entry for channel, using format string syntax, which may include values from run or chan dbs; if missing or falsey, use same value for all chans
                 # based on these, we will search "metadata["[path][.on(starttime)|/cycle_entry][/chan_entry]
             ...
+
         tables:
             raw: ch{@chan.daq.rawid:07d}/raw
             evt: evt
-            [tla]: # path to table for channel in tier_[tla] lh5 files. Use format string syntax, which can refer to values from the run_db and chan_db; e.g. "ch{@chan.daq.rawid}/raw"
+            tla: # path to table for channel in tier_tla lh5 files. Use format string syntax, which can refer to values from the run_db and chan_db; e.g. "ch{@chan.daq.rawid}/raw"
             ...
 
 These ``dataflow-config.yaml`` files should not often need to be created, and will

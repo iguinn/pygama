@@ -35,21 +35,19 @@ def build_iterator(
 
     runs
         python boolean expression for selecting runs, using column names defined
-        in ``cycle_def`` as variables. See :meth:query_runs
+        in ``cycle_def`` as variables. See :meth:`query_runs`
 
         Examples:
-        - ``"period>='p06' and period<='p08' and datatype=='cal'"`` selects calibration data from periods 6, 7 and 8 (assuming default cycle names)
-        - ``"det in ["V01234A", "V06789B"] and datatype=='th_HS2_lat_psa'`` selects runs for detectors V01234A and V06789B from Th calibration data (using Hades data cycle name ``experiment-det-datatype-run-starttime``)
+            - ``"period>='p06' and period<='p08' and datatype=='cal'"`` selects calibration data from periods 6, 7 and 8 (assuming default cycle names)
+            - ``"det in ['V01234A', 'V06789B'] and datatype=='th_HS2_lat_psa'"`` selects runs for detectors V01234A and V06789B from Th calibration data (using Hades data cycle name ``experiment-det-datatype-run-starttime``)
 
     channels
         expression used to select channels for each run. Expression can
         access values from all databases, as well as the run table.
 
         Examples:
-        - ``"@det.system=='geds' and @det.type=='icpc' and @det.analysis.usability=='on'"``
-          selects all ICPC detectors for each run that are marked as usable
-        - ``"@det.name=='S010' and @det.analysis.processible"`` selects SiPM channel 10 and
-          will only include runs where it is can be processed
+            - ``"@chan.system=='geds' and @chan.type=='icpc' and @chan.analysis.usability=='on'"`` selects all ICPC detectors for each run that are marked as usable
+            - ``"@chan.name=='S010' and @chan.analysis.processible"`` selects SiPM channel 10 and will only include runs where it is can be processed
 
         Note: if a parameter does not exist for a channel, it will evaluate to ``None``.
         If this causes an error to be thrown, this expression will evaluate to ``False``,

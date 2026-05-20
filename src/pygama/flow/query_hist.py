@@ -63,7 +63,7 @@ def query_hist(
 
             {
                 "cuspEmax_ctc_cal": axis.Regular(300, 0, 3000, label="Energy (keV)"),
-                "@det.name": axis.StrCategory(label="Detector", growth=True)"
+                "@chan.name": axis.StrCategory(label="Detector", growth=True)"
             }
 
     runs
@@ -89,11 +89,11 @@ def query_hist(
 
         - select all ICPC detectors for each run that are marked as usable::
 
-            "@det.system=='geds' and @det.type=='icpc' and @det.analysis.usability=='on'"``
+            "@chan.system=='geds' and @chan.type=='icpc' and @chan.analysis.usability=='on'"``
 
         - selects SiPM channel 10 and will only include runs where it is can be processed::
 
-            "@det.name=='S010' and @det.analysis.processible"
+            "@chan.name=='S010' and @chan.analysis.processible"
 
         Note: if a parameter does not exist for a channel, it will evaluate to ``None``.
         If this causes an error to be thrown, this expression will evaluate to ``False``,
