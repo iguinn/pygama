@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+
 from pygama.flow.utils import parse_query_paths
 
 
