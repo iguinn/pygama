@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 import awkward as ak
+import lh5
 import numpy as np
 import pytest
 import yaml
 from dbetto import AttrsDict
-from lgdo import Array, Table, VectorOfVectors, lh5, read_as
+from lgdo import Array, Table, VectorOfVectors
+from lh5 import read_as
 
 from pygama.evt import build_evt
 
@@ -146,7 +150,7 @@ def test_spms_p13(tcm_path: str, lgnd_test_data, tmp_dir):
         "evt": (outfile, "evt"),
     }
 
-    with open(f"{config_dir}/spms-p13-config.yaml") as file:
+    with Path(f"{config_dir}/spms-p13-config.yaml").open() as file:
         evt_config = AttrsDict(yaml.safe_load(file))
 
     build_evt(
@@ -364,6 +368,33 @@ def test_build_evt_write(files_config_write):
     )
     outfile = files_config_write["evt"][0]
     assert Path(outfile).exists()
+
+
+def test_description_attr(files_config_nowrite):
+    config = {
+        "channels": {"geds_on": ["ch1084803", "ch1084804", "ch1121600"]},
+        "outputs": ["multiplicity", "multiplicity_squared"],
+        "operations": {
+            "multiplicity": {
+                "channels": "geds_on",
+                "aggregation_mode": "sum",
+                "expression": "hit.cuspEmax_ctc_cal > a",
+                "parameters": {"a": 25},
+                "initial": 0,
+                "description": "Number of triggered detectors",
+            },
+            "multiplicity_squared": {
+                "expression": "evt.multiplicity * evt.multiplicity",
+                "description": "Square of event multiplicity",
+            },
+        },
+    }
+
+    evt = build_evt(files_config_nowrite, config=config)
+    assert evt.multiplicity.attrs["description"] == "Number of triggered detectors"
+    assert (
+        evt.multiplicity_squared.attrs["description"] == "Square of event multiplicity"
+    )
 
 
 def test_buffered_build_evt(files_config_nowrite):

@@ -3,6 +3,8 @@ This module contains the functions for performing the filter optimisation.
 This happens with a grid search performed on ENC peak.
 """
 
+from __future__ import annotations
+
 import logging
 import time
 
@@ -27,26 +29,31 @@ def noise_optimization(
     dsp_proc_chain: dict,
     par_dsp: dict,
     opt_dict: dict,
-    lh5_path: str,
+    _lh5_path: str,
     display: int = 0,
 ) -> dict:
     """
-    This function calculates the optimal filter par.
+    Calculate the optimal noise-filter parameter.
+
     Parameters
     ----------
-    tb_data : str
-        raw table to run the macro on
-    dsp_proc_chain: str
-        Path to minimal dsp config file
-    par_dsp: str
-        Dictionary with default dsp parameters
-    opt_dict: str
-        Dictionary with parameters for optimization
-    lh5_path:  str
-        Name of channel to process, should be name of lh5 group in raw files
+    tb_data
+        Raw LH5 table to run the DSP macro on.
+    dsp_proc_chain
+        Minimal DSP config dictionary.
+    par_dsp
+        Dictionary with default DSP parameters.
+    opt_dict
+        Dictionary with parameters for the optimisation.
+    _lh5_path
+        Name of the channel to process (LH5 group name in raw files).
+    display
+        Plot verbosity level.
+
     Returns
     -------
-    res_dict : dict
+    res_dict
+        Dictionary of optimisation results.
     """
 
     t0 = time.time()
@@ -74,22 +81,22 @@ def noise_optimization(
         plt.close()
 
     result_dict = {}
-    ene_pars = [par for par in opt_dict_par.keys()]
-    log.info(f"\nRunning optimization for {ene_pars}")
+    ene_pars = list(opt_dict_par.keys())
+    log.info("\nRunning optimization for %s", ene_pars)
     for i, x in enumerate(samples):
-        x = f"{x:.1f}"
-        log.info(f"\nCase {i}, par = {x} us")
+        x_str = f"{x:.1f}"
+        log.info("\nCase %s, par = %s us", i, x_str)
         for ene_par in ene_pars:
             dict_str = opt_dict_par[ene_par]["dict_str"]
             filter_par = opt_dict_par[ene_par]["filter_par"]
             if dict_str in par_dsp:
-                par_dsp[dict_str].update({filter_par: f"{x}*us"})
+                par_dsp[dict_str].update({filter_par: f"{x_str}*us"})
             else:
-                par_dsp[dict_str] = {filter_par: f"{x}*us"}
+                par_dsp[dict_str] = {filter_par: f"{x_str}*us"}
 
         t1 = time.time()
         dsp_data = run_one_dsp(tb_data, dsp_proc_chain, db_dict=par_dsp)
-        log.info(f"Time to process dsp data {time.time()-t1:.2f} s")
+        log.info("Time to process dsp data %.2f s", time.time() - t1)
 
         for ene_par in ene_pars:
             dict_str = opt_dict_par[ene_par]["dict_str"]
@@ -110,21 +117,21 @@ def noise_optimization(
                     opt_dict["n_bootstrap_samples"],
                 )
 
-            par_dict_res[x] = {}
-            par_dict_res[x]["energies"] = energies
-            par_dict_res[x]["fom"] = fom_results["fom"]
-            par_dict_res[x]["fom_err"] = fom_results["fom_err"]
+            par_dict_res[x_str] = {}
+            par_dict_res[x_str]["energies"] = energies
+            par_dict_res[x_str]["fom"] = fom_results["fom"]
+            par_dict_res[x_str]["fom_err"] = fom_results["fom_err"]
 
     for ene_par in ene_pars:
-        log.info(f"\nOptimization for {ene_par}")
+        log.info("\nOptimization for %s", ene_par)
         dict_str = opt_dict_par[ene_par]["dict_str"]
         par_dict_res = result_dict[dict_str]
-        sample_list = np.array([float(x) for x in result_dict[dict_str].keys()])
+        sample_list = np.array([float(x) for x in result_dict[dict_str]])
         fom_list = np.array(
-            [result_dict[dict_str][x]["fom"] for x in result_dict[dict_str].keys()]
+            [result_dict[dict_str][x]["fom"] for x in result_dict[dict_str]]
         )
         fom_err_list = np.array(
-            [result_dict[dict_str][x]["fom_err"] for x in result_dict[dict_str].keys()]
+            [result_dict[dict_str][x]["fom_err"] for x in result_dict[dict_str]]
         )
 
         guess_par = sample_list[np.nanargmin(fom_list)]
@@ -136,7 +143,8 @@ def noise_optimization(
         best_par = result.x[0]
         if (best_par < np.min(sample_list)) or (best_par > np.max(sample_list)):
             log.info(
-                f"Par from minimization not accepted {best_par:.2f}, setting par to guess"
+                "Par from minimization not accepted %.2f, setting par to guess",
+                best_par,
             )
             best_par = guess_par
 
@@ -144,12 +152,12 @@ def noise_optimization(
 
         b_best_pars = np.zeros(opt_dict["n_bootstrap_samples"])
         for i in range(opt_dict["n_bootstrap_samples"]):
-            indices = np.random.choice(len(sample_list), len(sample_list), replace=True)
+            indices = np.random.choice(len(sample_list), len(sample_list), replace=True)  # noqa: NPY002
             b_sample_list = sample_list[indices]
             b_fom_list = fom_list[indices]
             b_best_pars[i] = b_sample_list[np.nanargmin(b_fom_list)]
         best_par_err = np.std(b_best_pars)
-        log.info(f"best par: {best_par:.2f} ± {best_par_err:.2f} us")
+        log.info("best par: %.2f \u00b1 %.2f us", best_par, best_par_err)
 
         par_dict_res["best_par"] = best_par
         par_dict_res["best_par_err"] = best_par_err
@@ -165,10 +173,10 @@ def noise_optimization(
             plot_range = opt_dict["plot_range"]
             fig, ax = plt.subplots(figsize=(12, 6.75), facecolor="white")
             for i, x in enumerate(sample_list):
-                x = f"{x:.1f}"
-                energies = par_dict_res[x]["energies"]
-                par_dict_res[x].pop("energies")
-                hist, bins, var = get_hist(
+                x_str = f"{x:.1f}"
+                energies = par_dict_res[x_str]["energies"]
+                par_dict_res[x_str].pop("energies")
+                hist, bins, _var = get_hist(
                     energies, range=plot_range, dx=opt_dict["dx"]
                 )
                 bc = (bins[:-1] + bins[1:]) / 2.0
@@ -220,17 +228,43 @@ def noise_optimization(
             par_dict_res["optimization"] = fig
             plot_dict["nopt"][dict_str] = par_dict_res
 
-    log.info(f"Time to complete the optimization {time.time()-t0:.2f} s")
+    log.info("Time to complete the optimization %.2f s", time.time() - t0)
     if display > 0:
         return res_dict, plot_dict
-    else:
-        return res_dict
+    return res_dict
 
 
-def calculate_spread(energies, percentile_low, percentile_high, n_samples):
+def calculate_spread(energies, percentile_low, percentile_high, n_samples) -> dict:
+    """
+    Estimate the inter-percentile spread of an energy distribution via bootstrapping.
+
+    Repeatedly resamples the input array with replacement and computes the
+    difference between *percentile_high* and *percentile_low* for each
+    bootstrap replicate.  The mean and standard error of the bootstrap
+    distribution are returned as the figure-of-merit and its uncertainty.
+
+    Parameters
+    ----------
+    energies
+        1-D array of energy values.
+    percentile_low
+        Lower percentile (0-100) used to define the spread.
+    percentile_high
+        Upper percentile (0-100) used to define the spread.
+    n_samples
+        Number of bootstrap resamples to draw.
+
+    Returns
+    -------
+    results
+        Dictionary with keys:
+
+        * ``fom`` - mean inter-percentile spread across bootstrap samples.
+        * ``fom_err`` - standard error of the mean spread.
+    """
     spreads = np.zeros(n_samples)
     for i in range(n_samples):
-        resampled = np.random.choice(energies, size=len(energies), replace=True)
+        resampled = np.random.choice(energies, size=len(energies), replace=True)  # noqa: NPY002
         spread = np.percentile(resampled, percentile_high) - np.percentile(
             resampled, percentile_low
         )
@@ -245,10 +279,45 @@ def calculate_spread(energies, percentile_low, percentile_high, n_samples):
     return results
 
 
-def simple_gaussian_fit(energies, dx=1, sigma_thr=4, allowed_p_val=1e-20):
+def simple_gaussian_fit(energies, dx=1, sigma_thr=4, allowed_p_val=1e-20) -> dict:
+    """
+    Fit a Gaussian-on-uniform model to an ENC (noise) peak and return the FWHM.
+
+    An initial guess from :func:`simple_gaussian_guess` is used to define a
+    sigma-clipped fit range.  The unbinned fit is accepted if the covariance
+    is well-defined and the goodness-of-fit p-value exceeds *allowed_p_val*;
+    otherwise the guess values are returned with zero uncertainties.
+
+    Parameters
+    ----------
+    energies
+        1-D array of energy (or ENC) values.
+    dx
+        Histogram bin width used for initial guessing and goodness-of-fit
+        evaluation.
+    sigma_thr
+        Number of sigma around the estimated mean used to clip the fit range.
+    allowed_p_val
+        Minimum chi-squared p-value for the fit to be considered successful.
+
+    Returns
+    -------
+    results
+        Result dictionary with keys:
+
+        * ``pars`` - fit parameter array.
+        * ``errors`` - fit parameter uncertainties.
+        * ``covariance`` - parameter covariance matrix.
+        * ``mu`` - peak centre.
+        * ``mu_err`` - uncertainty on the peak centre.
+        * ``fom`` - FWHM of the peak.
+        * ``fom_err`` - uncertainty on the FWHM.
+        * ``chisq`` - reduced chi-squared of the fit.
+        * ``p_val`` - goodness-of-fit p-value.
+    """
     fit_range = [np.percentile(energies, 0.2), np.percentile(energies, 99.8)]
 
-    hist, bins, var = get_hist(energies, range=fit_range, dx=dx)
+    hist, bins, _var = get_hist(energies, range=fit_range, dx=dx)
     guess, bounds = simple_gaussian_guess(hist, bins, gauss_on_uniform)
     fit_range = [guess[0] - sigma_thr * guess[1], guess[0] + sigma_thr * guess[1]]
 
@@ -264,7 +333,7 @@ def simple_gaussian_fit(energies, dx=1, sigma_thr=4, allowed_p_val=1e-20):
     fwhm = pars[1] * 2 * np.sqrt(2 * np.log(2))
     fwhm_err = errs[1] * 2 * np.sqrt(2 * np.log(2))
 
-    hist, bins, var = get_hist(energies_fit, range=fit_range, dx=dx)
+    hist, bins, _var = get_hist(energies_fit, range=fit_range, dx=dx)
     gof_pars = pars
     gof_pars[2] *= dx
     chisq, dof = goodness_of_fit(
@@ -279,12 +348,12 @@ def simple_gaussian_fit(energies, dx=1, sigma_thr=4, allowed_p_val=1e-20):
     ):
         log.debug("fit failed, cov estimation failed")
         fit_failed = True
-    elif (np.abs(np.array(errs)[2:] / np.array(pars)[2:]) < 1e-7).any() or np.isnan(
-        np.array(errs)[2:]
-    ).any():
-        log.debug("fit failed, parameter error too low")
-        fit_failed = True
-    elif p_val < allowed_p_val or np.isnan(p_val):
+    elif (
+        (np.abs(np.array(errs)[2:] / np.array(pars)[2:]) < 1e-7).any()
+        or np.isnan(np.array(errs)[2:]).any()
+        or p_val < allowed_p_val
+        or np.isnan(p_val)
+    ):
         log.debug("fit failed, parameter error too low")
         fit_failed = True
     else:
@@ -297,7 +366,7 @@ def simple_gaussian_fit(energies, dx=1, sigma_thr=4, allowed_p_val=1e-20):
         fwhm = guess[1] * 2 * np.sqrt(2 * np.log(2))
         fwhm_err = 0
 
-    results = {
+    return {
         "pars": pars,
         "errors": errs,
         "covariance": cov,
@@ -308,10 +377,38 @@ def simple_gaussian_fit(energies, dx=1, sigma_thr=4, allowed_p_val=1e-20):
         "chisq": chisq / dof,
         "p_val": p_val,
     }
-    return results
 
 
-def simple_gaussian_guess(hist, bins, func, toll=0.2):
+def simple_gaussian_guess(hist, bins, func, toll=0.2) -> tuple:
+    """
+    Generate an initial parameter guess and bounds for a Gaussian-on-uniform fit.
+
+    Estimates the peak centre from the histogram maximum and the width from
+    the FWHM of the peak.  The signal count is estimated by integrating the
+    histogram over a +-2 sigma window around the peak.
+
+    Parameters
+    ----------
+    hist
+        1-D array of histogram counts.
+    bins
+        1-D array of bin edges (length ``len(hist) + 1``).
+    func
+        Probability distribution object whose parameter names are used to
+        construct the output dictionaries (must expose ``mu``, ``sigma``, and
+        ``n_sig`` parameters).
+    toll
+        Fractional tolerance used to set symmetric bounds around each guess
+        value.
+
+    Returns
+    -------
+    guess
+        Initial parameter values: ``{"mu": ..., "sigma": ..., "n_sig": ...}``.
+    bounds
+        Allowed parameter ranges: ``{"mu": (lo, hi), "sigma": (lo, hi),
+        "n_sig": (lo, hi)}``.
+    """
     max_idx = np.argmax(hist)
     mu = bins[max_idx]
     max_amp = np.max(hist)
@@ -343,10 +440,10 @@ def simple_gaussian_guess(hist, bins, func, toll=0.2):
     }
 
     for par in func.required_args():
-        if par == "x_lo" or par == "x_hi":
+        if par in {"x_lo", "x_hi"}:
             guess[par] = np.inf
             bounds[par] = None
-        elif par == "n_bkg" or par == "hstep":
+        elif par in {"n_bkg", "hstep"}:
             guess[par] = 0
             bounds[par] = None
     return guess, bounds

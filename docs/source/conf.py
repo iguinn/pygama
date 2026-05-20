@@ -1,4 +1,5 @@
 # Configuration file for the Sphinx documentation builder.
+from __future__ import annotations
 
 import sys
 from importlib.metadata import version as im_version
@@ -60,6 +61,7 @@ intersphinx_mapping = {
     "h5py": ("https://docs.h5py.org/en/stable", None),
     "pint": ("https://pint.readthedocs.io/en/stable", None),
     "lgdo": ("https://legend-pydataobj.readthedocs.io/en/stable", None),
+    "lh5": ("https://legend-lh5io.readthedocs.io/en/stable", None),
     "dspeed": ("https://dspeed.readthedocs.io/en/stable", None),
     "daq2lh5": ("https://legend-daq2lh5.readthedocs.io/en/stable", None),
 }

@@ -9,7 +9,7 @@ import re
 from collections.abc import Collection, Mapping
 
 import awkward as ak
-import lgdo.lh5 as lh5
+import lh5
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -62,7 +62,26 @@ mpl.use("agg")
 
 def get_keys(in_data, cut_dict):
     """
-    Get the keys of the data that are used in the cut dictionary
+    Extract the data column names referenced by a cut dictionary.
+
+    Scans each entry in *cut_dict* for the ``cut_parameter`` or
+    ``expression`` key and returns the subset of those names that actually
+    appear in *in_data*.
+
+    Parameters
+    ----------
+    in_data
+        Source of available column names.  Either a mapping (e.g. a dict
+        or LH5 ``Table``) whose ``.keys()`` give the column names, or an
+        iterable of name strings.
+    cut_dict
+        Cut specification dictionary, as used by :func:`generate_cuts`.
+
+    Returns
+    -------
+    keys
+        Sorted list of unique column names from *in_data* that are
+        referenced by *cut_dict*.
     """
     parameters = []
     for entry in cut_dict.values():
@@ -83,7 +102,27 @@ def get_keys(in_data, cut_dict):
     return np.unique(out_params).tolist()
 
 
-def get_mode_stdev(par_array):
+def get_mode_stdev(par_array) -> tuple:
+    """
+    Estimate the mode and standard deviation of a parameter distribution.
+
+    Uses a histogram-based approach: the distribution is first clipped to the
+    1st-99th percentile range, the modal bin is located, and a Gaussian is fit
+    in the neighbourhood of that bin to refine the estimates.  Multiple
+    fallback strategies are applied when the primary fit fails.
+
+    Parameters
+    ----------
+    par_array
+        1-D array of parameter values.
+
+    Returns
+    -------
+    mean
+        Estimated mode (peak position) of the distribution.
+    std
+        Estimated standard deviation corresponding to the FWHM of the peak.
+    """
     idxs = (par_array > np.nanpercentile(par_array, 1)) & (
         par_array < np.nanpercentile(par_array, 99)
     )
@@ -92,7 +131,7 @@ def get_mode_stdev(par_array):
     if bin_width == 0:
         bin_width = np.std(par_array) / 4
 
-    counts, start_bins, var = pgh.get_hist(
+    counts, start_bins, _ = pgh.get_hist(
         par_array,
         range=(np.nanmin(par_array), np.nanmax(par_array)),
         dx=bin_width,
@@ -120,7 +159,7 @@ def get_mode_stdev(par_array):
         dx = np.nanpercentile(par_array, 52) - np.nanpercentile(par_array, 50)
         if dx == 0:
             dx = bin_width
-        counts, bins, var = pgh.get_hist(
+        counts, bins, _ = pgh.get_hist(
             par_array,
             dx=dx,
             range=(lower_bound, upper_bound),
@@ -130,7 +169,7 @@ def get_mode_stdev(par_array):
 
         fwhm = pgh.get_fwhm(counts, bins)[0]
         mean = float(bin_centres[np.argmax(counts)])
-        pars, cov = pgf.gauss_mode_width_max(
+        pars, _cov = pgf.gauss_mode_width_max(
             counts,
             bins,
             mode_guess=mean,
@@ -163,7 +202,7 @@ def get_mode_stdev(par_array):
             if dx == 0:
                 dx = bin_width
 
-            counts, bins, var = pgh.get_hist(
+            counts, bins, _var = pgh.get_hist(
                 par_array,
                 dx=dx,
                 range=(lower_bound, upper_bound),
@@ -181,7 +220,33 @@ def get_mode_stdev(par_array):
     return mean, std
 
 
-def fit_distributions(x_lo, x_hi, norm_par_array, display=0):
+def fit_distributions(x_lo, x_hi, norm_par_array, display=0) -> tuple:
+    """
+    Fit several distribution models to a parameter distribution and return the
+    best-fitting one.
+
+    Candidates (Gaussian, exGauss, skewed Gaussian, Gaussian-on-exGauss, double
+    exGauss) are fitted unbinned over the range ``[x_lo, x_hi]``.  The winner
+    is chosen by p-value (or lowest chi-squared when all p-values are zero).
+
+    Parameters
+    ----------
+    x_lo
+        Lower bound of the fitting range.
+    x_hi
+        Upper bound of the fitting range.
+    norm_par_array
+        1-D array of (typically normalised) parameter values.
+    display
+        Verbosity / plotting level.  Values > 0 trigger diagnostic plots.
+
+    Returns
+    -------
+    func
+        Best-fitting distribution callable.
+    pars
+        Parameter array for the winning model.
+    """
     peak_par_array = norm_par_array[(norm_par_array > x_lo) & (norm_par_array < x_hi)]
 
     hist, bins, var = pgh.get_hist(peak_par_array, dx=0.1, range=(x_lo, x_hi))
@@ -364,10 +429,7 @@ def fit_distributions(x_lo, x_hi, norm_par_array, display=0):
         double_exgauss_csqr[0],
     ]
 
-    if (pvals == 0).all():
-        idx = np.nanargmin(csqrs)
-    else:
-        idx = np.nanargmax(pvals)
+    idx = np.nanargmin(csqrs) if (pvals == 0).all() else np.nanargmax(pvals)
     func = funcs[idx]
     pars = pars[idx]
     return func, pars
@@ -384,11 +446,11 @@ def generate_cuts(
 
     Parameters
     ----------
-    data : lh5 table, dictionary of arrays or pandas dataframe
-        data to calculate cuts on
-
-    parameters : dict
-        dictionary of the form:
+    data
+        Input data as an LH5 table, a dictionary of arrays, or a
+        :class:`pandas.DataFrame`.
+    cut_dict
+        Dictionary of the form:
 
         .. code-block:: json
 
@@ -400,9 +462,7 @@ def generate_cuts(
                 }
             }
 
-        number of sigmas can instead be a dictionary to specify different cut levels for low and high side
-        or to only have a one sided cut only specify one of the low or high side
-        e.g.
+        *cut_level* may also be a dict to set asymmetric or one-sided cuts:
 
         .. code-block:: json
 
@@ -414,7 +474,7 @@ def generate_cuts(
                 }
             }
 
-        alternatively can specify hit dict fields to just copy dict into output dict e.g.
+        Alternatively, pass through an arbitrary expression directly:
 
         .. code-block:: json
 
@@ -425,39 +485,28 @@ def generate_cuts(
                 }
             }
 
-        or
-
-        .. code-block:: json
-
-            {
-                "is_valid_cal":{
-                    "expression":"(~is_pileup_tail)&(~is_pileup_baseline)"
-                }
-            }
-
-    rounding : int
-        number of decimal places to round to
-
-    display : int
-        if 1 will display plots of the cuts
-        if 0 will not display plots
+    rounding
+        Number of decimal places to round cut boundaries to.
+    display
+        Verbosity level.  Values > 0 produce diagnostic histograms.
 
     Returns
     -------
-    dict
-        dictionary of the form (same as hit dicts):
+    output_dict
+        Cut expressions in hit-dict format:
 
         .. code-block:: python
 
             {
                 "output_parameter_name": {
                     "expression": "cut_expression",
-                    "parameters": {"a": "lower_bound", "b": "upper_bound"}
+                    "parameters": {"a": lower_bound, "b": upper_bound},
                 }
             }
 
     plot_dict
-        dictionary of plots
+        Dictionary of :class:`matplotlib.figure.Figure` objects keyed by
+        parameter name.  Only returned when *display* > 0.
     """
 
     output_dict = {}
@@ -486,13 +535,14 @@ def generate_cuts(
             bad_entries = (~np.isnan(all_par_array)) & (~np.isinf(all_par_array))
 
             if len(np.where(bad_entries)[0]) == 0:
-                raise RuntimeError(f"no valid entries for {par}")
+                msg = f"no valid entries for {par}"
+                raise RuntimeError(msg)
 
             mean, std = get_mode_stdev(
                 all_par_array[(~np.isnan(all_par_array)) & (~np.isinf(all_par_array))]
             )
 
-            if isinstance(num_sigmas, (int, float)):
+            if isinstance(num_sigmas, int | float):
                 num_sigmas_left = num_sigmas
                 num_sigmas_right = num_sigmas
             elif isinstance(num_sigmas, dict):
@@ -535,12 +585,10 @@ def generate_cuts(
                 up_val = np.nanpercentile(all_par_array, 95)
                 if upper is not None:
                     plt.axvline(upper)
-                    if up_val < upper:
-                        up_val = upper
+                    up_val = max(up_val, upper)
                 if lower is not None:
                     plt.axvline(lower)
-                    if low_val > lower:
-                        low_val = lower
+                    low_val = min(low_val, lower)
 
                 plt.hist(
                     all_par_array,
@@ -558,16 +606,31 @@ def generate_cuts(
                 plt.close()
     if display > 0:
         return output_dict, plot_dict
-    else:
-        return output_dict
+    return output_dict
 
 
 def get_cut_indexes(data, cut_parameters):
     """
-    Get the indexes of the data that pass the cuts in
+    Compute a boolean mask of events that pass all specified cuts.
+
+    Derives cut boundaries via :func:`generate_cuts`, evaluates each cut
+    expression, and returns a combined pass/fail mask.
+
+    Parameters
+    ----------
+    data
+        Input data as an :class:`lgdo.Table` or :class:`pandas.DataFrame`.
+    cut_parameters
+        Cut specification dictionary passed through to :func:`generate_cuts`.
+
+    Returns
+    -------
+    ct_mask
+        Boolean array of length ``len(data)``; ``True`` for events passing
+        all cuts.
     """
     cut_dict = generate_cuts(data, cut_dict=cut_parameters)
-    log.debug(f"Cuts are {cut_dict}")
+    log.debug("Cuts are %s", cut_dict)
 
     if isinstance(data, Table):
         ct_mask = np.full(len(data), True, dtype=bool)
@@ -589,7 +652,8 @@ def get_cut_indexes(data, cut_parameters):
             data[outname] = data.eval(exp, local_dict=info.get("parameters", None))
             ct_mask = ct_mask & data[outname]
     else:
-        raise ValueError("Data must be a Table or DataFrame")
+        msg = "Data must be a Table or DataFrame"
+        raise ValueError(msg)
 
     return ct_mask
 
@@ -597,7 +661,7 @@ def get_cut_indexes(data, cut_parameters):
 def generate_cut_classifiers(
     data: dict[str, np.ndarray],
     cut_dict: dict[str, int],
-    rounding: int = 4,
+    rounding: int = 4,  # noqa: ARG001
     display: int = 0,
 ) -> dict:
     """
@@ -605,11 +669,11 @@ def generate_cut_classifiers(
 
     Parameters
     ----------
-    data : lh5 table, dictionary of arrays or pandas dataframe
-        data to calculate cuts on
-
-    parameters : dict
-        dictionary of the form:
+    data
+        Input data as an LH5 table, a dictionary of arrays, or a
+        :class:`pandas.DataFrame`.
+    cut_dict
+        Dictionary of the form:
 
         .. code-block:: json
 
@@ -617,13 +681,11 @@ def generate_cut_classifiers(
                 "output_parameter_name": {
                     "cut_parameter": "parameter_to_cut_on",
                     "cut_level": "number_of_sigmas",
-                     "mode": "inclusive/exclusive"
+                    "mode": "inclusive/exclusive"
                 }
             }
 
-        number of sigmas can instead be a dictionary to specify different cut levels for low and high side
-        or to only have a one sided cut only specify one of the low or high side
-        e.g.
+        *cut_level* may also be a dict to set asymmetric or one-sided cuts:
 
         .. code-block:: json
 
@@ -635,7 +697,7 @@ def generate_cut_classifiers(
                 }
             }
 
-        alternatively can specify hit dict fields to just copy dict into output dict e.g.
+        Alternatively, pass through an arbitrary expression directly:
 
         .. code-block:: json
 
@@ -646,39 +708,30 @@ def generate_cut_classifiers(
                 }
             }
 
-        or
-
-        .. code-block:: json
-
-            {
-                "is_valid_cal":{
-                    "expression":"(~is_pileup_tail)&(~is_pileup_baseline)"
-                }
-            }
-
-    rounding : int
-        number of decimal places to round to
-
-    display : int
-        if 1 will display plots of the cuts
-        if 0 will not display plots
+    rounding
+        Number of decimal places to round cut boundaries to.
+    display
+        Verbosity level.  Values > 0 produce diagnostic histograms.
 
     Returns
     -------
-    dict
-        dictionary of the form (same as hit dicts):
+    output_dict
+        Cut expressions in hit-dict format with an additional
+        ``{out_par}_classifier`` normalisation entry for each fitted
+        parameter:
 
         .. code-block:: python
 
             {
                 "output_parameter_name": {
                     "expression": "cut_expression",
-                    "parameters": {"a": lower_bound, "b": upper_bound}
+                    "parameters": {"a": lower_bound, "b": upper_bound},
                 }
             }
 
     plot_dict
-        dictionary of plots
+        Dictionary of :class:`matplotlib.figure.Figure` objects keyed by
+        parameter name.  Only returned when *display* > 0.
     """
 
     output_dict = {}
@@ -712,7 +765,7 @@ def generate_cut_classifiers(
             norm_par_array = (all_par_array - mean) / std
 
             if num_sigmas is not None:
-                if isinstance(num_sigmas, (int, float)):
+                if isinstance(num_sigmas, int | float):
                     cut_left = -num_sigmas
                     cut_right = num_sigmas
                 elif isinstance(num_sigmas, dict):
@@ -756,14 +809,15 @@ def generate_cut_classifiers(
                             pars["mu"],
                             pars["sigma"],
                         )
-                    elif func == gauss_on_exgauss_areas or func == double_exgauss:
+                    elif func in (gauss_on_exgauss_areas, double_exgauss):
                         cdf = func.cdf_norm(xs, range_low, range_high, *pars[2:])
                     elif func == skewed_fit:
                         cdf = skewnorm.cdf(xs, pars["alpha"], pars["mu"], pars["sigma"])
                     else:
-                        raise ValueError("unknown func")
+                        msg = "unknown func"
+                        raise ValueError(msg)
 
-                    if isinstance(percentile, (int, float)):
+                    if isinstance(percentile, int | float):
                         cut_left = xs[np.argmin(np.abs(cdf - (1 - (percentile / 100))))]
                         cut_right = xs[np.argmin(np.abs(cdf - (percentile / 100)))]
 
@@ -779,25 +833,24 @@ def generate_cut_classifiers(
                         else:
                             cut_right = None
 
-                else:
-                    if isinstance(percentile, (int, float)):
-                        cut_left = np.nanpercentile(norm_par_array, 100 - percentile)
-                        cut_right = np.nanpercentile(norm_par_array, percentile)
+                elif isinstance(percentile, int | float):
+                    cut_left = np.nanpercentile(norm_par_array, 100 - percentile)
+                    cut_right = np.nanpercentile(norm_par_array, percentile)
 
-                    elif isinstance(percentile, dict):
-                        if "low_side" in percentile:
-                            cut_left = np.nanpercentile(norm_par_array, percentile)
-                        else:
-                            cut_left = None
-                        if "high_side" in percentile:
-                            cut_right = np.nanpercentile(norm_par_array, percentile)
-                        else:
-                            cut_right = None
+                elif isinstance(percentile, dict):
+                    if "low_side" in percentile:
+                        cut_left = np.nanpercentile(norm_par_array, percentile)
+                    else:
+                        cut_left = None
+                    if "high_side" in percentile:
+                        cut_right = np.nanpercentile(norm_par_array, percentile)
+                    else:
+                        cut_right = None
 
             if default is not None:
                 value = default["value"]
                 default_mode = default["mode"]
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     default_cut_left = -value
                     default_cut_right = value
                 else:
@@ -812,20 +865,17 @@ def generate_cut_classifiers(
 
                 if default_mode == "higher_limit":
                     if cut_left is not None:
-                        if cut_left < default_cut_left:
-                            cut_left = default_cut_left
+                        cut_left = max(cut_left, default_cut_left)
                     if cut_right is not None:
-                        if cut_right > default_cut_right:
-                            cut_right = default_cut_right
+                        cut_right = min(cut_right, default_cut_right)
                 elif default_mode == "lower_limit":
                     if cut_left is not None:
-                        if cut_left > default_cut_left:
-                            cut_left = default_cut_left
+                        cut_left = min(cut_left, default_cut_left)
                     if cut_right is not None:
-                        if cut_right < default_cut_right:
-                            cut_right = default_cut_right
+                        cut_right = max(cut_right, default_cut_right)
                 else:
-                    raise ValueError("unknown mode")
+                    msg = "unknown mode"
+                    raise ValueError(msg)
 
             if mode == "inclusive":
                 if cut_right is not None and cut_left is not None:
@@ -858,7 +908,7 @@ def generate_cut_classifiers(
                 fig = plt.figure()
                 low = -10 if cut_left is None or cut_left > -10 else cut_left
                 hi = 10 if cut_right is None or cut_right < 10 else cut_right
-                hist, _, _ = plt.hist(
+                _hist, _, _ = plt.hist(
                     norm_par_array,
                     bins=np.arange(low, hi, 0.1),
                     histtype="step",
@@ -881,13 +931,33 @@ def generate_cut_classifiers(
                 plt.close()
     if display > 0:
         return output_dict, plot_dict
-    else:
-        return output_dict
+    return output_dict
 
 
 def find_pulser_properties(df, energy="daqenergy"):
     """
-    Searches for pulser in the energy spectrum using time between events in peaks
+    Identify pulser peaks in an energy spectrum by their time periodicity.
+
+    Locates local maxima in the energy histogram, fits each peak top to
+    estimate its centroid and width, and then checks whether events in each
+    peak arrive with a regular time spacing — a hallmark of pulser signals.
+    Only peaks with a clearly periodic inter-arrival time are returned.
+
+    Parameters
+    ----------
+    df
+        DataFrame with at least an energy column (named by *energy*) and a
+        ``timestamp`` column in seconds.
+    energy
+        Name of the energy column to analyse.
+
+    Returns
+    -------
+    out_pulsers
+        List of ``(pulser_energy, peak_e_err, period, energy_name)`` tuples,
+        one per detected pulser peak.  *pulser_energy* is the peak centroid,
+        *peak_e_err* is its half-width, *period* is the repetition period in
+        seconds, and *energy_name* is the value of *energy*.
     """
     if np.nanmax(df[energy]) > 8000:
         hist, bins, var = pgh.get_hist(
@@ -903,32 +973,31 @@ def find_pulser_properties(df, energy="daqenergy"):
         var[np.where(var == 0)] = 1
     imaxes = pgc.get_i_local_maxima(hist / np.sqrt(var), 3)
     peak_energies = pgh.get_bin_centers(bins)[imaxes]
-    pt_pars, pt_covs = pgc.hpge_fit_E_peak_tops(
+    pt_pars, _pt_covs = pgc.hpge_fit_E_peak_tops(
         hist, bins, var, peak_energies, n_to_fit=10
     )
     peak_e_err = pt_pars[:, 1] * 4
 
     allowed_mask = np.ones(len(peak_energies), dtype=bool)
-    for i, e in enumerate(peak_energies[1:-1]):
-        i += 1
+    for j, e in enumerate(peak_energies[1:-1]):
+        i = j + 1
         if peak_e_err[i] > allowed_err:
             continue
-        if i == 1:
-            if (
-                e - peak_e_err[i] < peak_energies[i - 1] + peak_e_err[i - 1]
-                and peak_e_err[i - 1] < allowed_err
-            ):
-                overlap = (
-                    peak_energies[i - 1]
-                    + peak_e_err[i - 1]
-                    - (peak_energies[i] - peak_e_err[i])
-                )
-                peak_e_err[i] -= overlap * (
-                    peak_e_err[i] / (peak_e_err[i] + peak_e_err[i - 1])
-                )
-                peak_e_err[i - 1] -= overlap * (
-                    peak_e_err[i - 1] / (peak_e_err[i] + peak_e_err[i - 1])
-                )
+        if i == 1 and (
+            e - peak_e_err[i] < peak_energies[i - 1] + peak_e_err[i - 1]
+            and peak_e_err[i - 1] < allowed_err
+        ):
+            overlap = (
+                peak_energies[i - 1]
+                + peak_e_err[i - 1]
+                - (peak_energies[i] - peak_e_err[i])
+            )
+            peak_e_err[i] -= overlap * (
+                peak_e_err[i] / (peak_e_err[i] + peak_e_err[i - 1])
+            )
+            peak_e_err[i - 1] -= overlap * (
+                peak_e_err[i - 1] / (peak_e_err[i] + peak_e_err[i - 1])
+            )
 
         if (
             e + peak_e_err[i] > peak_energies[i + 1] - peak_e_err[i + 1]
@@ -949,7 +1018,7 @@ def find_pulser_properties(df, energy="daqenergy"):
             df_peak = df[e_cut]
 
             time_since_last = (
-                df_peak.timestamp.values[1:] - df_peak.timestamp.values[:-1]
+                df_peak.timestamp.to_numpy()[1:] - df_peak.timestamp.to_numpy()[:-1]
             )
 
             tsl = time_since_last[
@@ -968,32 +1037,56 @@ def find_pulser_properties(df, energy="daqenergy"):
             super_max = super_max[super_max > 20]
             if len(maxs) < 2:
                 continue
-            else:
-                max_locs = np.array([0.0])
-                max_locs = np.append(max_locs, bcs[np.array(maxs)])
-                if (
-                    len(np.where(np.abs(np.diff(np.diff(max_locs))) <= 0.001)[0]) > 1
-                    or (np.abs(np.diff(np.diff(max_locs))) <= 0.001).all()
-                    or len(super_max) > 0
-                ):
-                    pulser_e = e
-                    period = stats.mode(tsl).mode[0]
-                    if period > 0.1:
-                        out_pulsers.append((pulser_e, peak_e_err[i], period, energy))
+            max_locs = np.array([0.0])
+            max_locs = np.append(max_locs, bcs[np.array(maxs)])
+            if (
+                len(np.where(np.abs(np.diff(np.diff(max_locs))) <= 0.001)[0]) > 1
+                or (np.abs(np.diff(np.diff(max_locs))) <= 0.001).all()
+                or len(super_max) > 0
+            ):
+                pulser_e = e
+                period = stats.mode(tsl).mode[0]
+                if period > 0.1:
+                    out_pulsers.append((pulser_e, peak_e_err[i], period, energy))
 
-                else:
-                    continue
+            else:
+                continue
         except Exception:
             continue
     return out_pulsers
 
 
-def get_tcm_pulser_ids(tcm_file, channel, multiplicity_threshold):
+def get_tcm_pulser_ids(tcm_file, channel, multiplicity_threshold) -> tuple:
+    """
+    Identify pulser event indices from a TCM (Time Coincidence Map) file.
+
+    Reads the hardware TCM table and returns the indices of events in which
+    the specified channel appears and the total multiplicity exceeds the
+    given threshold — a signature typical of pulser events that fire multiple
+    channels simultaneously.
+
+    Parameters
+    ----------
+    tcm_file
+        Path to a single TCM LH5 file, or a list of such file paths.  When a
+        list is supplied the results are concatenated.
+    channel
+        Channel identifier.  Accepts an integer or a string with an optional
+        ``"ch"`` prefix (e.g. ``"ch34"`` or ``"34"``).
+    multiplicity_threshold
+        Minimum event multiplicity required for an event to be labelled as a
+        pulser.
+
+    Returns
+    -------
+    ids
+        Array of integer indices of pulser events within the channel's event
+        list.
+    mask
+        Boolean mask of the same length as the channel event list.
+    """
     if isinstance(channel, str):
-        if channel[:2] == "ch":
-            chan = int(channel[2:])
-        else:
-            chan = int(channel)
+        chan = int(channel[2:]) if channel[:2] == "ch" else int(channel)
     else:
         chan = channel
     if isinstance(tcm_file, list):
@@ -1012,7 +1105,37 @@ def get_tcm_pulser_ids(tcm_file, channel, multiplicity_threshold):
     return ids, mask
 
 
-def tag_pulsers(df, chan_info, window=0.01):
+def tag_pulsers(df, chan_info, window=0.01) -> pd.DataFrame:
+    """
+    Tag pulser events in a DataFrame using energy and periodicity cuts.
+
+    For each channel descriptor in *chan_info*, events are selected by a
+    narrow energy window around the pulser peak energy.  A linear fit to the
+    pulse timestamps is then used to determine the precise period and phase of
+    the pulser train; events that fall within *window* seconds of an expected
+    pulse are labelled as pulsers via an ``isPulser`` column.
+
+    Parameters
+    ----------
+    df
+        DataFrame containing at minimum a ``timestamp`` column and the energy
+        column(s) referenced in *chan_info*.
+    chan_info
+        A single tuple ``(pulser_energy, peak_e_err, period, energy_name)``
+        or a list of such tuples, one per channel.  *pulser_energy* and
+        *peak_e_err* define the energy selection window; *period* is the
+        approximate repetition period in seconds; *energy_name* is the column
+        in *df* to use.
+    window
+        Half-width (seconds) of the time residual window around each expected
+        pulse used to define the period cut.
+
+    Returns
+    -------
+    df
+        The input DataFrame with an added (or updated) ``isPulser`` column
+        set to 1 for pulser events and 0 for physics events.
+    """
     df["isPulser"] = 0
 
     if isinstance(chan_info, tuple):
@@ -1028,7 +1151,7 @@ def tag_pulsers(df, chan_info, window=0.01):
 
         time_since_last = np.zeros(len(df_pulser))
         time_since_last[1:] = (
-            df_pulser.timestamp.values[1:] - df_pulser.timestamp.values[:-1]
+            df_pulser.timestamp.to_numpy()[1:] - df_pulser.timestamp.to_numpy()[:-1]
         )
 
         mode_idxs = (time_since_last > period - window) & (
@@ -1041,7 +1164,7 @@ def tag_pulsers(df, chan_info, window=0.01):
             return df
         df_pulser = df_pulser[mode_idxs]
 
-        ts = df_pulser.timestamp.values
+        ts = df_pulser.timestamp.to_numpy()
         diff_zero = np.zeros(len(ts))
         diff_zero[1:] = np.around(np.divide(np.subtract(ts[1:], ts[:-1]), period))
         diff_cum = np.cumsum(diff_zero)

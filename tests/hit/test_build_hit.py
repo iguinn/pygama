@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import json
-import os
 from pathlib import Path
 
 import awkward as ak
+import lh5
 import numpy as np
 import pytest
-from lgdo import lh5
 
 from pygama.hit import build_hit
 from pygama.hit.build_hit import _reorder_table_operations
@@ -40,7 +41,7 @@ def test_basics(dsp_test_file, tmp_dir):
         wo_mode="overwrite",
     )
 
-    assert os.path.exists(outfile)
+    assert Path(outfile).exists()
     assert lh5.ls(outfile, "/ch1084803/") == ["ch1084803/hit"]
 
     tbl = lh5.read("ch1084803/hit", outfile)
@@ -78,7 +79,7 @@ def test_lh5_table_configs(dsp_test_file, tmp_dir):
         wo_mode="overwrite",
     )
 
-    assert os.path.exists(outfile)
+    assert Path(outfile).exists()
     assert lh5.ls(outfile, "/ch1084803/") == ["ch1084803/hit"]
 
     lh5_tables_config = {
@@ -101,7 +102,7 @@ def test_lh5_table_configs(dsp_test_file, tmp_dir):
         wo_mode="overwrite",
     )
 
-    assert os.path.exists(outfile)
+    assert Path(outfile).exists()
     assert lh5.ls(outfile, "/ch1084803/") == ["ch1084803/hit"]
 
 
@@ -138,26 +139,26 @@ def test_aggregation_outputs(dsp_test_file, tmp_dir):
         "is_valid_tmax",
     ]
 
-    df = lh5.read_as("ch1084803/hit", outfile, "pd")
+    hit_df = lh5.read_as("ch1084803/hit", outfile, "pd")
 
     # aggr1 consists of 3 bits --> max number can be 7, aggr2 consists of 2 bits so max number can be 3
-    assert not (df["aggr1"] > 7).any()
-    assert not (df["aggr2"] > 3).any()
+    assert not (hit_df["aggr1"] > 7).any()
+    assert not (hit_df["aggr2"] > 3).any()
 
     def get_bit(x, n):
         """bit numbering from right to left, starting with bit 0"""
         return x & (1 << n) != 0
 
-    df["bit0_check"] = df.apply(lambda row: get_bit(row["aggr1"], 0), axis=1)
-    are_identical = df["bit0_check"].equals(df.is_valid_rt)
+    hit_df["bit0_check"] = hit_df.apply(lambda row: get_bit(row["aggr1"], 0), axis=1)
+    are_identical = hit_df["bit0_check"].equals(hit_df.is_valid_rt)
     assert are_identical
 
-    df["bit1_check"] = df.apply(lambda row: get_bit(row["aggr1"], 1), axis=1)
-    are_identical = df["bit1_check"].equals(df.is_valid_t0)
+    hit_df["bit1_check"] = hit_df.apply(lambda row: get_bit(row["aggr1"], 1), axis=1)
+    are_identical = hit_df["bit1_check"].equals(hit_df.is_valid_t0)
     assert are_identical
 
-    df["bit2_check"] = df.apply(lambda row: get_bit(row["aggr1"], 2), axis=1)
-    are_identical = df["bit2_check"].equals(df.is_valid_tmax)
+    hit_df["bit2_check"] = hit_df.apply(lambda row: get_bit(row["aggr1"], 2), axis=1)
+    are_identical = hit_df["bit2_check"].equals(hit_df.is_valid_tmax)
     assert are_identical
 
 
@@ -165,12 +166,12 @@ def test_build_hit_multiconfig(dsp_test_file, tmp_dir):
     out_file = f"{tmp_dir}/test_cal_geds_hit.lh5"
 
     # append the tmp_dir to the start of paths in the hit-multi-config.json
-    with open(f"{config_dir}/hit-multi-config.json") as f:
+    with Path(f"{config_dir}/hit-multi-config.json").open() as f:
         configdict = json.load(f)
-    for key in configdict.keys():
+    for key in configdict:
         configdict[key] = f"{config_dir}/" + configdict[key].split("/")[-1]
     newdict = json.dumps(configdict)
-    with open(f"{tmp_dir}/hit-multi-config.json", "w") as file:
+    with Path(f"{tmp_dir}/hit-multi-config.json").open("w") as file:
         file.write(newdict)
 
     build_hit(
@@ -209,6 +210,33 @@ def test_build_hit_calc(dsp_test_file, tmp_dir):
 
         assert len(df_hit) == len(df_dsp)
         assert np.all(np.isclose(df_hit, np.sqrt(1.23 + 42.69 * (2 * df_dsp) ** 2)))
+
+
+def test_description_attr(dsp_test_file, tmp_dir):
+    outfile = f"{tmp_dir}/test_description_hit.lh5"
+
+    lh5_tables_config = {
+        "/ch1084803/dsp": {
+            "outputs": ["calE"],
+            "operations": {
+                "calE": {
+                    "expression": "sqrt(a + b * trapEmax**2)",
+                    "parameters": {"a": 1.23, "b": 42.69},
+                    "description": "Calibrated energy in keV",
+                }
+            },
+        }
+    }
+
+    build_hit(
+        dsp_test_file,
+        outfile=outfile,
+        lh5_tables_config=lh5_tables_config,
+        wo_mode="overwrite",
+    )
+
+    tbl = lh5.read("ch1084803/hit", outfile)
+    assert tbl.calE.attrs["description"] == "Calibrated energy in keV"
 
 
 def test_vov_input(lgnd_test_data, tmp_dir):

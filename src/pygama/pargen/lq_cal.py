@@ -1,5 +1,22 @@
+"""
+Calibration routines for the Late Charge (LQ) parameter in HPGe detectors.
+
+LQ is computed from the ratio of the late-charge integral to the total charge
+and is sensitive to multi-site events.  This module provides functions to
+
+* determine the fit range and histogram the LQ distribution,
+* fit the distribution with a Gaussian model,
+* perform a drift-time correction for the time-dependent LQ shift,
+* calculate the LQ cut value from the DEP (double-escape peak) survival fraction,
+* compute survival fractions as a function of LQ cut position,
+* produce diagnostic plots.
+
+The main entry point is the :class:`LQCal` class.
+"""
+
 from __future__ import annotations
 
+import contextlib
 import logging
 import re
 from datetime import datetime
@@ -23,8 +40,23 @@ log = logging.getLogger(__name__)
 
 def get_fit_range(lq: np.array) -> tuple(float, float):
     """
-    Function for determining the fit range for a given distribution of lq values
-    """
+    Determine a ±2.5σ fit range around the mode of an LQ distribution.
+
+    Uses a 100-bin histogram over the 1st–95th percentile range to locate
+    the peak centroid and estimate the width, then returns a ±2.5σ window
+    suitable for a subsequent Gaussian fit.
+
+    Parameters
+    ----------
+    lq
+        1-D array of LQ parameter values.
+
+    Returns
+    -------
+    fit_range
+        ``(left_edge, right_edge)`` tuple defining the ±2.5σ window
+        around the estimated peak centroid.
+    """  # noqa: RUF002
 
     # Get an initial guess of mu and sigma, use these values to determine our final fit range
     left_guess = np.nanpercentile(lq, 1)
@@ -38,9 +70,7 @@ def get_fit_range(lq: np.array) -> tuple(float, float):
 
     left_edge = mu - 2.5 * sigma
     right_edge = mu + 2.5 * sigma
-    fit_range = (left_edge, right_edge)
-
-    return fit_range
+    return (left_edge, right_edge)
 
 
 def get_lq_hist(
@@ -51,8 +81,35 @@ def get_lq_hist(
     sidebands: bool = True,
 ):
     """
-    Function for getting a distribution of LQ values for a given peak. Returns a histogram of the
-    LQ distribution as well as an array of bin edges
+    Histogram the LQ distribution for events near a calibration peak.
+
+    Optionally performs sideband subtraction to isolate peak-associated
+    events from the Compton continuum.  The peak window is
+    ``(peak - 8, peak + 5)`` keV and the sideband window is
+    ``(peak + 7, peak + 20)`` keV.
+
+    Parameters
+    ----------
+    df
+        DataFrame containing both the LQ parameter and calibrated energy.
+    lq_param
+        Name of the LQ parameter column.
+    cal_energy_param
+        Name of the calibrated energy column.
+    peak
+        Peak energy in keV around which to select events.
+    sidebands
+        If ``True`` (default), subtract a sideband histogram to remove
+        the Compton background contribution.
+
+    Returns
+    -------
+    hist
+        Counts array (sideband-subtracted when *sidebands* is ``True``).
+    bins
+        Bin-edge array.
+    var
+        Per-bin variance (combined Poisson uncertainty).
     """
 
     if sidebands:
@@ -80,19 +137,18 @@ def get_lq_hist(
 
         return final_hist, bins, var
 
-    else:
-        # Return a histogram in a 13 keV range surrounding the specified peak
+    # Return a histogram in a 13 keV range surrounding the specified peak
 
-        df_peak = df.query(
-            f"{cal_energy_param} < ({peak} + 5) & {cal_energy_param} > ({peak} - 8)"
-        )
+    df_peak = df.query(
+        f"{cal_energy_param} < ({peak} + 5) & {cal_energy_param} > ({peak} - 8)"
+    )
 
-        fit_range = get_fit_range(df_peak[lq_param].to_numpy())
-        dep_hist, bins, var = pgh.get_hist(
-            df_peak[lq_param].to_numpy(), bins=100, range=fit_range
-        )
+    fit_range = get_fit_range(df_peak[lq_param].to_numpy())
+    dep_hist, bins, var = pgh.get_hist(
+        df_peak[lq_param].to_numpy(), bins=100, range=fit_range
+    )
 
-        return dep_hist, bins, var
+    return dep_hist, bins, var
 
 
 def binned_lq_fit(
@@ -100,7 +156,7 @@ def binned_lq_fit(
     lq_param: str,
     cal_energy_param: str,
     peak: float,
-    cdf=gaussian,
+    _cdf=gaussian,
     sidebands: bool = True,
 ):
     """Function for fitting a distribution of LQ values within a specified
@@ -108,36 +164,32 @@ def binned_lq_fit(
 
     Parameters
     ----------
-    df: pd.DataFrame()
-        Dataframe containing the data for fitting. Data must
-        contain the desired lq parameter and the calibrated
-        energy
-    lq_param: string
-        Name of the LQ parameter to fit
-    cal_energy_param: string
-        Name of the calibrated energy parameter of choice
-    peak: float
-        Energy value, in keV, of the peak who's LQ
-        distribution will be fit
-    cdf: callable
-        Function to be used for the binned fit
-    sidebands: bool
-        Whether or not to perform a sideband subtraction when
-        fitting the LQ distribution
+    df
+        DataFrame containing the LQ parameter and calibrated energy.
+    lq_param
+        Name of the LQ parameter column.
+    cal_energy_param
+        Name of the calibrated energy column.
+    peak
+        Energy value in keV of the peak whose LQ distribution will be fit.
+    cdf
+        CDF callable used for the binned fit.
+    sidebands
+        Whether to apply sideband subtraction when building the histogram.
 
     Returns
     -------
-    m1.values: array-like object
-        Resulting parameter values from the peak fit
-    m1.errors: array-like object
-        Resulting parameter errors from the peak fit
-    hist: array
-        Histogram that was used for the binned fit
-    bins: array
-        Array of bin edges used for the binned fit
+    values
+        Best-fit parameter values ``(mu, sigma)`` from the Gaussian fit.
+    errors
+        Parameter uncertainties corresponding to *values*.
+    hist
+        Histogram counts used for the binned fit.
+    bins
+        Bin-edge array used for the binned fit.
     """
 
-    hist, bins, var = get_lq_hist(df, lq_param, cal_energy_param, peak, sidebands)
+    hist, bins, _var = get_lq_hist(df, lq_param, cal_energy_param, peak, sidebands)
 
     # Temporary fix for negative bin counts
     # TODO: Adjust fitting to handle negative bin counts
@@ -153,7 +205,7 @@ def binned_lq_fit(
     m1.simplex().migrad()
     m1.hesse()
 
-    return m1.values, m1.errors, hist, bins
+    return m1.values, m1.errors, hist, bins  # noqa: PD011
 
 
 def calculate_time_means(
@@ -161,12 +213,37 @@ def calculate_time_means(
     lq_param: str,
     cal_energy_param: str,
     peak: float,
-    sidebands: bool = True,
+    sidebands: bool = True,  # noqa: ARG001
 ):
     """
-    Function for calculating the arithmetic mean and sigma for LQ events in a
-    specified peak
-    """
+    Compute the arithmetic mean and standard deviation of LQ at a peak.
+
+    Selects events in a ±8/+5 keV window around *peak*, restricts to the
+    ±2.5σ fit range returned by :func:`get_fit_range`, and returns the
+    sample mean and standard deviation together with their statistical
+    uncertainties.
+
+    Parameters
+    ----------
+    df
+        DataFrame containing the LQ and calibrated energy columns.
+    lq_param
+        Name of the LQ parameter column.
+    cal_energy_param
+        Name of the calibrated energy column.
+    peak
+        Peak energy in keV.
+    sidebands
+        Unused; kept for signature consistency with :func:`binned_lq_fit`.
+
+    Returns
+    -------
+    pars
+        Dictionary ``{"mu": mean, "sigma": std}`` of the LQ distribution.
+    errors
+        Dictionary ``{"mu": mean_err, "sigma": sigma_err}`` of the
+        statistical uncertainties.
+    """  # noqa: RUF002
 
     df_peak = df.query(
         f"{cal_energy_param} < ({peak} + 5) & {cal_energy_param} > ({peak} - 8)"
@@ -189,6 +266,31 @@ def calculate_time_means(
 
 
 def fit_time_means(tstamps, means, reses):
+    """
+    Compute a running weighted-average LQ mean across run timestamps.
+
+    Accumulates valid (non-NaN) mean/resolution pairs and stores the
+    weighted-average mean (weighted by inverse resolution) for every
+    accumulated timestamp.  Timestamps with NaN values in either *means*
+    or *reses* are assigned NaN in the output.
+
+    Parameters
+    ----------
+    tstamps
+        Ordered sequence of run-timestamp strings.
+    means
+        Array of per-timestamp LQ mean values; may contain NaN.
+    reses
+        Array of per-timestamp LQ resolutions (sigma/mu) used as inverse
+        weights; may contain NaN.
+
+    Returns
+    -------
+    out_dict
+        Dictionary mapping each timestamp to the cumulative weighted-
+        average LQ mean up to that point, or ``np.nan`` for invalid
+        entries.
+    """
     out_dict = {}
     current_tstamps = []
     current_means = []
@@ -227,21 +329,23 @@ class LQCal:
         """
         Parameters
         ----------
-        cal_dicts: dict
-            A dictionary containing the hit-level operations to apply
-            to the data.
-        cal_energy_param: string
-            The calibrated energy parameter of choice
-        dt_param: string
-            The drift-time parameter of choice
-        eres_function: callable
-            The energy resolutions function
-        cdf: callable
-            The CDF used for the binned fits
-        selection_string: string
-            A string of flags to apply the data when running the calibration
-        debug_mode: boolean
-            Determines if the class is initialized in debug mode
+        cal_dicts
+            Hit-level calibration dictionary of expressions/parameters to
+            apply to the data.  May be keyed by run timestamp.
+        cal_energy_param
+            Name of the calibrated energy parameter.
+        dt_param
+            Name of the drift-time parameter.
+        eres_func
+            Callable that returns the energy resolution (FWHM) in keV for
+            a given energy.
+        cdf
+            CDF callable used for the binned Gaussian fits.
+        selection_string
+            Boolean expression selecting valid, non-pulser events.
+        debug_mode
+            If ``True``, exceptions are re-raised instead of being caught
+            and logged.
         """
 
         self.cal_dicts = cal_dicts
@@ -253,7 +357,20 @@ class LQCal:
         self.debug_mode = debug_mode
 
     def update_cal_dicts(self, update_dict):
-        if re.match(r"(\d{8})T(\d{6})Z", list(self.cal_dicts)[0]):
+        """
+        Merge new entries into the calibration dictionary.
+
+        If ``cal_dicts`` is keyed by run timestamps, each timestamp's
+        sub-dict is updated individually, using *update_dict* directly as a
+        fallback when a timestamp is absent.  Otherwise *update_dict* is
+        merged directly.
+
+        Parameters
+        ----------
+        update_dict
+            Dictionary of new calibration entries to merge.
+        """
+        if re.match(r"(\d{8})T(\d{6})Z", next(iter(self.cal_dicts))):
             for tstamp in self.cal_dicts:
                 if tstamp in update_dict:
                     self.cal_dicts[tstamp].update(update_dict[tstamp])
@@ -262,11 +379,29 @@ class LQCal:
         else:
             self.cal_dicts.update(update_dict)
 
-    def lq_timecorr(self, df, lq_param, output_name="LQ_Timecorr", display=0):
+    def lq_timecorr(self, df, lq_param, output_name="LQ_Timecorr", display=0):  # noqa: ARG002
         """
-        Calculates the average LQ value for DEP events for each specified
-        run_timestamp. Applies a time normalization based on the average LQ value
-        in the DEP across all run_timestamps.
+        Normalise LQ by the time-varying DEP mean.
+
+        Fits the LQ distribution at the DEP (1592.5 keV) for each
+        ``run_timestamp`` group (or globally when no timestamp column is
+        present) and divides *lq_param* by the resulting weighted-average
+        mean.  The normalised column is stored as *output_name* in *df* and
+        the corresponding calibration expression is written into
+        :attr:`cal_dicts`.
+
+        Parameters
+        ----------
+        df
+            DataFrame modified in-place; must contain *lq_param* and the
+            calibrated energy column.  If a ``run_timestamp`` column is
+            present, the correction is applied per timestamp.
+        lq_param
+            Name of the raw LQ parameter column.
+        output_name
+            Name of the output time-corrected LQ column.
+        display
+            Verbosity level (currently unused).
         """
 
         log.info("Starting LQ time correction")
@@ -302,9 +437,7 @@ class LQCal:
                             ]
                         )
                     except BaseException as e:
-                        if e == KeyboardInterrupt:
-                            raise (e)
-                        elif self.debug_mode:
+                        if isinstance(e, KeyboardInterrupt) or self.debug_mode:
                             raise (e)
 
                         self.timecorr_df = pd.concat(
@@ -324,7 +457,7 @@ class LQCal:
                             ]
                         )
 
-                self.timecorr_df.set_index("run_timestamp", inplace=True)
+                self.timecorr_df = self.timecorr_df.set_index("run_timestamp")
                 time_dict = fit_time_means(
                     np.array(self.timecorr_df.index),
                     np.array(self.timecorr_df["mean"]),
@@ -375,9 +508,7 @@ class LQCal:
                         ]
                     )
                 except BaseException as e:
-                    if e == KeyboardInterrupt:
-                        raise (e)
-                    elif self.debug_mode:
+                    if isinstance(e, KeyboardInterrupt) or self.debug_mode:
                         raise (e)
                     self.timecorr_df = pd.concat(
                         [
@@ -406,9 +537,7 @@ class LQCal:
                 )
                 log.info("LQ time correction finished")
         except BaseException as e:
-            if e == KeyboardInterrupt:
-                raise (e)
-            elif self.debug_mode:
+            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
                 raise (e)
             log.error("LQ time correction failed")
             self.update_cal_dicts(
@@ -421,12 +550,31 @@ class LQCal:
             )
 
     def drift_time_correction(
-        self, df: pd.DataFrame(), lq_param, cal_energy_param: str, display: int = 0
+        self,
+        df: pd.DataFrame(),
+        lq_param,
+        cal_energy_param: str,  # noqa: ARG002
+        display: int = 0,  # noqa: ARG002
     ):
         """
-        Deterimines the drift time correction parameters for LQ by fitting a degree 1 polynomial to
-        the LQ vs drift time distribution for DEP events. Corrects for any linear dependence and
-        centers the final LQ distribution to a mean of 0.
+        Remove the linear drift-time dependence from the LQ distribution.
+
+        Fits a degree-1 polynomial to LQ vs. drift time for DEP events in
+        a 6 keV window around 1592.5 keV.  Subtracts the fitted slope and
+        intercept to produce a corrected ``LQ_Corrected`` column centred at
+        zero, and writes the calibration expression into :attr:`cal_dicts`.
+
+        Parameters
+        ----------
+        df
+            DataFrame modified in-place; must contain *lq_param*, the
+            calibrated energy column, and the drift-time column.
+        lq_param
+            Name of the LQ parameter column to correct.
+        cal_energy_param
+            Name of the calibrated energy column.
+        display
+            Verbosity level (currently unused).
         """
 
         log.info("Starting LQ drift time correction")
@@ -467,9 +615,7 @@ class LQCal:
             )
 
         except BaseException as e:
-            if e == KeyboardInterrupt:
-                raise (e)
-            elif self.debug_mode:
+            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
                 raise (e)
             log.error("LQ drift time correction failed")
             self.dt_fit_pars = (np.nan, np.nan)
@@ -485,16 +631,27 @@ class LQCal:
 
     def get_cut_lq_dep(self, df: pd.DataFrame(), lq_param: str, cal_energy_param: str):
         """
-        Determines the cut value for LQ. Value is calculated by fitting the LQ distribution
-        for events in the DEP to a gaussian. The LQ values are normalized by the fitted
-        sigma, and the cut value is set to a value of 3. Sideband subtraction is used to
-        determine the LQ distribution for DEP events. Events greater than the cut value
-        fail the cut.
-        """
+        Determine the LQ cut value from the DEP distribution.
+
+        Fits a Gaussian to the sideband-subtracted LQ distribution at the
+        DEP (1592.5 keV).  The LQ values are normalised by the fitted σ to
+        produce ``LQ_Classifier``, and a fixed cut at 3 σ is applied
+        (``LQ_Cut``).  Both columns are added to *df* and the corresponding
+        calibration expressions are written into :attr:`cal_dicts`.
+
+        Parameters
+        ----------
+        df
+            DataFrame modified in-place; must contain *lq_param* and
+            *cal_energy_param*.
+        lq_param
+            Name of the (drift-time-corrected) LQ parameter column.
+        cal_energy_param
+            Name of the calibrated energy column.
+        """  # noqa: RUF002
 
         log.info("Starting LQ Cut calculation")
         try:
-
             pars, errs, hist, bins = binned_lq_fit(
                 df, lq_param, cal_energy_param, peak=1592.5
             )
@@ -508,15 +665,13 @@ class LQCal:
             df["LQ_Cut"] = df["LQ_Classifier"] < self.cut_val
 
         except BaseException as e:
-            if e == KeyboardInterrupt:
-                raise (e)
-            elif self.debug_mode:
+            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
                 raise (e)
             log.error("LQ cut determination failed")
             self.cut_val = np.nan
             c = cost.UnbinnedNLL(np.array([0]), gaussian.pdf)
             m = Minuit(c, np.full(2, np.nan))
-            self.cut_fit_pars = pars = m.values
+            self.cut_fit_pars = pars = m.values  # noqa: PD011
 
         self.update_cal_dicts(
             {
@@ -532,7 +687,30 @@ class LQCal:
         )
 
     def calibrate(self, df, initial_lq_param):
-        """Run the LQ calibration and calculate the cut value"""
+        """
+        Run the full LQ calibration pipeline.
+
+        Executes the three calibration steps in sequence:
+
+        1. :meth:`lq_timecorr` — normalise by the time-varying DEP mean.
+        2. :meth:`drift_time_correction` — remove the linear drift-time
+           dependence.
+        3. :meth:`get_cut_lq_dep` — fit the normalised DEP distribution
+           and set the cut value.
+
+        Survival fractions at the DEP (1592.5 keV), Qββ (2039 keV),
+        2103.53 keV, and 2614.5 keV are then computed and stored in
+        :attr:`low_side_sf` and :attr:`low_side_peak_dfs`.
+
+        Parameters
+        ----------
+        df
+            DataFrame modified in-place; must contain *initial_lq_param*
+            and all columns referenced by :attr:`cal_energy_param`,
+            :attr:`dt_param`, and :attr:`selection_string`.
+        initial_lq_param
+            Name of the raw LQ parameter column in *df*.
+        """
 
         self.lq_timecorr(df, initial_lq_param)
         log.info("Finished LQ Time Correction")
@@ -562,7 +740,7 @@ class LQCal:
                     emin = 2 * fwhm
                     emax = 2 * fwhm
                     peak_df = select_df.query(
-                        f"({self.cal_energy_param}>{peak-emin})&({self.cal_energy_param}<{peak+emax})"
+                        f"({self.cal_energy_param}>{peak - emin})&({self.cal_energy_param}<{peak + emax})"
                     )
 
                     cut_df, sf, sf_err = compton_sf_sweep(
@@ -604,11 +782,9 @@ class LQCal:
                         ]
                     )
                     self.low_side_peak_dfs[peak] = cut_df
-                log.info(f"{peak}keV: {sf:2.1f} +/- {sf_err:2.1f} %")
+                log.info("%skeV: %2.1f +/- %2.1f %%", peak, sf, sf_err)
             except BaseException as e:
-                if e == KeyboardInterrupt:
-                    raise (e)
-                elif self.debug_mode:
+                if isinstance(e, KeyboardInterrupt) or self.debug_mode:
                     raise (e)
                 self.low_side_sf = pd.concat(
                     [
@@ -616,12 +792,16 @@ class LQCal:
                         pd.DataFrame([{"peak": peak, "sf": np.nan, "sf_err": np.nan}]),
                     ]
                 )
-                log.error(f"LQ Survival fraction determination failed for {peak} peak")
-        self.low_side_sf.set_index("peak", inplace=True)
+                log.error("LQ Survival fraction determination failed for %s peak", peak)
+        self.low_side_sf = self.low_side_sf.set_index("peak")
 
 
 def plot_lq_mean_time(
-    lq_class, data, lq_param="LQ_Timecorr", figsize=(12, 8), fontsize=12
+    lq_class,
+    data,  # noqa: ARG001
+    lq_param="LQ_Timecorr",  # noqa: ARG001
+    figsize=(12, 8),
+    fontsize=12,
 ) -> plt.figure:
     """Plots the mean LQ value calculated for each given timestamp"""
 
@@ -690,7 +870,7 @@ def plot_drift_time_correction(
 
     plt.rcParams["figure.figsize"] = figsize
     plt.rcParams["font.size"] = fontsize
-    fig, ax = plt.subplots(1, 1)
+    fig, _ax = plt.subplots(1, 1)
 
     try:
         dep_range = (1590, 1595)
@@ -733,7 +913,7 @@ def plot_drift_time_correction(
     return fig
 
 
-def plot_lq_cut_fit(lq_class, data, figsize=(12, 8), fontsize=12) -> plt.figure:
+def plot_lq_cut_fit(lq_class, data, figsize=(12, 8), fontsize=12) -> plt.figure:  # noqa: ARG001
     """Plots the final histogram of LQ values for events in the
     DEP, and the fit results used for determining the cut
     value"""
@@ -788,7 +968,10 @@ def plot_lq_cut_fit(lq_class, data, figsize=(12, 8), fontsize=12) -> plt.figure:
 
 
 def plot_survival_fraction_curves(
-    lq_class, data, figsize=(12, 8), fontsize=12
+    lq_class,
+    data,  # noqa: ARG001
+    figsize=(12, 8),
+    fontsize=12,
 ) -> plt.figure:
     """Plots the survival fraction curves as a function of
     LQ cut values for every peak of interest"""
@@ -807,18 +990,16 @@ def plot_survival_fraction_curves(
         )
 
         for peak, survival_df in lq_class.low_side_peak_dfs.items():
-            try:
+            with contextlib.suppress(Exception):
                 plt.errorbar(
                     survival_df.index,
                     survival_df["sf"],
                     yerr=survival_df["sf_err"],
-                    label=f'{AoE.get_peak_label(peak)} {peak} keV: {lq_class.low_side_sf.loc[peak]["sf"]:2.1f} +/- {lq_class.low_side_sf.loc[peak]["sf_err"]:2.1f} %',
+                    label=f"{AoE.get_peak_label(peak)} {peak} keV: {lq_class.low_side_sf.loc[peak]['sf']:2.1f} +/- {lq_class.low_side_sf.loc[peak]['sf_err']:2.1f} %",
                 )
-            except Exception:
-                pass
     except Exception:
         pass
-    vals, labels = plt.yticks()
+    vals, _labels = plt.yticks()
     plt.yticks(vals, [f"{x:,.0f} %" for x in vals])
     plt.legend(loc="lower right")
     plt.xlabel("cut value")
@@ -855,7 +1036,7 @@ def plot_sf_vs_energy(
     except Exception:
         pass
     plt.ylim([0, 100])
-    vals, labels = plt.yticks()
+    vals, _labels = plt.yticks()
     plt.yticks(vals, [f"{x:,.0f} %" for x in vals])
     plt.xlabel("energy (keV)")
     plt.ylabel("survival percentage")
@@ -969,7 +1150,7 @@ def plot_classifier(
     plt.rcParams["font.size"] = fontsize
 
     fig = plt.figure()
-    try:
+    with contextlib.suppress(Exception):
         plt.hist2d(
             data.query(lq_class.selection_string)[lq_class.cal_energy_param],
             data.query(lq_class.selection_string)[lq_param],
@@ -979,8 +1160,6 @@ def plot_classifier(
             ],
             norm=LogNorm(),
         )
-    except Exception:
-        pass
     plt.xlabel("energy (keV)")
     plt.ylabel(lq_param)
     plt.xlim(xrange)

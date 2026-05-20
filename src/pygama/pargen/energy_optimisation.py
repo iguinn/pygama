@@ -5,6 +5,8 @@ separately using the optimiser, then the resulting grids are interpolated
 to provide the best energy resolution at Qbb
 """
 
+from __future__ import annotations
+
 import logging
 
 import matplotlib.pyplot as plt
@@ -20,7 +22,33 @@ log = logging.getLogger(__name__)
 
 def simple_guess(energy, func, fit_range=None, bin_width=None):
     """
-    Simple guess for peak fitting
+    Generate a simple initial parameter guess for a peak fit.
+
+    Estimates the peak centroid, width, signal and background counts, and
+    (for HPGe-style models) tail parameters from the histogram of *energy*.
+    The bin width is chosen adaptively using an inter-quartile-range rule
+    when not provided explicitly.
+
+    Parameters
+    ----------
+    energy
+        1-D array of energy values.
+    func
+        Distribution function to guess for; currently supports
+        ``hpge_peak`` and ``gauss_on_step``.
+    fit_range
+        ``(low, high)`` energy window.  Defaults to the full range of
+        *energy*.
+    bin_width
+        Histogram bin width.  When ``None`` an optimal width is estimated
+        from the data.
+
+    Returns
+    -------
+    parguess
+        :class:`iminuit.Values` of initial parameter values, or the
+        NaN-filled fallback from :func:`~pygama.pargen.utils.return_nans`
+        if *func* is not supported.
     """
     if fit_range is None:
         fit_range = (np.nanmin(energy), np.nanmax(energy))
@@ -47,13 +75,13 @@ def simple_guess(energy, func, fit_range=None, bin_width=None):
                 init_sigma = np.nanstd(energy)
         bin_width = (init_sigma) * len(energy) ** (-1 / 3)
 
-    hist, bins, var = pgh.get_hist(energy, dx=bin_width, range=fit_range)
+    hist, bins, _var = pgh.get_hist(energy, dx=bin_width, range=fit_range)
 
     # make binning dynamic based on max, % of events/ n of events?
-    hist, bins, var = pgh.get_hist(energy, range=fit_range, dx=bin_width)
+    hist, bins, _var = pgh.get_hist(energy, range=fit_range, dx=bin_width)
 
-    if func == pgd.hpge_peak or func == pgd.gauss_on_step:
-        mu, sigma, amp = pgh.get_gaussian_guess(hist, bins)
+    if func in (pgd.hpge_peak, pgd.gauss_on_step):
+        mu, sigma, _amp = pgh.get_gaussian_guess(hist, bins)
         i_0 = np.argmax(hist)
         bg = np.mean(hist[-10:])
         step = bg - np.mean(hist[:10])
@@ -80,7 +108,7 @@ def simple_guess(energy, func, fit_range=None, bin_width=None):
             parguess["tau"] = tau
 
     else:
-        log.error(f"simple_guess not implemented for {func.__name__}")
+        log.error("simple_guess not implemented for %s", func.__name__)
         return return_nans(func)
 
     return convert_to_minuit(parguess, func).values
@@ -101,8 +129,68 @@ def get_peak_fwhm_with_dt_corr(
     display=0,
 ):
     """
-    Applies the drift time correction and fits the peak returns the fwhm, fwhm/max and associated errors,
-    along with the number of signal events and the reduced chi square of the fit. Can return result in ADC or keV.
+    Apply a drift-time correction and fit a peak, returning FWHM and fit quality.
+
+    Computes ``ct_energy = energy + alpha * dt * energy``, then performs an
+    unbinned staged fit of *func* to the corrected spectrum inside a window
+    around the peak.  Bootstrap resampling is used to estimate the
+    uncertainty on the FWHM.  All return values are ``np.nan`` / ``None``
+    when the fit fails.
+
+    Parameters
+    ----------
+    energies
+        1-D array of raw (uncorrected) energy values.
+    alpha
+        Charge-trapping correction coefficient.
+    dt
+        1-D array of drift-time values, same length as *energies*.
+    func
+        Peak-shape distribution to fit.
+    peak
+        Known peak energy in keV (used for ADC-to-keV conversion).
+    kev_width
+        ``(low_side, high_side)`` half-widths in keV that define the fit
+        window relative to the peak centroid.
+    guess
+        Optional initial parameter guess; forwarded to
+        :func:`~pygama.pargen.energy_cal.unbinned_staged_energy_fit`.
+    kev
+        If ``True``, convert the returned FWHM from ADC to keV.
+    frac_max
+        Fractional height at which to evaluate the peak width
+        (default 0.5 gives the FWHM).
+    bin_width
+        Histogram bin width in ADC counts.
+    allow_tail_drop
+        Passed through to the staged fit; allows the tail fraction to
+        drop to zero.
+    display
+        Verbosity level; values > 0 produce diagnostic plots.
+
+    Returns
+    -------
+    fwhm
+        Full-width at *frac_max* of the maximum in keV (or ADC if
+        *kev* is ``False``).
+    fwhm_o_max
+        Ratio of FWHM to peak maximum (shape quality metric).
+    fwhm_err
+        Bootstrap uncertainty on *fwhm*.
+    fwhm_o_max_err
+        Bootstrap uncertainty on *fwhm_o_max*.
+    chisqr
+        ``(chi2, ndof)`` reduced chi-squared tuple from the staged fit.
+    n_sig
+        Fitted number of signal events.
+    n_sig_err
+        Uncertainty on *n_sig*.
+    mu
+        Fitted peak centroid in ADC.
+    mu_err
+        Uncertainty on *mu*.
+    energy_pars
+        Full best-fit parameter values from the staged fit.
     """
 
     correction = np.multiply(
@@ -112,7 +200,7 @@ def get_peak_fwhm_with_dt_corr(
 
     lower_bound = (np.nanmin(ct_energy) // bin_width) * bin_width
     upper_bound = ((np.nanmax(ct_energy) // bin_width) + 1) * bin_width
-    hist, bins, var = pgh.get_hist(
+    hist, bins, _var = pgh.get_hist(
         ct_energy, dx=bin_width, range=(lower_bound, upper_bound)
     )
     mu = bins[np.nanargmax(hist)]
@@ -185,7 +273,7 @@ def get_peak_fwhm_with_dt_corr(
 
         if display > 0:
             plt.figure()
-            hist, bins, var = pgh.get_hist(
+            hist, bins, _var = pgh.get_hist(
                 ct_energy, dx=bin_width, range=(lower_bound, upper_bound)
             )
             plt.step(pgh.get_bin_centers(bins), hist)
@@ -232,8 +320,43 @@ def fom_fwhm_with_alpha_fit(
     tb_in, kwarg_dict, ctc_parameter, nsteps=11, idxs=None, frac_max=0.2, display=0
 ):
     """
-    FOM for sweeping over ctc values to find the best value, returns the best found fwhm with its error,
-    the corresponding alpha value and the number of events in the fitted peak, also the reduced chisquare of the
+    Figure-of-merit: FWHM minimised over a sweep of charge-trapping correction values.
+
+    Scans *nsteps* values of the charge-trapping coefficient alpha between
+    0 and 3.5x10^-6, fitting the peak at each step via
+    :func:`get_peak_fwhm_with_dt_corr`.  A degree-4 polynomial is fit to
+    the valid FWHM/max-ratio values to locate the optimal alpha, and the
+    peak is re-fit at that alpha to obtain the final FWHM in keV.  An early
+    termination heuristic stops the sweep when the FWHM curve is clearly
+    rising.
+
+    Parameters
+    ----------
+    tb_in
+        LH5 table containing the energy and drift-time columns.
+    kwarg_dict
+        Per-peak fitting options with at minimum the keys ``parameter``
+        (energy column name), ``func`` (peak shape), ``peak`` (keV),
+        and ``kev_width`` (fit window half-widths).  Optional key
+        ``bin_width`` sets the histogram bin width (default 1 ADC).
+    ctc_parameter
+        Name of the charge-trapping correction parameter column in *tb_in*.
+    nsteps
+        Number of alpha values to scan.
+    idxs
+        Optional boolean or integer index array to select a subset of
+        events.
+    frac_max
+        Fractional height used to define the final FWHM.
+    display
+        Verbosity level; values > 0 produce diagnostic plots.
+
+    Returns
+    -------
+    out_dict
+        Dictionary with keys ``fwhm``, ``fwhm_err``, ``alpha``,
+        ``alpha_err``, ``chisquare``, ``n_sig``, and ``n_sig_err``.
+        All values are ``np.nan`` (and ``alpha`` is 0) on failure.
     """
     parameter = kwarg_dict["parameter"]
     func = kwarg_dict["func"]
@@ -275,7 +398,7 @@ def fom_fwhm_with_alpha_fit(
                 _,
                 _,
                 _,
-                fit_pars,
+                _fit_pars,
             ) = get_peak_fwhm_with_dt_corr(
                 energies,
                 alpha,
@@ -291,17 +414,17 @@ def fom_fwhm_with_alpha_fit(
                 fwhms = np.append(fwhms, fwhm_o_max)
                 final_alphas = np.append(final_alphas, alpha)
                 fwhm_errs = np.append(fwhm_errs, fwhm_o_max_err)
-                if fwhms[-1] < best_fwhm:
-                    best_fwhm = fwhms[-1]
-            log.info(f"alpha: {alpha}, fwhm/max:{fwhm_o_max:.4f}+-{fwhm_o_max_err:.4f}")
+                best_fwhm = min(best_fwhm, fwhms[-1])
+            log.info(
+                "alpha: %s, fwhm/max:%.4f+-%.4f", alpha, fwhm_o_max, fwhm_o_max_err
+            )
 
             ids = (fwhm_errs < 2 * np.nanpercentile(fwhm_errs, 50)) & (
                 fwhm_errs > 1e-10
             )
-            if len(fwhms[ids]) > 5:
-                if (np.diff(fwhms[ids])[-3:] > 0).all():
-                    early_break = True
-                    break
+            if len(fwhms[ids]) > 5 and (np.diff(fwhms[ids])[-3:] > 0).all():
+                early_break = True
+                break
 
         # Make sure fit isn't based on only a few points
         if len(fwhms) < nsteps * 0.2 and early_break is False:
@@ -380,7 +503,7 @@ def fom_fwhm_with_alpha_fit(
             display=display,
         )
         if np.isnan(final_fwhm) or np.isnan(final_err):
-            log.debug(f"final fit failed, alpha was {alpha}")
+            log.debug("final fit failed, alpha was %s", alpha)
             raise RuntimeError
         return {
             "fwhm": final_fwhm,
@@ -414,7 +537,45 @@ def fom_fwhm_no_alpha_sweep(
     display=0,
 ):
     """
-    FOM with no ctc sweep, used for optimising ftp.
+    Figure-of-merit: FWHM at a fixed (or pre-computed) alpha, no sweep.
+
+    Applies a single drift-time correction with the given *alpha* and fits
+    the peak, returning a comprehensive set of fit quality metrics.  Used
+    when the optimal alpha is already known (e.g. from a prior
+    :func:`fom_fwhm_with_alpha_fit` call) or when no charge-trapping
+    correction is desired.
+
+    Parameters
+    ----------
+    tb_in
+        LH5 table containing the energy and optional drift-time columns.
+    kwarg_dict
+        Per-peak fitting options with at minimum the keys ``parameter``
+        (energy column name), ``func``, ``peak``, and ``kev_width``.
+        Optional keys: ``alpha`` (overrides the *alpha* argument),
+        ``ctc_param`` (drift-time column name).
+    ctc_param
+        Name of the charge-trapping correction column; overridden by
+        ``kwarg_dict["ctc_param"]`` if present.
+    alpha
+        Charge-trapping correction coefficient; overridden by
+        ``kwarg_dict["alpha"]`` if present.
+    idxs
+        Optional index array to select a subset of events.
+    frac_max
+        Fractional height used to define the FWHM.
+    kev
+        If ``True``, return the FWHM in keV rather than ADC units.
+    display
+        Verbosity level; values > 0 produce diagnostic plots.
+
+    Returns
+    -------
+    out_dict
+        Dictionary with keys ``fwhm``, ``fwhm_o_max``, ``fwhm_err``,
+        ``fwhm_o_max_err``, ``chisquare``, ``n_sig``, ``n_sig_err``,
+        ``mu``, ``mu_err``, and ``fit_pars``.  All values are ``np.nan``
+        if the input energies contain NaNs.
     """
     parameter = kwarg_dict["parameter"]
     func = kwarg_dict["func"]
@@ -488,12 +649,45 @@ def fom_fwhm_no_alpha_sweep(
     }
 
 
-def fom_single_peak_alpha_sweep(data, kwarg_dict, display=0):
+def fom_single_peak_alpha_sweep(data, kwarg_dict, display=0) -> dict:
+    """
+    Figure-of-merit wrapper: FWHM with alpha (charge-trapping correction) sweep
+    for a single calibration peak.
+
+    Thin adapter around :func:`fom_fwhm_with_alpha_fit` that unpacks the
+    standardised ``kwarg_dict`` interface expected by the optimisation
+    framework.
+
+    Parameters
+    ----------
+    data
+        DataFrame containing the energy and charge-trapping correction
+        parameters for all events.
+    kwarg_dict
+        Dictionary with keys:
+
+        * ``idx_list`` - list of event-index arrays, one per peak.  Only the  # noqa: RUF002
+          first entry (``idx_list[0]``) is used.
+        * ``ctc_param`` - name of the charge-trapping correction parameter.  # noqa: RUF002
+        * ``peak_dicts`` - list of per-peak fitting dictionaries.  Only the  # noqa: RUF002
+          first entry is used.
+        * ``frac_max`` *(optional, default 0.2)* - fraction of the peak  # noqa: RUF002
+          maximum used to define the fit range.
+    display
+        Verbosity / plotting level passed through to the underlying fit.
+
+    Returns
+    -------
+    out_dict
+        Result dictionary from :func:`fom_fwhm_with_alpha_fit` containing
+        at minimum ``fwhm``, ``fwhm_err``, ``alpha``, ``n_sig``, and
+        ``n_sig_err``.
+    """
     idx_list = kwarg_dict["idx_list"]
     ctc_param = kwarg_dict["ctc_param"]
     peak_dicts = kwarg_dict["peak_dicts"]
     frac_max = kwarg_dict.get("frac_max", 0.2)
-    out_dict = fom_fwhm_with_alpha_fit(
+    return fom_fwhm_with_alpha_fit(
         data,
         peak_dicts[0],
         ctc_param,
@@ -501,12 +695,52 @@ def fom_single_peak_alpha_sweep(data, kwarg_dict, display=0):
         frac_max=frac_max,
         display=display,
     )
-    return out_dict
 
 
 def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
     data, kwarg_dict, display=0
-):
+) -> dict | tuple:
+    """
+    Figure-of-merit: energy resolution interpolated to a target energy using
+    a multi-peak sweep with a shared alpha from the highest-energy peak.
+
+    The charge-trapping correction parameter *alpha* is determined from the
+    last (highest-energy) peak via :func:`fom_fwhm_with_alpha_fit`; this
+    alpha is then applied to all remaining peaks via
+    :func:`fom_fwhm_no_alpha_sweep`.  The resulting FWHM vs. energy curve is
+    fit with *fwhm_func* and interpolated to each energy in *interp_energy*.
+
+    Parameters
+    ----------
+    data
+        DataFrame containing energy and correction parameters for all events.
+    kwarg_dict
+        Dictionary with keys:
+
+        * ``peaks_kev`` - list of peak energies in keV, ordered from low to  # noqa: RUF002
+          high.  The last entry is used for the alpha sweep.
+        * ``idx_list`` - list of event-index arrays, one per peak.  # noqa: RUF002
+        * ``ctc_param`` - name of the charge-trapping correction parameter.  # noqa: RUF002
+        * ``peak_dicts`` - list of per-peak fitting dictionaries.  # noqa: RUF002
+        * ``interp_energy`` *(optional, default ``{"Qbb": 2039}``)* - dict  # noqa: RUF002
+          mapping energy label to keV value for interpolation.
+        * ``fwhm_func`` *(optional, default* ``pgc.FWHMLinear`` *)* - FWHM  # noqa: RUF002
+          curve model used for the energy-resolution fit.
+        * ``frac_max`` *(optional, default 0.2)* - fraction of peak maximum  # noqa: RUF002
+          used to define fit range.
+    display
+        Verbosity / plotting level passed through to the underlying fits.
+
+    Returns
+    -------
+    results
+        Result dictionary containing interpolated FWHM value(s), e.g.
+        ``{"Qbb_fwhm": ..., "Qbb_fwhm_err": ..., "alpha": ...,
+        "peaks": ..., "fwhms": ..., "fwhm_errs": ...,
+        "n_sig": ..., "n_sig_err": ...}``.
+        Returns ``(nan, nan, nan)`` if fewer than two valid FWHM values are
+        available.
+    """
     peaks = kwarg_dict["peaks_kev"]
     idx_list = kwarg_dict["idx_list"]
     ctc_param = kwarg_dict["ctc_param"]
@@ -547,7 +781,7 @@ def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
     fwhm_errs.append(out_dict["fwhm_err"])
     n_sig.append(out_dict["n_sig"])
     n_sig_err.append(out_dict["n_sig_err"])
-    log.info(f"fwhms are {fwhms}keV +- {fwhm_errs}")
+    log.info("fwhms are %skeV +- %s", fwhms, fwhm_errs)
 
     fwhms = np.array(fwhms)
     fwhm_errs = np.array(fwhm_errs)
@@ -558,26 +792,27 @@ def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
     nan_mask = np.isnan(fwhms) | (fwhms < 0)
     if len(fwhms[~nan_mask]) < 2:
         return np.nan, np.nan, np.nan
-    else:
-        results = pgc.HPGeCalibration.fit_energy_res_curve(
-            fwhm_func, peaks[~nan_mask], fwhms[~nan_mask], fwhm_errs[~nan_mask]
-        )
-        results = pgc.HPGeCalibration.interpolate_energy_res(
-            fwhm_func, peaks[~nan_mask], results, interp_energy
-        )
-        interp_res = results[f"{list(interp_energy)[0]}_fwhm_in_kev"]
-        interp_res_err = results[f"{list(interp_energy)[0]}_fwhm_err_in_kev"]
+    results = pgc.HPGeCalibration.fit_energy_res_curve(
+        fwhm_func, peaks[~nan_mask], fwhms[~nan_mask], fwhm_errs[~nan_mask]
+    )
+    results = pgc.HPGeCalibration.interpolate_energy_res(
+        fwhm_func, peaks[~nan_mask], results, interp_energy
+    )
+    interp_res = results[f"{next(iter(interp_energy))}_fwhm_in_kev"]
+    interp_res_err = results[f"{next(iter(interp_energy))}_fwhm_err_in_kev"]
 
-        if nan_mask[-1] is True or nan_mask[-2] is True:
-            interp_res_err = np.nan
-        if interp_res_err / interp_res > 0.1:
-            interp_res_err = np.nan
+    if nan_mask[-1] is True or nan_mask[-2] is True:
+        interp_res_err = np.nan
+    if interp_res_err / interp_res > 0.1:
+        interp_res_err = np.nan
 
-    log.info(f"{list(interp_energy)[0]} fwhm is {interp_res} keV +- {interp_res_err}")
+    log.info(
+        "%s fwhm is %s keV +- %s", next(iter(interp_energy)), interp_res, interp_res_err
+    )
 
     return {
-        f"{list(interp_energy)[0]}_fwhm": interp_res,
-        f"{list(interp_energy)[0]}_fwhm_err": interp_res_err,
+        f"{next(iter(interp_energy))}_fwhm": interp_res,
+        f"{next(iter(interp_energy))}_fwhm_err": interp_res_err,
         "alpha": alpha,
         "peaks": peaks.tolist(),
         "fwhms": fwhms,
