@@ -51,6 +51,7 @@ repos:
     rev: "v2.4.2"
     hooks:
       - id: codespell
+        args: ["-L", "livetime"]
         additional_dependencies:
           - tomli
 
