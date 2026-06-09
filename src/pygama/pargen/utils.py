@@ -172,9 +172,7 @@ def load_data(
         # Get set of fields to read from files
         fields = cal_keys | (file_keys & params)
 
-        lh5_it = lh5.iterator.LH5Iterator(
-            files, lh5_path, field_mask=fields, buffer_len=100000
-        )
+        lh5_it = lh5.LH5Iterator(files, lh5_path, field_mask=fields, buffer_len=100000)
         df_fields = params & (fields | set(cal_dict))
         if df_fields != params:
             log.debug(
