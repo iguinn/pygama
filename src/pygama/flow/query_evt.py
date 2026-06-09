@@ -1,7 +1,7 @@
 import os
 from collections.abc import Collection, Mapping
 from concurrent.futures import Executor, ProcessPoolExecutor
-from contextlib import nullcontext
+from contextlib import ExitStack
 from pathlib import Path
 
 import awkward as ak
@@ -16,12 +16,12 @@ from rich.status import Status
 
 def query_evt(
     fields: Collection[str],
-    runs: str | ak.Array | Mapping[np.ndarray] | pd.DataFrame | None,
+    runs: str | ak.Array | Mapping[str, np.ndarray] | pd.DataFrame | None,
     events: str,
     *,
     dataflow_config: Path | str | Mapping = "$REFPROD/dataflow-config.yaml",
     tiers: Collection[str] = None,
-    tables: Collection[str] = None,
+    tables: Mapping[str,str] = None,
     return_query_vals: bool = False,
     processes: Executor | int = None,
     executor: Executor = None,
@@ -63,11 +63,11 @@ def query_evt(
 
             "det in ["V01234A", "V06789B"] and datatype=='th_HS2_lat_psa'``
 
-    entries
-        expression used to select data entries for each run/channel. Expression
-        can access values from any data tier, from all databases, and from
-        run table. Parameters with aliases can be accessed using their on-disk
-        field name or their alias.
+    events
+        expression used to select data events for each run/channel. Expression
+        can access values from the event tier. Parameters with aliases can be
+        accessed using their on-disk field name or their alias. Awkward is available
+        using ``ak``.
 
         Examples:
 
@@ -87,7 +87,7 @@ def query_evt(
         tiers to include
 
     tables
-        list of format strings to access tables for each tier. Format strings may reference
+        mapping of tiers to format strings to access tables. Format strings may reference
         values from run or channel DBs. If no channel-wise information is included in the string
         the same table will be accessed for each channel (may be useful for evt tier). If ``None``,
         read from ``dataflow_config``. This is required.
@@ -130,26 +130,25 @@ def query_evt(
     events_fields = parse_query_paths(events)
     all_paths = {path for _, _, path in field_info + events_fields}
 
-    if processes is None and isinstance(executor, Executor):
-        processes = executor._max_workers
+    with ExitStack() as stack:
+        if processes is None and isinstance(executor, Executor):
+            processes = executor._max_workers
 
-    if executor is None and isinstance(processes, int):
-        executor = ProcessPoolExecutor(processes)
+        if executor is None and isinstance(processes, int):
+            executor = stack.enter_context(ProcessPoolExecutor(processes))
 
-    # set up the status bar
-    if isinstance(progress, Status):
-        progress.update("Querying runs...")
-        # if it's already started, don't restart it
-        if progress._live.is_started:
-            progress = nullcontext(enter_result=progress)
-    elif isinstance(progress, Console):
-        progress = progress.status("Querying runs...", spinner="betaWave")
-    elif progress:
-        progress = Status("Querying runs...", spinner="betaWave")
-    else:
-        progress = nullcontext(enter_result=None)
+        # set up the status bar
+        if isinstance(progress, Status):
+            progress.update("Querying runs...")
+            # start spinner in context if not already started
+            status = progress if progress._live.is_started else stack.enter_context(progress)
+        elif isinstance(progress, Console):
+            status = stack.enter_context(progress.status("Querying runs...", spinner="betaWave"))
+        elif progress:
+            status = stack.enter_context(Status("Querying runs...", spinner="betaWave"))
+        else:
+            status = None
 
-    with progress as status:
         # Query (or convert) run_records
         if runs is None or isinstance(runs, str):
             run_records = query_runs(

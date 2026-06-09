@@ -2,7 +2,7 @@ import os
 import sys
 from collections.abc import Collection, Mapping
 from concurrent.futures import Executor, ProcessPoolExecutor
-from contextlib import nullcontext
+from contextlib import ExitStack
 from copy import copy
 
 if sys.version_info >= (3, 12):
@@ -27,7 +27,7 @@ from .utils import get_recursive, format_vars, parse_query_paths
 
 def query_meta(
     fields: Collection[str],
-    runs: str | ak.Array | Mapping[np.ndarray] | pd.DataFrame,
+    runs: str | ak.Array | pd.DataFrame,
     channels: str,
     *,
     dataflow_config: Path | str | Mapping = "$REFPROD/dataflow-config.yaml",
@@ -199,22 +199,25 @@ def query_meta(
     query_run_kwargs
         see :meth:`query_runs`
     """
+    with ExitStack() as stack:
+        # set up the status bar
+        if isinstance(progress, Status):
+            progress.update("Querying runs...")
+            # start spinner in context if not already started
+            status = progress if progress._live.is_started else stack.enter_context(progress)
+        elif isinstance(progress, Console):
+            status = stack.enter_context(progress.status("Querying runs...", spinner="betaWave"))
+        elif progress:
+            status = stack.enter_context(Status("Querying runs...", spinner="betaWave"))
+        else:
+            status = None
 
-    # set up the status bar
-    # set up the status bar
-    if isinstance(progress, Status):
-        progress.update("Querying runs...")
-        # if it's already started, don't restart it
-        if progress._live.is_started:
-            progress = nullcontext(enter_result=progress)
-    elif isinstance(progress, Console):
-        progress = progress.status("Querying runs...", spinner="betaWave")
-    elif progress:
-        progress = Status("Querying runs...", spinner="betaWave")
-    else:
-        progress = nullcontext(enter_result=None)
+        if processes is None and isinstance(executor, Executor):
+            processes = executor._max_workers
 
-    with progress as status:
+        if executor is None and isinstance(processes, int):
+            executor = stack.enter_context(ProcessPoolExecutor(processes))
+
         if isinstance(dataflow_config, (Path, str)):
             df_config = Props.read_from(
                 os.path.expandvars(dataflow_config), subst_pathvar=True
@@ -390,7 +393,7 @@ def query_meta(
                 raise ValueError(msg)
 
         # Now run the query...
-        if processes is None and executor is None:
+        if executor is None:
             records, eval_success, path_hits = _query_loop(
                 run_records,
                 col_list,
@@ -402,11 +405,6 @@ def query_meta(
                 group_chans,
             )
         else:
-            if processes is None:
-                processes = executor._max_workers
-            if executor is None:
-                executor = ProcessPoolExecutor(processes)
-
             records = []
             eval_success = False
             path_hits = {}

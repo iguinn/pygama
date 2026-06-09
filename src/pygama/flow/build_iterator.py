@@ -1,6 +1,6 @@
 import os
 from collections.abc import Collection, Mapping
-from contextlib import nullcontext
+from contextlib import ExitStack
 from pathlib import Path
 
 import awkward as ak
@@ -15,12 +15,12 @@ from rich.status import Status
 
 def build_iterator(
     fields: Collection[str],
-    runs: str | ak.Array | Mapping[np.ndarray] | pd.DataFrame,
-    channels: str | ak.Array | Mapping[np.ndarray] | pd.DataFrame,
+    runs: str | ak.Array | Mapping[str, np.ndarray] | pd.DataFrame,
+    channels: str | ak.Array | Mapping[str, np.ndarray] | pd.DataFrame,
     *,
     dataflow_config: Path | str | Mapping = "$REFPROD/dataflow-config.yaml",
     tiers: Collection[str] = None,
-    tables: Collection[str] = None,
+    tables: Mapping[str, str] = None,
     return_alias_map: bool = False,
     progress: Status | Console | bool = True,
     **query_meta_kwargs,
@@ -62,7 +62,7 @@ def build_iterator(
         tiers to include
 
     tables
-        list of format strings to access tables for each tier. Format strings may reference
+        mapping of tiers to format strings to access tables. Format strings may reference
         values from run or channel DBs. If no channel-wise information is included in the string
         the same table will be accessed for each channel (may be useful for evt tier). If ``None``,
         read from ``dataflow_config``. This is required.
@@ -79,21 +79,19 @@ def build_iterator(
     query_meta_kwargs
         additional keyword arguments for :meth:`query_meta` and :meth:`query_runs`
     """
+    with ExitStack() as stack:
+        # set up the status bar
+        if isinstance(progress, Status):
+            progress.update("Querying runs...")
+            # start spinner in context if not already started
+            status = progress if progress._live.is_started else stack.enter_context(progress)
+        elif isinstance(progress, Console):
+            status = stack.enter_context(progress.status("Querying runs...", spinner="betaWave"))
+        elif progress:
+            status = stack.enter_context(Status("Querying runs...", spinner="betaWave"))
+        else:
+            status = None
 
-    # set up the status bar
-    if isinstance(progress, Status):
-        progress.update("Querying runs...")
-        # if it's already started, don't restart it
-        if progress._live.is_started:
-            progress = nullcontext(enter_result=progress)
-    elif isinstance(progress, Console):
-        progress = progress.status("Querying runs...", spinner="betaWave")
-    elif progress:
-        progress = Status("Querying runs...", spinner="betaWave")
-    else:
-        progress = nullcontext(enter_result=None)
-
-    with progress as status:
         if isinstance(dataflow_config, (Path, str)):
             df_config = Props.read_from(
                 os.path.expandvars(dataflow_config), subst_pathvar=True
@@ -200,6 +198,9 @@ def build_iterator(
                 else:
                     lh5_it.add_friend(new_it)
 
+        if lh5_it is None:
+            msg = "No LH5 files were found for the selected fields, runs, tiers, and channels."
+            raise ValueError(msg)
         lh5_it.reset_field_mask(field_names, warn_missing=True)
 
         if return_alias_map:

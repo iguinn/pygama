@@ -2,7 +2,7 @@ import os
 import re
 from collections.abc import Collection, Mapping
 from concurrent.futures import Executor, ProcessPoolExecutor
-from contextlib import nullcontext
+from contextlib import ExitStack
 from copy import copy
 from pathlib import Path
 from rich.console import Console
@@ -107,21 +107,18 @@ def query_runs(
         if ``True`` draw progress spinner; can also provide a :class:`rich.Status`
         or:class:`rich.Console`
     """
+    with ExitStack() as stack:
+        # set up the status bar
+        if isinstance(progress, Status):
+            progress.update("Querying runs...")
+            # start spinner in context if not already started
+            if not progress._live.is_started:
+                stack.enter_context(progress)
+        elif isinstance(progress, Console):
+            stack.enter_context(progress.status("Querying runs...", spinner="betaWave"))
+        elif progress:
+            stack.enter_context(Status("Querying runs...", spinner="betaWave"))
 
-    # set up the status bar
-    if isinstance(progress, Status):
-        progress.update("Querying runs...")
-        # if it's already started, don't restart it
-        if progress._live.is_started:
-            progress = nullcontext(enter_result=progress)
-    elif isinstance(progress, Console):
-        progress = progress.status("Querying runs...", spinner="betaWave")
-    elif progress:
-        progress = Status("Querying runs...", spinner="betaWave")
-    else:
-        progress = nullcontext(enter_result=None)
-
-    with progress as status:
         if isinstance(dataflow_config, (Path, str)):
             df_config = Props.read_from(
                 os.path.expandvars(dataflow_config), subst_pathvar=True
@@ -173,9 +170,9 @@ def query_runs(
             records = []
 
             if executor is None and processes:
-                executor = ProcessPoolExecutor(processes)
+                executor = stack.enter_context(ProcessPoolExecutor(processes))
 
-            for dirpath, dirnames, files in os.walk("."):
+            for dirpath, dirnames, files in os.walk(".", followlinks=True):
                 relpath = dirpath[2:]  # get rid of ./
 
                 # Prune subdirectories that are not in all tiers

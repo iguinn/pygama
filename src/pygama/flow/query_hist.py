@@ -1,6 +1,6 @@
 from collections.abc import Collection, Mapping
 from concurrent.futures import Executor, ProcessPoolExecutor
-from contextlib import nullcontext
+from contextlib import ExitStack
 from inspect import signature
 from pathlib import Path
 
@@ -18,8 +18,8 @@ from . import build_iterator
 
 def query_hist(
     axes: Collection[hist.axis] | Mapping[str, hist.axis],
-    runs: str | ak.Array | Mapping[np.ndarray] | pd.DataFrame,
-    channels: str | ak.Array | Mapping[np.ndarray] | pd.DataFrame,
+    runs: str | ak.Array | pd.DataFrame,
+    channels: str,
     entries: str,
     *,
     dataflow_config: Path | str | Mapping = "$REFPROD/dataflow-config.yaml",
@@ -152,26 +152,25 @@ def query_hist(
 
     entries_fields = parse_query_paths(entries)
 
-    if processes is None and isinstance(executor, Executor):
-        processes = executor._max_workers
+    with ExitStack() as stack:
+        if processes is None and isinstance(executor, Executor):
+            processes = executor._max_workers
 
-    if executor is None and isinstance(processes, int):
-        executor = ProcessPoolExecutor(processes)
+        if executor is None and isinstance(processes, int):
+            executor = stack.enter_context(ProcessPoolExecutor(processes))
 
-    # set up the status bar
-    if isinstance(progress, Status):
-        progress.update("Querying runs...")
-        # if it's already started, don't restart it
-        if progress._live.is_started:
-            progress = nullcontext(enter_result=progress)
-    elif isinstance(progress, Console):
-        progress = progress.status("Querying runs...", spinner="betaWave")
-    elif progress:
-        progress = Status("Querying runs...", spinner="betaWave")
-    else:
-        progress = nullcontext(enter_result=None)
+        # set up the status bar
+        if isinstance(progress, Status):
+            progress.update("Querying runs...")
+            # start spinner in context if not already started
+            status = progress if progress._live.is_started else stack.enter_context(progress)
+        elif isinstance(progress, Console):
+            status = stack.enter_context(progress.status("Querying runs...", spinner="betaWave"))
+        elif progress:
+            status = stack.enter_context(Status("Querying runs...", spinner="betaWave"))
+        else:
+            status = None
 
-    with progress as status:
         # split kwargs up based on which function they should feed into
         bi_kwargs = {}
         hist_kwargs = {}
