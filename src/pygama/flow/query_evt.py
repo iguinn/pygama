@@ -156,7 +156,7 @@ def query_evt(
                 runs,
                 dataflow_config=df_config,
                 progress = status,
-                tiers = tiers
+                tiers = tiers,
                 **kwargs,
             )
         else:

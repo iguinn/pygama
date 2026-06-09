@@ -193,6 +193,7 @@ def query_hist(
             return_alias_map=True,
             processes=processes,
             executor=executor,
+            progress=status,
             **bi_kwargs,
         )
 
@@ -204,7 +205,7 @@ def query_hist(
                 a.label = alias_map.get(path)
 
         if status:
-            status.update("Querying data...", spinner="betaWave")
+            status.update("Filling histogram...", spinner="betaWave")
 
         ret = lh5_it.hist(
             ax,
