@@ -48,6 +48,7 @@ dependencies = [
     "tables",
     "pint",
     "pyyaml",
+    "rich",
     "scikit-learn",
     "scipy >=1.0.1",
     "tqdm >=4.66",
