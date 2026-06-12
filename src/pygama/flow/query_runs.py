@@ -243,6 +243,67 @@ def query_runs(
             os.chdir(cwd)
 
 
+def list_run_fields(
+    dataflow_config: Path | str | Mapping = "$REFPROD/dataflow-config.yaml",
+    cycle_def: str | None = None,
+    tiers: str | Collection[str] | Mapping[str, str] | None = None,
+) -> list[str]:
+    """
+    List the fields that are available to :meth:`query_runs`.
+
+    Parameters
+    ----------
+    dataflow_config
+        config file of reference production. If not provided, use the environment
+        variable ``$REFPROD`` as a directory, and find file ``dataflow-config.yaml``
+
+    cycle_def
+        hyphen-separated names of fields in cycle names; names will be used for columns.
+        By default get from dataflow-config.
+
+        Examples:
+        - ``experiment-period-run-datatype-cycle`` for a L200 cycle, e.g. ``l200-p03-r001-cal-19720101T000000Z``
+        - ``experiment-chan-datatype-run-starttime`` for a Hades cycle, e.g. ``char_data-V05268A-th_HS2_lat_psa-r001-20201008T122118Z``
+
+    tiers
+        tiers used to find files. First tier in list is used to walk through
+        directories to populate run DB. Remaining tiers are checked for presence of
+        cycles; a cycle is only added if it exists for each tier. File relative path
+        for each tier's file is added as a column called ``tier_[t]``. Can provide:
+        - Mapping from tier name to path to root of tier
+        - List of tier names/single tier name. Paths will be found in ``dataflow_config["paths"]``
+        - ``None``: read from ``dataflow_config``; if ``tiers`` entry not found, use ``"raw"``
+    """
+    if isinstance(dataflow_config, (Path, str)):
+        df_config = Props.read_from(
+            os.path.expandvars(dataflow_config), subst_pathvar=True
+        )
+    elif isinstance(dataflow_config, Mapping):
+        df_config = dataflow_config
+    else:
+        msg = "dataflow_config must be a str, Path, or Mapping"
+        raise ValueError(msg)
+    df_paths = df_config.get("paths")
+    query_config = df_config.get("query", {})
+
+    if cycle_def is None:
+        if "cycle_def" not in query_config:
+            msg = "cycle_def must be provided either as kwarg or in dataflow_config"
+            raise ValueError(msg)
+        cycle_def = query_config["cycle_def"]
+
+    # turn tiers into list of tier-name/path pairs
+    if tiers is None:
+        tiers = query_config.get("tiers", ["raw"])
+    if isinstance(tiers, str):
+        tiers = [tiers]
+    if isinstance(tiers, Mapping):
+        tiers = [(f"tier_{t}", p) for t, p in tiers.items()]
+    else:
+        tiers = [(f"tier_{t}", df_paths[f"tier_{t}"]) for t in tiers]
+
+    return {"relpath", "cycle"} | set(cycle_def.split("-")) | set(t[0] for t in tiers)
+
 def _get_run_records_loop(
     files: list[str],
     relpath: str,

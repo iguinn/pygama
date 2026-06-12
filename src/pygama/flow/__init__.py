@@ -78,7 +78,7 @@ be provided with most dataprods! If you set the environment variable $REFPROD th
 the file will automatically be accessed from the referenced directory!
 """
 
-from .query_runs import query_runs
+from .query_runs import query_runs, list_run_fields
 from .query_meta import query_meta
 from .build_iterator import build_iterator
 from .query_data import query_data
@@ -92,4 +92,5 @@ __all__ = [
     "query_hist",
     "query_evt",
     "build_iterator",
+    "list_run_fields",
 ]

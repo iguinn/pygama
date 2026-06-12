@@ -7,6 +7,7 @@ import awkward as ak
 import numpy as np
 import pandas as pd
 from dbetto import Props
+from pygama.flow.query_runs import list_run_fields
 from . import query_meta
 from .utils import format_vars, parse_query_paths
 from lh5 import LH5Iterator
@@ -105,6 +106,8 @@ def build_iterator(
 
         # identify fields we need to get from the metadata
         field_names = [parse_query_paths(f, fullmatch=True) for f in fields]
+        run_fields = list_run_fields(dataflow_config=df_config, tiers=tiers, cycle_def=query_meta_kwargs.get("cycle_def"))
+        run_fields = {f for f, _, path in field_names if path in run_fields}
         meta_fields = {f for f, _, path in field_names if path[0] == "@"}
 
         if tables is None:
@@ -123,13 +126,12 @@ def build_iterator(
             gp_fields[tier] = fields
 
         run_data, alias_map = query_meta(
-            meta_fields,
+            meta_fields | run_fields | {"cycle", "relpath"},
             runs,
             channels,
             dataflow_config=df_config,
             tiers=tiers,
             group_chans=True,
-            return_query_vals=True,
             return_alias_map=True,
             progress=status,
             **query_meta_kwargs,
