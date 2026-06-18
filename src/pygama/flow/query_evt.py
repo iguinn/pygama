@@ -171,36 +171,25 @@ def query_evt(
             if "tables" not in query_config:
                 msg = "tables not found in dataflow_config; either provide as kwarg or add to config"
                 raise ValueError(msg)
-            tables = query_config["tables"]
+            tables = query_config["evt_tables"]
 
         events_fields = parse_query_paths(events)
 
+        if tiers is None:
+            tiers = query_config.get("evt_tiers", [])
+
         lh5_it = None
-        for tier_key, tier_dir in df_paths.items():
-            if not tier_key[:5] == "tier_":
-                continue
-            tier = tier_key[5:]
-            if tiers and tier not in tiers:
-                continue
-
-            # keep only tiers with no channel information
-            tab_name = tables[tier]
-            if len(format_vars(tab_name)) > 0:
-                continue
-
-            # broadcast groups and run_records
-            lh5_files, groups, run_records = ak.broadcast_arrays(
-                [
-                    [f"{relpath}/{cycle}-tier_{tier}.lh5"]
-                    for relpath, cycle in zip(run_records["relpath"], run_records["cycle"])
-                ],
-                [tab_name],
-                run_records,
-            )
+        for tier in tiers:
+            tier_dir = df_paths[f"tier_{tier}"]
+            lh5_files = [
+                [f"{relpath}/{cycle}-tier_{tier}.lh5"]
+                for relpath, cycle in zip(run_records["relpath"], run_records["cycle"])
+            ]
+            groups = [ [tables[tier]] ]*len(lh5_files)
 
             new_it = LH5Iterator(
-                ak.to_list(lh5_files),
-                ak.to_list(groups),
+                lh5_files,
+                groups,
                 base_path=tier_dir,
                 group_data=run_records if lh5_it is None else None,
             )

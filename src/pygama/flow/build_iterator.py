@@ -143,20 +143,15 @@ def build_iterator(
             status.update("Building iterator...")
 
         lh5_it = None
-        for tier_key, tier_dir in df_paths.items():
-            if not tier_key[:5] == "tier_":
-                continue
-            tier = tier_key[5:]
-            if tiers and tier not in tiers:
-                continue
-
+        for tier in tiers:
+            tier_dir = df_paths[f"tier_{tier}"]
             lh5_files = [
                 [f"{relpath}/{cycle}-tier_{tier}.lh5"]
                 for relpath, cycle in zip(run_data["relpath"], run_data["cycle"])
             ]
-
             tab_format = tables[tier]
             tab_fields = []
+
             for fname, _, path in gp_fields[tier]:
                 tab_format = tab_format.replace(fname, alias_map[path])
                 tab_fields.append(alias_map[path])

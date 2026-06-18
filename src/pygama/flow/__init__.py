@@ -53,7 +53,20 @@ A template for a minimal `dataflow-config.yaml` file:
         cycle_def: experiment-period-run-datatype-starttime # REQUIRED: hyphen-separated-list-of-fields-in-cycle-name; these will be columns of run db
         metadata: LegendMetadata # REQUIRED: name of metadata class (e.g. LegendMetadata)
         ignored_cycles: dataprod/config/ignored_cycles # path in metadata to list of cycles to skip; by default do not ignore any
-        tiers: ["raw", "dsp", "hit", "evt"] # list of tiers TLAs to use from paths for parameter and data queries; default use all
+        tiers: ["raw", "dsp", "hit", "tcm", "evt"] # list of tiers TLAs to use from paths for parameter and data queries; default use all
+
+        tables: # mapping from tier names to table paths in lh5 files
+            raw: ch{@chan.daq.rawid:07d}/raw
+            evt: evt
+            tla: # path to table for channel in tier_tla lh5 files. Use format string syntax, which can refer to values from the run_db and chan_db; e.g. "ch{@chan.daq.rawid}/raw"
+            ...
+
+        evt_tiers: ["tcm", "evt"] # list of tiers to use for event-level queries
+
+        evt_tables: # mapping from event-level tier names to table paths in lh5 files
+            evt: evt
+            tla: # path to table for channel in tier_tla lh5 files. Do not use format string syntax!
+
         chan_db: # path in metadata to list of channels for a given run. Use format string syntax, which may refer to any values in the run DB (i.e. cycle_def fields, cycle name, and relative path). If no value was provided, call "metadata.channelmap(on = starttime)", where "starttime" is drawn from the run db
         par_db: #optional info for navigating par dbs. If missing use "par_db.on(starttime)[@chan.name]"
             cycle_entry: # sub-path to entry for cycle, using format string syntax, which may include values from run db; if missing or falsey, call .on
@@ -65,12 +78,6 @@ A template for a minimal `dataflow-config.yaml` file:
                 cycle_entry: # sub-path to entry for cycle, using format string syntax, which may include values from run db; if missing or falsey, call .on
                 chan_entry: # sub-sub-path to entry for channel, using format string syntax, which may include values from run or chan dbs; if missing or falsey, use same value for all chans
                 # based on these, we will search "metadata["[path][.on(starttime)|/cycle_entry][/chan_entry]
-            ...
-
-        tables:
-            raw: ch{@chan.daq.rawid:07d}/raw
-            evt: evt
-            tla: # path to table for channel in tier_tla lh5 files. Use format string syntax, which can refer to values from the run_db and chan_db; e.g. "ch{@chan.daq.rawid}/raw"
             ...
 
 These ``dataflow-config.yaml`` files should not often need to be created, and will
