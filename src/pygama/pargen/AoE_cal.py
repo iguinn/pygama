@@ -881,15 +881,18 @@ def bimodal_dt_fit(
                     (mus[0] * aoe_pars["mu"]) - (mus[1] * aoe_pars2["mu"])
                 )
             except ZeroDivisionError:
+                log.debug(
+                    "bimodal_dt_fit: alpha denominator is zero, falling back to alpha = 0"
+                )
                 alpha = 0
 
             dt_res_dict["alpha"] = alpha
             log.info("dtcorr successful alpha: %s", alpha)
 
-    except BaseException as e:
-        if isinstance(e, KeyboardInterrupt) or debug_mode:
-            raise e
-        log.error("Drift time correction (bimodal_dt_fit) failed")
+    except Exception as e:
+        if debug_mode:
+            raise
+        log.error("Drift time correction (bimodal_dt_fit) failed: %s", e)
 
     return alpha, dt_res_dict
 
@@ -937,7 +940,7 @@ def mcdrift(
         )
     except Exception as e:
         if debug_mode:
-            raise e
+            raise
         log.error("MCD drift: event selection query failed: %s", e)
         return 0, {}
 
@@ -1003,7 +1006,7 @@ def mcdrift(
         mcd = MinCovDet().fit(subset)
     except Exception as e:
         if debug_mode:
-            raise e
+            raise
         log.error("MCD drift: MCD fit failed: %s", e)
         return 0, {}
 
@@ -1215,9 +1218,15 @@ class CalAoE:
                                 ),
                             ]
                         )
-                    except BaseException as e:
-                        if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                            raise (e)
+                    except Exception as e:
+                        if self.debug_mode:
+                            raise
+                        log.debug(
+                            "A/E time correction: fit failed for run_timestamp %s, filling nan: %s",
+                            tstamp,
+                            e,
+                            exc_info=True,
+                        )
                         self.timecorr_df = pd.concat(
                             [
                                 self.timecorr_df,
@@ -1332,12 +1341,21 @@ class CalAoE:
                             raise ValueError(msg)
 
                     else:
-                        msg = "unknown mode"
+                        msg = (
+                            f"unknown mode {mode!r}, expected 'full', 'partial', 'none', "
+                            "'average_consecutive' or 'interpolate_consecutive'"
+                        )
                         raise ValueError(msg)
 
-                    df[output_name] = df[aoe_param] / np.array(
-                        [time_dict[tstamp] for tstamp in df["run_timestamp"]]
-                    )
+                    try:
+                        df[output_name] = df[aoe_param] / np.array(
+                            [time_dict[tstamp] for tstamp in df["run_timestamp"]]
+                        )
+                    except KeyError as e:
+                        msg = (
+                            f"no time-correction entry for run_timestamp {e.args[0]!r}"
+                        )
+                        raise KeyError(msg) from e
                     self.update_cal_dicts(final_time_dict)
                 else:
                     df[output_name] = (
@@ -1385,10 +1403,14 @@ class CalAoE:
                             ),
                         ]
                     )
-                except BaseException as e:
-                    if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                        raise (e)
-
+                except Exception as e:
+                    if self.debug_mode:
+                        raise
+                    log.debug(
+                        "A/E time correction: single-run fit failed, filling nan: %s",
+                        e,
+                        exc_info=True,
+                    )
                     self.timecorr_df = pd.concat(
                         [
                             self.timecorr_df,
@@ -1417,10 +1439,10 @@ class CalAoE:
                     }
                 )
                 log.info("Finished A/E time correction")
-        except BaseException as e:
-            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                raise (e)
-            log.error("A/E time correction failed")
+        except Exception as e:
+            if self.debug_mode:
+                raise
+            log.error("A/E time correction failed: %s", e)
             df[output_name] = df[aoe_param] / np.nan
             self.update_cal_dicts(
                 {
@@ -1609,9 +1631,15 @@ class CalAoE:
                         ]
                     )
 
-                except BaseException as e:
-                    if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                        raise (e)
+                except Exception as e:
+                    if self.debug_mode:
+                        raise
+                    log.debug(
+                        "A/E energy correction: fit failed for compton band %s, filling nan: %s",
+                        band,
+                        e,
+                        exc_info=True,
+                    )
                     self.energy_corr_fits = pd.concat(
                         [
                             self.energy_corr_fits,
@@ -1717,10 +1745,14 @@ class CalAoE:
                     pdf=self.pdf,
                     display=display,
                 )
-            except BaseException as e:
-                if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                    raise (e)
-
+            except Exception as e:
+                if self.debug_mode:
+                    raise
+                log.debug(
+                    "A/E energy correction: DEP fit failed, filling nan: %s",
+                    e,
+                    exc_info=True,
+                )
                 dep_pars, dep_err, _ = return_nans(self.pdf)
 
             data[corrected_param] = data[aoe_param] / self.mean_func.func(
@@ -1733,10 +1765,10 @@ class CalAoE:
             log.info("mean pars are %s", mu_pars.to_dict())
             log.info("sigma pars are %s", sig_pars.to_dict())
 
-        except BaseException as e:
-            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                raise (e)
-            log.error("A/E energy correction failed")
+        except Exception as e:
+            if self.debug_mode:
+                raise
+            log.error("A/E energy correction failed: %s", e)
             mu_pars, mu_errs, _mu_cov = return_nans(self.mean_func.func)
             csqr_mu, dof_mu, p_val_mu = (np.nan, np.nan, np.nan)
             csqr_sig, dof_sig, p_val_sig = (np.nan, np.nan, np.nan)
@@ -1889,10 +1921,10 @@ class CalAoE:
                 data[output_cut_param] = (
                     data[output_cut_param] & (data[self.dt_cut_param])
                 )
-        except BaseException as e:
-            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                raise (e)
-            log.error("A/E cut determination failed")
+        except Exception as e:
+            if self.debug_mode:
+                raise
+            log.error("A/E cut determination failed: %s", e)
             self.low_cut_val = np.nan
             data[output_cut_param] = False
 
@@ -2010,9 +2042,9 @@ class CalAoE:
                     )
                     peak_dfs[peak] = cut_df
                 log.info("%skeV: %.1f +/- %.1f %%", peak, sf, sf_err)
-            except BaseException as e:
-                if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                    raise (e)
+            except Exception as e:
+                if self.debug_mode:
+                    raise
                 sfs = pd.concat(
                     [
                         sfs,
@@ -2020,8 +2052,9 @@ class CalAoE:
                     ]
                 )
                 log.error(
-                    "A/E Survival fraction sweep determination failed for %s peak",
+                    "A/E survival fraction sweep determination failed for %s peak: %s",
                     peak,
+                    e,
                 )
         sfs = sfs.set_index("peak")
         return sfs, peak_dfs
@@ -2112,9 +2145,9 @@ class CalAoE:
                     )
                 log.info("%skeV: %.1f +/- %.1f %%", peak, sf, sf_err)
 
-            except BaseException as e:
-                if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                    raise (e)
+            except Exception as e:
+                if self.debug_mode:
+                    raise
                 sfs = pd.concat(
                     [
                         sfs,
@@ -2122,7 +2155,9 @@ class CalAoE:
                     ]
                 )
                 log.error(
-                    "A/E survival fraction determination failed for %s peak", peak
+                    "A/E survival fraction determination failed for %s peak: %s",
+                    peak,
+                    e,
                 )
         return sfs.set_index("peak")
 
@@ -2757,7 +2792,7 @@ def plot_sigma_fit(aoe_class, _data, figsize=(12, 8), fontsize=12) -> plt.figure
         if aoe_class.sigma_func == SigmaFit:
             label = f"sqrt model: \nsqrt({sig_pars['a']:1.4f}+({sig_pars['b']:1.1f}/E)^{sig_pars['c']:1.1f})"
         else:
-            msg = "unknown sigma function"
+            msg = f"unknown sigma function {aoe_class.sigma_func!r}, expected SigmaFit"
             raise ValueError(msg)
         ax1.plot(
             aoe_class.energy_corr_fits.index.to_numpy(),

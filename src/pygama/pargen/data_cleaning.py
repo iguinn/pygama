@@ -95,6 +95,9 @@ def get_keys(in_data, cut_dict):
         possible_keys = in_data.keys()
     elif isinstance(in_data, Collection):
         possible_keys = in_data
+    else:
+        msg = f"in_data must be a Mapping or Collection, got {type(in_data).__name__}"
+        raise TypeError(msg)
     for param in parameters:
         for key in possible_keys:
             if key in param:
@@ -146,7 +149,11 @@ def get_mode_stdev(par_array) -> tuple:
 
         upper_bound = mu + 10 * guess_sig
 
-    except Exception:
+    except Exception as e:
+        log.debug(
+            "get_mode_stdev: fwhm estimate failed, falling back to percentile bounds: %s",
+            e,
+        )
         lower_bound = np.nanpercentile(par_array, 5)
         upper_bound = np.nanpercentile(par_array, 95)
 
@@ -187,13 +194,18 @@ def get_mode_stdev(par_array) -> tuple:
             or (mean + std) < mu
             or (mean - std) > mu
         ):
-            raise IndexError
+            msg = "gaussian mode estimate fell outside histogram range"
+            raise IndexError(msg)
     except IndexError:
         try:
             fwhm = pgh.get_fwhm(counts, bins)[0]
             mean = float(bin_centres[np.argmax(counts)])
             std = fwhm / 2.355
-        except Exception:
+        except Exception as e:
+            log.debug(
+                "get_mode_stdev: fwhm estimate failed, retrying with percentile bounds: %s",
+                e,
+            )
             lower_bound = np.nanpercentile(par_array, 5)
             upper_bound = np.nanpercentile(par_array, 95)
 
@@ -214,7 +226,11 @@ def get_mode_stdev(par_array) -> tuple:
                 fwhm = pgh.get_fwhm(counts, bins)[0]
                 mean = float(bin_centres[np.argmax(counts)])
                 std = fwhm / 2.355
-            except Exception:
+            except Exception as e:
+                log.debug(
+                    "get_mode_stdev: fwhm estimate failed, falling back to nanstd: %s",
+                    e,
+                )
                 mean = float(bin_centres[np.argmax(counts)])
                 std = np.nanstd(par_array)
     return mean, std
@@ -518,6 +534,12 @@ def generate_cuts(
         data = pd.DataFrame.from_dict(data)
     elif isinstance(data, dict):
         data = pd.DataFrame.from_dict(data)
+    else:
+        msg = (
+            "data must be a pandas DataFrame, lgdo Table or dict, "
+            f"got {type(data).__name__}"
+        )
+        raise ValueError(msg)
     for out_par, cut in cut_dict.items():
         if "expression" in cut:
             output_dict[out_par] = {"expression": cut["expression"]}
@@ -530,7 +552,11 @@ def generate_cuts(
             try:
                 all_par_array = data[par].to_numpy()
             except KeyError:
-                all_par_array = data.eval(par).to_numpy()
+                try:
+                    all_par_array = data.eval(par).to_numpy()
+                except Exception as e:
+                    msg = f"unable to find or evaluate cut parameter {par!r} in data"
+                    raise ValueError(msg) from e
 
             bad_entries = (~np.isnan(all_par_array)) & (~np.isinf(all_par_array))
 
@@ -546,16 +572,24 @@ def generate_cuts(
                 num_sigmas_left = num_sigmas
                 num_sigmas_right = num_sigmas
             elif isinstance(num_sigmas, dict):
-                if "low_side" in num_sigmas:
-                    num_sigmas_left = num_sigmas["low_side"]
-                else:
-                    num_sigmas_left = None
-                if "high_side" in num_sigmas:
-                    num_sigmas_right = num_sigmas["high_side"]
-                else:
-                    num_sigmas_right = None
-            upper = round(float((num_sigmas_right * std) + mean), rounding)
-            lower = round(float((-num_sigmas_left * std) + mean), rounding)
+                num_sigmas_left = num_sigmas.get("low_side")
+                num_sigmas_right = num_sigmas.get("high_side")
+            else:
+                msg = (
+                    f"cut_level for {par!r} must be a number or dict, "
+                    f"got {type(num_sigmas).__name__}"
+                )
+                raise TypeError(msg)
+            upper = (
+                round(float((num_sigmas_right * std) + mean), rounding)
+                if num_sigmas_right is not None
+                else None
+            )
+            lower = (
+                round(float((-num_sigmas_left * std) + mean), rounding)
+                if num_sigmas_left is not None
+                else None
+            )
             if mode == "inclusive":
                 if upper is not None and lower is not None:
                     cut_string = f"({par}>a) & ({par}<b)"
@@ -576,6 +610,9 @@ def generate_cuts(
                 elif lower is None:
                     cut_string = f"{par}>a"
                     par_dict = {"a": upper}
+            else:
+                msg = f"unknown mode {mode!r}, expected 'inclusive' or 'exclusive'"
+                raise ValueError(msg)
 
             output_dict[out_par] = {"expression": cut_string, "parameters": par_dict}
 
@@ -652,7 +689,9 @@ def get_cut_indexes(data, cut_parameters):
             data[outname] = data.eval(exp, local_dict=info.get("parameters", None))
             ct_mask = ct_mask & data[outname]
     else:
-        msg = "Data must be a Table or DataFrame"
+        msg = (
+            f"data must be an lgdo Table or pandas DataFrame, got {type(data).__name__}"
+        )
         raise ValueError(msg)
 
     return ct_mask
@@ -743,6 +782,12 @@ def generate_cut_classifiers(
         data = pd.DataFrame.from_dict(data)
     elif isinstance(data, dict):
         data = pd.DataFrame.from_dict(data)
+    else:
+        msg = (
+            "data must be a pandas DataFrame, lgdo Table or dict, "
+            f"got {type(data).__name__}"
+        )
+        raise ValueError(msg)
     for out_par, cut in cut_dict.items():
         if "expression" in cut:
             output_dict[out_par] = {"expression": cut["expression"]}
@@ -758,7 +803,11 @@ def generate_cut_classifiers(
             try:
                 all_par_array = data[par].to_numpy()
             except KeyError:
-                all_par_array = data.eval(par).to_numpy()
+                try:
+                    all_par_array = data.eval(par).to_numpy()
+                except Exception as e:
+                    msg = f"unable to find or evaluate cut parameter {par!r} in data"
+                    raise ValueError(msg) from e
 
             mean, std = get_mode_stdev(all_par_array)
 
@@ -769,14 +818,14 @@ def generate_cut_classifiers(
                     cut_left = -num_sigmas
                     cut_right = num_sigmas
                 elif isinstance(num_sigmas, dict):
-                    if "low_side" in num_sigmas:
-                        cut_left = num_sigmas["low_side"]
-                    else:
-                        cut_left = None
-                    if "high_side" in num_sigmas:
-                        cut_right = num_sigmas["high_side"]
-                    else:
-                        cut_right = None
+                    cut_left = num_sigmas.get("low_side")
+                    cut_right = num_sigmas.get("high_side")
+                else:
+                    msg = (
+                        f"cut_level for {par!r} must be a number or dict, "
+                        f"got {type(num_sigmas).__name__}"
+                    )
+                    raise TypeError(msg)
 
             elif percentile is not None:
                 if method == "fit":
@@ -814,7 +863,10 @@ def generate_cut_classifiers(
                     elif func == skewed_fit:
                         cdf = skewnorm.cdf(xs, pars["alpha"], pars["mu"], pars["sigma"])
                     else:
-                        msg = "unknown func"
+                        msg = (
+                            f"unknown func {getattr(func, '__name__', func)!r}, expected "
+                            "exgauss, gaussian, gauss_on_exgauss_areas, double_exgauss or skewed_fit"
+                        )
                         raise ValueError(msg)
 
                     if isinstance(percentile, int | float):
@@ -824,14 +876,24 @@ def generate_cut_classifiers(
                     elif isinstance(percentile, dict):
                         if "low_side" in percentile:
                             cut_left = xs[
-                                np.argmin(np.abs(cdf - (1 - (percentile / 100))))
+                                np.argmin(
+                                    np.abs(cdf - (1 - (percentile["low_side"] / 100)))
+                                )
                             ]
                         else:
                             cut_left = None
                         if "high_side" in percentile:
-                            cut_right = xs[np.argmin(np.abs(cdf - (percentile / 100)))]
+                            cut_right = xs[
+                                np.argmin(np.abs(cdf - (percentile["high_side"] / 100)))
+                            ]
                         else:
                             cut_right = None
+                    else:
+                        msg = (
+                            f"cut_percentile for {par!r} must be a number or dict, "
+                            f"got {type(percentile).__name__}"
+                        )
+                        raise TypeError(msg)
 
                 elif isinstance(percentile, int | float):
                     cut_left = np.nanpercentile(norm_par_array, 100 - percentile)
@@ -839,13 +901,29 @@ def generate_cut_classifiers(
 
                 elif isinstance(percentile, dict):
                     if "low_side" in percentile:
-                        cut_left = np.nanpercentile(norm_par_array, percentile)
+                        cut_left = np.nanpercentile(
+                            norm_par_array, 100 - percentile["low_side"]
+                        )
                     else:
                         cut_left = None
                     if "high_side" in percentile:
-                        cut_right = np.nanpercentile(norm_par_array, percentile)
+                        cut_right = np.nanpercentile(
+                            norm_par_array, percentile["high_side"]
+                        )
                     else:
                         cut_right = None
+                else:
+                    msg = (
+                        f"cut_percentile for {par!r} must be a number or dict, "
+                        f"got {type(percentile).__name__}"
+                    )
+                    raise TypeError(msg)
+            else:
+                msg = (
+                    f"cut definition for {par!r} must provide either "
+                    "'cut_level' or 'cut_percentile'"
+                )
+                raise ValueError(msg)
 
             if default is not None:
                 value = default["value"]
@@ -874,7 +952,10 @@ def generate_cut_classifiers(
                     if cut_right is not None:
                         cut_right = max(cut_right, default_cut_right)
                 else:
-                    msg = "unknown mode"
+                    msg = (
+                        f"unknown default mode {default_mode!r}, "
+                        "expected 'higher_limit' or 'lower_limit'"
+                    )
                     raise ValueError(msg)
 
             if mode == "inclusive":
@@ -897,6 +978,9 @@ def generate_cut_classifiers(
                 elif cut_left is None:
                     cut_string = f"{out_par}_classifier>a"
                     par_dict = {"a": cut_right}
+            else:
+                msg = f"unknown mode {mode!r}, expected 'inclusive' or 'exclusive'"
+                raise ValueError(msg)
 
             output_dict[f"{out_par}_classifier"] = {
                 "expression": f"(({par})-a)/b",
@@ -978,7 +1062,6 @@ def find_pulser_properties(df, energy="daqenergy"):
     )
     peak_e_err = pt_pars[:, 1] * 4
 
-    allowed_mask = np.ones(len(peak_energies), dtype=bool)
     for j, e in enumerate(peak_energies[1:-1]):
         i = j + 1
         if peak_e_err[i] > allowed_err:
@@ -1009,8 +1092,15 @@ def find_pulser_properties(df, energy="daqenergy"):
             peak_e_err[i + 1] -= (overlap) * (peak_e_err[i + 1] / total)
 
     out_pulsers = []
-    for i, e in enumerate(peak_energies[allowed_mask]):
-        if peak_e_err[i] > allowed_err:
+    for i, e in enumerate(peak_energies):
+        if np.isnan(peak_e_err[i]) or peak_e_err[i] > allowed_err:
+            log.debug(
+                "find_pulser_properties: skipping peak at %s, "
+                "half-width %s is nan or above %s",
+                e,
+                peak_e_err[i],
+                allowed_err,
+            )
             continue
 
         try:
@@ -1051,7 +1141,10 @@ def find_pulser_properties(df, energy="daqenergy"):
 
             else:
                 continue
-        except Exception:
+        except Exception as ex:
+            log.debug(
+                "find_pulser_properties: skipping candidate peak at %s: %s", e, ex
+            )
             continue
     return out_pulsers
 

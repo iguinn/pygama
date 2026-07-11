@@ -436,10 +436,15 @@ class LQCal:
                                 ),
                             ]
                         )
-                    except BaseException as e:
-                        if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                            raise (e)
-
+                    except Exception as e:
+                        if self.debug_mode:
+                            raise
+                        log.debug(
+                            "LQ time correction: fit failed for run_timestamp %s, filling nan: %s",
+                            tstamp,
+                            e,
+                            exc_info=True,
+                        )
                         self.timecorr_df = pd.concat(
                             [
                                 self.timecorr_df,
@@ -464,9 +469,13 @@ class LQCal:
                     np.array(self.timecorr_df["res"]),
                 )
 
-                df[output_name] = df[lq_param] / np.array(
-                    [time_dict[tstamp] for tstamp in df["run_timestamp"]]
-                )
+                try:
+                    df[output_name] = df[lq_param] / np.array(
+                        [time_dict[tstamp] for tstamp in df["run_timestamp"]]
+                    )
+                except KeyError as e:
+                    msg = f"no time-correction entry for run_timestamp {e.args[0]!r}"
+                    raise KeyError(msg) from e
                 self.update_cal_dicts(
                     {
                         tstamp: {
@@ -507,9 +516,14 @@ class LQCal:
                             ),
                         ]
                     )
-                except BaseException as e:
-                    if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                        raise (e)
+                except Exception as e:
+                    if self.debug_mode:
+                        raise
+                    log.debug(
+                        "LQ time correction: single-run fit failed, filling nan: %s",
+                        e,
+                        exc_info=True,
+                    )
                     self.timecorr_df = pd.concat(
                         [
                             self.timecorr_df,
@@ -536,10 +550,10 @@ class LQCal:
                     }
                 )
                 log.info("LQ time correction finished")
-        except BaseException as e:
-            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                raise (e)
-            log.error("LQ time correction failed")
+        except Exception as e:
+            if self.debug_mode:
+                raise
+            log.error("LQ time correction failed: %s", e)
             self.update_cal_dicts(
                 {
                     output_name: {
@@ -614,10 +628,10 @@ class LQCal:
                 - self.dt_fit_pars[1]
             )
 
-        except BaseException as e:
-            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                raise (e)
-            log.error("LQ drift time correction failed")
+        except Exception as e:
+            if self.debug_mode:
+                raise
+            log.error("LQ drift time correction failed: %s", e)
             self.dt_fit_pars = (np.nan, np.nan)
 
         self.update_cal_dicts(
@@ -664,10 +678,10 @@ class LQCal:
             df["LQ_Classifier"] = np.divide(df[lq_param].to_numpy(), pars[1])
             df["LQ_Cut"] = df["LQ_Classifier"] < self.cut_val
 
-        except BaseException as e:
-            if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                raise (e)
-            log.error("LQ cut determination failed")
+        except Exception as e:
+            if self.debug_mode:
+                raise
+            log.error("LQ cut determination failed: %s", e)
             self.cut_val = np.nan
             c = cost.UnbinnedNLL(np.array([0]), gaussian.pdf)
             m = Minuit(c, np.full(2, np.nan))
@@ -783,16 +797,20 @@ class LQCal:
                     )
                     self.low_side_peak_dfs[peak] = cut_df
                 log.info("%skeV: %2.1f +/- %2.1f %%", peak, sf, sf_err)
-            except BaseException as e:
-                if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                    raise (e)
+            except Exception as e:
+                if self.debug_mode:
+                    raise
                 self.low_side_sf = pd.concat(
                     [
                         self.low_side_sf,
                         pd.DataFrame([{"peak": peak, "sf": np.nan, "sf_err": np.nan}]),
                     ]
                 )
-                log.error("LQ Survival fraction determination failed for %s peak", peak)
+                log.error(
+                    "LQ survival fraction determination failed for %s peak: %s",
+                    peak,
+                    e,
+                )
         self.low_side_sf = self.low_side_sf.set_index("peak")
 
 

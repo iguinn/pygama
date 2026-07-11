@@ -20,6 +20,7 @@ from pygama.math.distributions import gauss_on_uniform
 from pygama.math.histogram import get_hist
 from pygama.math.unbinned_fitting import fit_unbinned
 from pygama.pargen.dsp_optimize import run_one_dsp
+from pygama.pargen.utils import require_config_keys
 
 log = logging.getLogger(__name__)
 
@@ -57,6 +58,26 @@ def noise_optimization(
     """
 
     t0 = time.time()
+
+    require_config_keys(
+        opt_dict,
+        [
+            "start",
+            "stop",
+            "step",
+            "step_val",
+            "optimization",
+            "perform_fit",
+            "fit_deg",
+        ],
+        name="opt_dict",
+    )
+    for ene_par, par_config in opt_dict["optimization"].items():
+        require_config_keys(
+            par_config,
+            ["dict_str", "filter_par", "ene_str"],
+            name=f"opt_dict['optimization'][{ene_par!r}]",
+        )
 
     samples = np.arange(opt_dict["start"], opt_dict["stop"], opt_dict["step"])
     samples_val = np.arange(opt_dict["start"], opt_dict["stop"], opt_dict["step_val"])
@@ -436,7 +457,7 @@ def simple_gaussian_guess(hist, bins, func, toll=0.2) -> tuple:
     bounds = {
         "mu": (mu - sigma, mu + sigma),
         "sigma": (sigma - sigma * toll, sigma + sigma * toll),
-        "n_sig": (n_sig + n_sig * toll, n_sig + n_sig * toll),
+        "n_sig": (n_sig - n_sig * toll, n_sig + n_sig * toll),
     }
 
     for par in func.required_args():

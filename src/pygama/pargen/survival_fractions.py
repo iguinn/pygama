@@ -48,8 +48,12 @@ def energy_guess(energy, func_i, fit_range=None, bin_width=1, peak=None, eres=No
     Returns
     -------
     parguess
-        :class:`iminuit.Values` of initial parameter values for *func_i*, or
-        ``None`` if *func_i* is not supported.
+        :class:`iminuit.Values` of initial parameter values for *func_i*.
+
+    Raises
+    ------
+    NotImplementedError
+        If *func_i* is not supported.
     """
     if fit_range is None:
         fit_range = (np.nanmin(energy), np.nanmax(energy))
@@ -69,8 +73,8 @@ def energy_guess(energy, func_i, fit_range=None, bin_width=1, peak=None, eres=No
                 parguess[i] = 0
 
     else:
-        log.error("energy_guess not implemented for %s", func_i)
-        return None
+        msg = f"energy_guess not implemented for {getattr(func_i, '__name__', func_i)}"
+        raise NotImplementedError(msg)
     return parguess
 
 
@@ -92,11 +96,15 @@ def fix_all_but_nevents(func) -> tuple:
     Returns
     -------
     fixed
-        List of parameter names to be held fixed during the fit, or ``None``
-        if *func* is not supported.
+        List of parameter names to be held fixed during the fit.
     mask
         Boolean array of length ``len(func.required_args())``, where ``True``
         indicates a free (floating) parameter.
+
+    Raises
+    ------
+    NotImplementedError
+        If *func* is not supported.
     """
 
     if func == gauss_on_step:
@@ -108,8 +116,10 @@ def fix_all_but_nevents(func) -> tuple:
         fixed = ["x_lo", "x_hi", "mu", "sigma", "htail", "tau", "hstep"]
 
     else:
-        log.error("get_hpge_E_fixed not implemented for %s", func)
-        return None, None
+        msg = (
+            f"fix_all_but_nevents not implemented for {getattr(func, '__name__', func)}"
+        )
+        raise NotImplementedError(msg)
     mask = ~np.isin(func.required_args(), fixed)
     return fixed, mask
 
@@ -133,8 +143,12 @@ def get_bounds(func, parguess) -> dict:
     Returns
     -------
     bounds
-        Dictionary mapping parameter names to ``(low, high)`` bound tuples,
-        or ``None`` if *func* is not supported.
+        Dictionary mapping parameter names to ``(low, high)`` bound tuples.
+
+    Raises
+    ------
+    NotImplementedError
+        If *func* is not supported.
     """
     if func in (hpge_peak, gauss_on_step):
         bounds = pgc.get_hpge_energy_bounds(func, parguess)
@@ -144,8 +158,8 @@ def get_bounds(func, parguess) -> dict:
         bounds["n_bkg"] = (0, 2 * (parguess["n_sig"] + parguess["n_bkg"]))
 
     else:
-        log.error("get_bounds not implemented for %s", func)
-        return None
+        msg = f"get_bounds not implemented for {getattr(func, '__name__', func)}"
+        raise NotImplementedError(msg)
     return bounds
 
 
@@ -441,7 +455,10 @@ def update_guess(func, parguess, energies):
         parguess["n_bkg"] = total_events - parguess["n_sig"]
         return parguess
 
-    log.error("update_guess not implemented for %s", func)
+    log.warning(
+        "update_guess not implemented for %s, returning original guess",
+        getattr(func, "__name__", func),
+    )
     return parguess
 
 
@@ -532,7 +549,7 @@ def get_survival_fraction(
     elif mode == "less":
         idxs = (cut_param < cut_val) & data_mask
     else:
-        msg = "mode not recognised"
+        msg = f"unknown mode {mode!r}, expected 'greater' or 'less'"
         raise ValueError(msg)
 
     if pars is None:
@@ -585,7 +602,10 @@ def get_survival_fraction(
         ) + cost.ExtendedUnbinnedNLL(energy[(~nan_idxs) & (~idxs)], fail_pdf_gos)
 
     else:
-        msg = "Unknown func"
+        msg = (
+            f"unknown func {getattr(func, '__name__', func)!r}, "
+            "expected hpge_peak or gauss_on_step"
+        )
         raise ValueError(msg)
 
     m = Minuit(lh, **parguess)
@@ -636,7 +656,7 @@ def get_sf_sweep(
     mode="greater",
     fit_range=None,
     debug_mode=False,
-) -> tuple(pd.DataFrame, float, float):
+) -> tuple[pd.DataFrame, float, float]:
     """
     Function sweeping through cut values and calculating the survival fraction for each value
     using a fit to the surviving and failing enegry distributions.
@@ -718,9 +738,15 @@ def get_sf_sweep(
             out_df = pd.concat(
                 [out_df, pd.DataFrame([{"cut_val": cut_val, "sf": sf, "sf_err": err}])]
             )
-        except BaseException as e:
-            if isinstance(e, KeyboardInterrupt) or debug_mode:
-                raise (e)
+        except Exception as e:
+            if debug_mode:
+                raise
+            log.debug(
+                "survival fraction sweep: fit failed for cut_val %s, skipping: %s",
+                cut_val,
+                e,
+                exc_info=True,
+            )
     out_df = out_df.set_index("cut_val")
     if final_cut_value is not None:
         sf, sf_err, _, _ = get_survival_fraction(
@@ -788,7 +814,7 @@ def compton_sf(
     elif mode == "less":
         mask = (cut_param < low_cut_val) & data_mask
     else:
-        msg = "mode not recognised"
+        msg = f"unknown mode {mode!r}, expected 'greater' or 'less'"
         raise ValueError(msg)
 
     sf = len(cut_param[mask]) / len(cut_param)
@@ -811,7 +837,7 @@ def compton_sf_sweep(
     cut_range=(-5, 5),
     n_samples=51,
     mode="greater",
-) -> tuple(pd.DataFrame, float, float):
+) -> tuple[pd.DataFrame, float, float]:
     """
     Function sweeping through cut values and calculating the survival fraction for each value
     using a simple counting analysis.

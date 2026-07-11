@@ -6,6 +6,7 @@ used across the pargen calibration and optimisation modules.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable, Mapping
 from types import FunctionType
 
 import lh5
@@ -14,6 +15,32 @@ import pandas as pd
 from iminuit import Minuit, cost
 
 log = logging.getLogger(__name__)
+
+
+def require_config_keys(
+    config: Mapping, keys: Iterable[str], name: str = "config"
+) -> None:
+    """
+    Check that *config* contains every key in *keys*.
+
+    Parameters
+    ----------
+    config
+        Mapping to validate.
+    keys
+        Required key names.
+    name
+        Name of the mapping used in the error message.
+
+    Raises
+    ------
+    KeyError
+        If any of *keys* is missing from *config*, listing all missing keys.
+    """
+    missing = sorted(k for k in keys if k not in config)
+    if missing:
+        msg = f"{name} is missing required key(s): {', '.join(missing)}"
+        raise KeyError(msg)
 
 
 def convert_to_minuit(pars, func) -> Minuit:
@@ -82,7 +109,7 @@ def load_data(
     cal_energy_param: str = "cuspEmax_ctc_cal",
     threshold=None,
     return_selection_mask=False,
-) -> pd.DataFrame | tuple(pd.DataFrame, np.array):
+) -> pd.DataFrame | tuple[pd.DataFrame, np.ndarray]:
     """
     Load parameters from LH5 files and apply calibration expressions.
 
@@ -126,6 +153,13 @@ def load_data(
     if isinstance(files, str):
         files = [files]
 
+    if not isinstance(files, dict | list):
+        msg = (
+            "files must be a str, list of paths or dict of "
+            f"timestamp -> paths, got {type(files).__name__}"
+        )
+        raise TypeError(msg)
+
     if isinstance(files, dict):
         # Go through each tstamp and recursively load_data on file lists
         data_df = []
@@ -156,6 +190,14 @@ def load_data(
             masks = np.concatenate(masks)
 
     elif isinstance(files, list):
+        if len(files) == 0:
+            msg = "files list is empty, no data to load"
+            raise ValueError(msg)
+        for outname, info in cal_dict.items():
+            if "expression" not in info:
+                msg = f"cal_dict entry {outname!r} has no 'expression' key"
+                raise KeyError(msg)
+
         # Get set of available fields between input table and cal_dict
         file_keys = lh5.ls(
             files[0], lh5_path if lh5_path[-1] == "/" else lh5_path + "/"
