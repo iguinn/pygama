@@ -2445,7 +2445,10 @@ def get_hpge_energy_fixed(func):
         fixed = ["x_lo", "x_hi"]
 
     else:
-        msg = f"get_hpge_energy_fixed not implemented for {func.__name__}"
+        msg = (
+            "get_hpge_energy_fixed not implemented for "
+            f"{getattr(func, '__name__', func)}"
+        )
         raise NotImplementedError(msg)
     mask = ~np.isin(func.required_args(), fixed)
     return fixed, mask
