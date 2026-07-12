@@ -80,7 +80,11 @@ def dplms_ge_dict(
         ],
         name="dplms_dict",
     )
-
+    require_config_keys(
+        dplms_dict["dp_def"],
+        ["nm", "za", "pl", "ft", "rt", "pt"],
+        name="dplms_dict['dp_def']",
+    )
     log.info("Using baseline-selected FFT events")
 
     dsp_fft = run_one_dsp(raw_fft, dsp_config, db_dict=par_dsp)
