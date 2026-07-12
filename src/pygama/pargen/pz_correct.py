@@ -312,7 +312,7 @@ def tp100_align(wfs: np.array, tp100_window_width: int, tp100s: np.array) -> np.
         )
         raise RuntimeError(msg)
 
-    return time_aligned_wfs
+    return np.asarray(time_aligned_wfs)
 
 
 class PZCorrect:
