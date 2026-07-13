@@ -524,20 +524,29 @@ def get_survival_fraction(
     if fit_range is None:
         fit_range = (np.nanmin(energy), np.nanmax(energy))
 
+    # enforce fit_range on the data that enters the likelihood by folding it into
+    # data_mask, so both the passing and failing selections below are restricted
+    # to the fit window.
+    data_mask = np.asarray(data_mask, dtype=bool)
+    data_mask = data_mask & (energy >= fit_range[0]) & (energy <= fit_range[1])
     nan_idxs = np.isnan(cut_param)
     if high_cut is not None:
-        idxs = (cut_param > cut_val) & (cut_param < high_cut) & data_mask
+        passing_cut = (cut_param > cut_val) & (cut_param < high_cut)
     elif mode == "greater":
-        idxs = (cut_param > cut_val) & data_mask
+        passing_cut = cut_param > cut_val
     elif mode == "less":
-        idxs = (cut_param < cut_val) & data_mask
+        passing_cut = cut_param < cut_val
     else:
         msg = "mode not recognised"
         raise ValueError(msg)
 
+    # apply data_mask symmetrically to both selections.
+    pass_idxs = passing_cut & data_mask
+    fail_idxs = (~passing_cut) & data_mask
+
     if pars is None:
         (pars, _errs, _cov, _, func, _, _, _) = pgc.unbinned_staged_energy_fit(
-            energy,
+            energy[(~nan_idxs) & data_mask],
             func,
             guess_func=energy_guess,
             bounds_func=get_bounds,
@@ -548,7 +557,9 @@ def get_survival_fraction(
     guess_pars_surv = copy.deepcopy(pars)
 
     # add update guess here for n_sig and n_bkg
-    guess_pars_surv = update_guess(func, guess_pars_surv, energy[(~nan_idxs) & (idxs)])
+    guess_pars_surv = update_guess(
+        func, guess_pars_surv, energy[(~nan_idxs) & (pass_idxs)]
+    )
 
     parguess = {
         "x_lo": pars["x_lo"],
@@ -577,12 +588,12 @@ def get_survival_fraction(
 
     if func == hpge_peak:
         lh = cost.ExtendedUnbinnedNLL(
-            energy[(~nan_idxs) & (idxs)], pass_pdf_hpge
-        ) + cost.ExtendedUnbinnedNLL(energy[(~nan_idxs) & (~idxs)], fail_pdf_hpge)
+            energy[(~nan_idxs) & (pass_idxs)], pass_pdf_hpge
+        ) + cost.ExtendedUnbinnedNLL(energy[(~nan_idxs) & (fail_idxs)], fail_pdf_hpge)
     elif func == gauss_on_step:
         lh = cost.ExtendedUnbinnedNLL(
-            energy[(~nan_idxs) & (idxs)], pass_pdf_gos
-        ) + cost.ExtendedUnbinnedNLL(energy[(~nan_idxs) & (~idxs)], fail_pdf_gos)
+            energy[(~nan_idxs) & (pass_idxs)], pass_pdf_gos
+        ) + cost.ExtendedUnbinnedNLL(energy[(~nan_idxs) & (fail_idxs)], fail_pdf_gos)
 
     else:
         msg = "Unknown func"
@@ -608,9 +619,9 @@ def get_survival_fraction(
     if display > 1:
         _fig, (ax1, ax2) = plt.subplots(1, 2)
         bins = np.arange(fit_range[0], fit_range[1], 1)
-        ax1.hist(energy[(~nan_idxs) & (idxs)], bins=bins, histtype="step")
+        ax1.hist(energy[(~nan_idxs) & (pass_idxs)], bins=bins, histtype="step")
 
-        ax2.hist(energy[(~nan_idxs) & (~idxs)], bins=bins, histtype="step")
+        ax2.hist(energy[(~nan_idxs) & (fail_idxs)], bins=bins, histtype="step")
 
         if func == hpge_peak:
             ax1.plot(bins, pass_pdf_hpge(bins, **m.values.to_dict())[1])  # noqa: PD011
@@ -778,15 +789,23 @@ def compton_sf(
     if data_mask is None:
         data_mask = np.full(len(cut_param), True, dtype=bool)
 
+    data_mask = np.asarray(data_mask, dtype=bool)
+    if np.sum(data_mask) == 0:
+        msg = "data_mask selects zero events; cannot compute survival fraction"
+        raise ValueError(msg)
+
     if not isinstance(cut_param, np.ndarray):
         cut_param = np.array(cut_param)
 
+    # restrict to the data_mask population
+    cut_param = cut_param[data_mask]
+
     if high_cut_val is not None:
-        mask = (cut_param > low_cut_val) & (cut_param < high_cut_val) & data_mask
+        mask = (cut_param > low_cut_val) & (cut_param < high_cut_val)
     elif mode == "greater":
-        mask = (cut_param > low_cut_val) & data_mask
+        mask = cut_param > low_cut_val
     elif mode == "less":
-        mask = (cut_param < low_cut_val) & data_mask
+        mask = cut_param < low_cut_val
     else:
         msg = "mode not recognised"
         raise ValueError(msg)
