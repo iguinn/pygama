@@ -1,0 +1,190 @@
+"""Tests for the error paths of the pargen modules."""
+
+from __future__ import annotations
+
+import logging
+
+import numpy as np
+import pandas as pd
+import pytest
+
+import pygama.pargen.data_cleaning as dc
+import pygama.pargen.survival_fractions as sf
+from pygama.pargen import dsp_optimize, energy_cal
+from pygama.pargen.utils import load_data, require_config_keys
+
+
+def unsupported_func(x):
+    return x
+
+
+class TestRequireConfigKeys:
+    def test_passes_when_complete(self):
+        require_config_keys({"a": 1, "b": 2}, ["a", "b"])
+
+    def test_raises_listing_missing_keys(self):
+        with pytest.raises(
+            KeyError, match=r"my_dict is missing required key\(s\): a, c"
+        ):
+            require_config_keys({"b": 2}, ["a", "b", "c"], name="my_dict")
+
+
+class TestHPGeCalibration:
+    def test_invalid_deg_raises(self):
+        with pytest.raises(ValueError, match="invalid deg = -2"):
+            energy_cal.HPGeCalibration("energy", [2614.5], 0.5, deg=-2)
+
+    def test_invalid_guess_kev_raises(self):
+        with pytest.raises(ValueError, match="invalid guess_kev = 0"):
+            energy_cal.HPGeCalibration("energy", [2614.5], 0, deg=0)
+
+    def test_get_hpge_energy_fixed_unsupported_func(self):
+        with pytest.raises(NotImplementedError, match="unsupported_func"):
+            energy_cal.get_hpge_energy_fixed(unsupported_func)
+
+    def test_fwhm_fit_with_no_peaks_falls_back_to_nan(self, caplog):
+        with caplog.at_level(logging.ERROR, logger="pygama.pargen.energy_cal"):
+            results = energy_cal.HPGeCalibration.fit_energy_res_curve(
+                energy_cal.FWHMLinear, np.array([]), np.array([]), np.array([])
+            )
+        assert np.isnan(np.array(results["parameters"])).all()
+        assert "no valid peaks" in caplog.text
+
+
+class TestDataCleaning:
+    def test_get_keys_wrong_type(self):
+        with pytest.raises(TypeError, match="got int"):
+            dc.get_keys(42, {"cut": {"cut_parameter": "bl_std"}})
+
+    def test_generate_cuts_wrong_data_type(self):
+        with pytest.raises(ValueError, match="got list"):
+            dc.generate_cuts(
+                [1, 2, 3],
+                {
+                    "cut": {
+                        "cut_parameter": "bl_std",
+                        "cut_level": 4,
+                        "mode": "inclusive",
+                    }
+                },
+            )
+
+    def test_generate_cuts_unknown_mode(self):
+        rng = np.random.default_rng(42)
+        data = pd.DataFrame({"bl_std": rng.normal(10, 1, 1000)})
+        with pytest.raises(ValueError, match="banana"):
+            dc.generate_cuts(
+                data,
+                {"cut": {"cut_parameter": "bl_std", "cut_level": 4, "mode": "banana"}},
+            )
+
+    def test_generate_cuts_bad_cut_level_type(self):
+        rng = np.random.default_rng(42)
+        data = pd.DataFrame({"bl_std": rng.normal(10, 1, 1000)})
+        with pytest.raises(TypeError, match="got str"):
+            dc.generate_cuts(
+                data,
+                {
+                    "cut": {
+                        "cut_parameter": "bl_std",
+                        "cut_level": "4",
+                        "mode": "inclusive",
+                    }
+                },
+            )
+
+    def test_generate_cuts_one_sided_cut_level(self):
+        rng = np.random.default_rng(42)
+        data = pd.DataFrame({"bl_std": rng.normal(10, 1, 1000)})
+        cut_dict = dc.generate_cuts(
+            data,
+            {
+                "cut": {
+                    "cut_parameter": "bl_std",
+                    "cut_level": {"high_side": 4},
+                    "mode": "inclusive",
+                }
+            },
+        )
+        assert cut_dict["cut"]["expression"] == "bl_std<a"
+        assert cut_dict["cut"]["parameters"]["a"] == pytest.approx(14, abs=1)
+
+    def test_generate_cut_classifiers_one_sided_percentile(self):
+        rng = np.random.default_rng(42)
+        data = pd.DataFrame({"bl_std": rng.normal(10, 1, 1000)})
+        cut_dict = dc.generate_cut_classifiers(
+            data,
+            {
+                "cut": {
+                    "cut_parameter": "bl_std",
+                    "cut_percentile": {"high_side": 97.5},
+                    "mode": "inclusive",
+                    "method": "percentile",
+                }
+            },
+        )
+        assert cut_dict["cut"]["expression"] == "cut_classifier<a"
+        # 97.5th percentile of a standard normal is ~1.96 sigma; the classifier
+        # std comes from an fwhm-based mode estimate, so allow a loose window
+        assert 1.5 < cut_dict["cut"]["parameters"]["a"] < 3.5
+
+    def test_generate_cuts_unknown_parameter(self):
+        rng = np.random.default_rng(42)
+        data = pd.DataFrame({"bl_std": rng.normal(10, 1, 1000)})
+        with pytest.raises(ValueError, match="not_a_column"):
+            dc.generate_cuts(
+                data,
+                {
+                    "cut": {
+                        "cut_parameter": "not_a_column",
+                        "cut_level": 4,
+                        "mode": "inclusive",
+                    }
+                },
+            )
+
+
+class TestSurvivalFractions:
+    def test_compton_sf_unknown_mode(self):
+        with pytest.raises(ValueError, match="banana"):
+            sf.compton_sf(np.array([1.0, 2.0, 3.0]), 1.5, mode="banana")
+
+    def test_energy_guess_unsupported_func(self):
+        with pytest.raises(NotImplementedError, match="unsupported_func"):
+            sf.energy_guess(np.array([1.0, 2.0, 3.0]), unsupported_func)
+
+    def test_fix_all_but_nevents_unsupported_func(self):
+        with pytest.raises(NotImplementedError, match="unsupported_func"):
+            sf.fix_all_but_nevents(unsupported_func)
+
+    def test_get_bounds_unsupported_func(self):
+        with pytest.raises(NotImplementedError, match="unsupported_func"):
+            sf.get_bounds(unsupported_func, {})
+
+
+class TestDspOptimize:
+    def test_bad_sampling_rate_type(self):
+        with pytest.raises(TypeError, match="got float"):
+            dsp_optimize.BayesianOptimizer(
+                acq_func="ei", batch_size=1, sampling_rate=3.0
+            )
+
+    def test_bad_acq_func(self):
+        with pytest.raises(ValueError, match="banana"):
+            dsp_optimize.BayesianOptimizer(acq_func="banana", batch_size=1)
+
+
+class TestLoadData:
+    def test_wrong_files_type(self):
+        with pytest.raises(TypeError, match="got int"):
+            load_data(42, "dsp", {}, {"energy"})
+
+    def test_empty_files_list(self):
+        with pytest.raises(ValueError, match="empty"):
+            load_data([], "dsp", {}, {"energy"})
+
+    def test_cal_dict_missing_expression(self):
+        with pytest.raises(KeyError, match="'expression'"):
+            load_data(
+                ["dummy.lh5"], "dsp", {"energy_cal": {"parameters": {}}}, {"energy"}
+            )

@@ -15,7 +15,7 @@ import numpy as np
 import pygama.math.distributions as pgd
 import pygama.math.histogram as pgh
 import pygama.pargen.energy_cal as pgc
-from pygama.pargen.utils import convert_to_minuit, return_nans
+from pygama.pargen.utils import convert_to_minuit, require_config_keys, return_nans
 
 log = logging.getLogger(__name__)
 
@@ -259,7 +259,12 @@ def get_peak_fwhm_with_dt_corr(
         for i, p in enumerate(par_b):
             try:
                 y_b[i] = func.get_fwfm(p, frac_max=frac_max)
-            except Exception:
+            except Exception as e:
+                log.debug(
+                    "bootstrap fwfm evaluation failed for sample %s, filling nan: %s",
+                    i,
+                    e,
+                )
                 y_b[i] = np.nan
         fwhm_err = np.nanstd(y_b, axis=0)
         fwhm_o_max_err = np.nanstd(y_b / maxs, axis=0)
@@ -284,7 +289,12 @@ def get_peak_fwhm_with_dt_corr(
             )
             plt.show()
 
-    except Exception:
+    except Exception as e:
+        log.warning(
+            "get_peak_fwhm_with_dt_corr: fit failed for peak %s, returning nan: %s",
+            peak,
+            e,
+        )
         return (
             np.nan,
             np.nan,
@@ -358,6 +368,9 @@ def fom_fwhm_with_alpha_fit(
         ``alpha_err``, ``chisquare``, ``n_sig``, and ``n_sig_err``.
         All values are ``np.nan`` (and ``alpha`` is 0) on failure.
     """
+    require_config_keys(
+        kwarg_dict, ["parameter", "func", "peak", "kev_width"], name="kwarg_dict"
+    )
     parameter = kwarg_dict["parameter"]
     func = kwarg_dict["func"]
     energies = tb_in[parameter].nda
@@ -377,11 +390,11 @@ def fom_fwhm_with_alpha_fit(
         dt = dt[idxs]
     try:
         if np.isnan(energies).any():
-            log.debug("nan in energies")
-            raise RuntimeError
+            msg = f"nan in energies for {parameter}"
+            raise RuntimeError(msg)
         if np.isnan(dt).any():
-            log.debug("nan in dts")
-            raise RuntimeError
+            msg = f"nan in drift times for {ctc_parameter}"
+            raise RuntimeError(msg)
         fwhms = np.array([])
         final_alphas = np.array([])
         fwhm_errs = np.array([])
@@ -428,8 +441,11 @@ def fom_fwhm_with_alpha_fit(
 
         # Make sure fit isn't based on only a few points
         if len(fwhms) < nsteps * 0.2 and early_break is False:
-            log.debug("less than 20% fits successful")
-            raise RuntimeError
+            msg = (
+                f"less than 20% of alpha-sweep fits successful "
+                f"({len(fwhms)} of {nsteps})"
+            )
+            raise RuntimeError(msg)
 
         ids = (fwhm_errs < 2 * np.nanpercentile(fwhm_errs, 50)) & (fwhm_errs > 1e-10)
         # Fit alpha curve to get best alpha
@@ -471,12 +487,13 @@ def fom_fwhm_with_alpha_fit(
                 )
                 plt.show()
 
-        except Exception:
-            log.debug("alpha fit failed")
+        except Exception as e:
+            msg = "alpha polynomial fit failed"
+            raise RuntimeError(msg) from e
 
         if np.isnan(fit_vals).all():
-            log.debug("alpha fit all nan")
-            raise RuntimeError
+            msg = "alpha polynomial fit returned all nan"
+            raise RuntimeError(msg)
         (
             final_fwhm,
             _,
@@ -503,8 +520,8 @@ def fom_fwhm_with_alpha_fit(
             display=display,
         )
         if np.isnan(final_fwhm) or np.isnan(final_err):
-            log.debug("final fit failed, alpha was %s", alpha)
-            raise RuntimeError
+            msg = f"final dt-corrected fit failed, alpha was {alpha}"
+            raise RuntimeError(msg)
         return {
             "fwhm": final_fwhm,
             "fwhm_err": final_err,
@@ -514,7 +531,13 @@ def fom_fwhm_with_alpha_fit(
             "n_sig": n_sig,
             "n_sig_err": n_sig_err,
         }
-    except Exception:
+    except Exception as e:
+        log.warning(
+            "fom_fwhm_with_alpha_fit failed for peak %s (%s), returning nan: %s",
+            peak,
+            parameter,
+            e,
+        )
         return {
             "fwhm": np.nan,
             "fwhm_err": np.nan,
@@ -577,6 +600,9 @@ def fom_fwhm_no_alpha_sweep(
         ``mu``, ``mu_err``, and ``fit_pars``.  All values are ``np.nan``
         if the input energies contain NaNs.
     """
+    require_config_keys(
+        kwarg_dict, ["parameter", "func", "peak", "kev_width"], name="kwarg_dict"
+    )
     parameter = kwarg_dict["parameter"]
     func = kwarg_dict["func"]
     energies = tb_in[parameter].nda
@@ -592,7 +618,6 @@ def fom_fwhm_no_alpha_sweep(
             dt = tb_in[ctc_param].nda
         except KeyError:
             dt = tb_in.eval(ctc_param)
-            dt = tb_in[ctc_param].nda
     else:
         dt = 0
 
@@ -683,6 +708,9 @@ def fom_single_peak_alpha_sweep(data, kwarg_dict, display=0) -> dict:
         at minimum ``fwhm``, ``fwhm_err``, ``alpha``, ``n_sig``, and
         ``n_sig_err``.
     """
+    require_config_keys(
+        kwarg_dict, ["idx_list", "ctc_param", "peak_dicts"], name="kwarg_dict"
+    )
     idx_list = kwarg_dict["idx_list"]
     ctc_param = kwarg_dict["ctc_param"]
     peak_dicts = kwarg_dict["peak_dicts"]
@@ -741,6 +769,11 @@ def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
         Returns ``(nan, nan, nan)`` if fewer than two valid FWHM values are
         available.
     """
+    require_config_keys(
+        kwarg_dict,
+        ["peaks_kev", "idx_list", "ctc_param", "peak_dicts"],
+        name="kwarg_dict",
+    )
     peaks = kwarg_dict["peaks_kev"]
     idx_list = kwarg_dict["idx_list"]
     ctc_param = kwarg_dict["ctc_param"]
@@ -801,7 +834,7 @@ def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
     interp_res = results[f"{next(iter(interp_energy))}_fwhm_in_kev"]
     interp_res_err = results[f"{next(iter(interp_energy))}_fwhm_err_in_kev"]
 
-    if nan_mask[-1] is True or nan_mask[-2] is True:
+    if nan_mask[-1] or nan_mask[-2]:
         interp_res_err = np.nan
     if interp_res_err / interp_res > 0.1:
         interp_res_err = np.nan

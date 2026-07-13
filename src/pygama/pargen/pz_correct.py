@@ -121,6 +121,11 @@ def linear_dpz_fit(
     slope_1, intercept_1, *_ = linregress(ts[:tau1_idx], np.log(sub_pulse[:tau1_idx]))
     # If the fit fails, just return an arbitrary good-enough guess. All detectors have a roughly ~130 sample short time constant for presumming of 8.
     if slope_1 > 0:
+        log.warning(
+            "short time-constant fit failed (positive slope %s), "
+            "falling back to default 130-sample tau",
+            slope_1,
+        )
         slope_1 = -1 / 130
         intercept_1 = np.log(1 - np.exp(intercept_2))
 
@@ -275,9 +280,6 @@ def tp100_align(wfs: np.array, tp100_window_width: int, tp100s: np.array) -> np.
     time_aligned_wfs
         An array of waveforms that are all aligned at their maximal values
     """
-    tp100_window_width = (
-        13  # If tp100 isn't in +/- this window of the median, forget about it
-    )
     median_tp100 = int(np.nanmedian(tp100s))  # in samples
     wf_len = len(wfs[0])
     time_aligned_wfs = []
@@ -296,7 +298,21 @@ def tp100_align(wfs: np.array, tp100_window_width: int, tp100s: np.array) -> np.
             ]
             time_aligned_wfs.append(wf_win)
 
-    return time_aligned_wfs
+    if len(time_aligned_wfs) < len(wfs):
+        log.debug(
+            "tp100_align: kept %s of %s waveforms within +/- %s samples of the median tp100",
+            len(time_aligned_wfs),
+            len(wfs),
+            tp100_window_width,
+        )
+    if len(time_aligned_wfs) == 0:
+        msg = (
+            f"no waveforms had a tp100 within +/- {tp100_window_width} samples "
+            "of the median, cannot build superpulse"
+        )
+        raise RuntimeError(msg)
+
+    return np.asarray(time_aligned_wfs)
 
 
 class PZCorrect:

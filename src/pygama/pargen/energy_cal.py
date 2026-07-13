@@ -75,15 +75,16 @@ class HPGeCalibration:
         self.energy_param = energy_param
 
         if deg < -1:
-            log.error("hpge_E_cal warning: invalid deg = %s", deg)
-            return
+            msg = f"invalid deg = {deg}, must be >= -1"
+            raise ValueError(msg)
         self.deg = int(deg)
 
         self.peaks_kev = np.asarray(sorted(glines))
         self.peak_locs = []
 
-        if guess_kev <= 0:
-            log.error("hpge_E_cal warning: invalid guess_kev = %s", guess_kev)
+        if np.isscalar(guess_kev) and guess_kev <= 0:
+            msg = f"invalid guess_kev = {guess_kev}, must be positive"
+            raise ValueError(msg)
         if deg == -1:
             self.pars = np.zeros(2, dtype=float)
             self.pars[0] = guess_kev
@@ -633,13 +634,8 @@ class HPGeCalibration:
                 csqr = (csqr[0], csqr[1] + len(np.where(mask)[0]))
 
                 if np.isnan(pars_i).any():
-                    log.debug(
-                        "hpge_cal_energy_peak_tops: fit failed for i_peak=%s at loc %g, par is nan : %s",
-                        i_peak,
-                        mode_guess,
-                        pars_i,
-                    )
-                    raise RuntimeError
+                    msg = f"fit at loc {mode_guess:g} returned nan parameters: {pars_i}"
+                    raise RuntimeError(msg)
 
                 p_val = scipy.stats.chi2.sf(csqr[0], csqr[1])
 
@@ -689,12 +685,14 @@ class HPGeCalibration:
 
                 mu, mu_err = func_i.get_mu(pars_i, errors=errs_i)
 
-            except BaseException as e:
-                if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                    raise (e)
+            except Exception as e:
+                if self.debug_mode:
+                    raise
                 log.debug(
-                    "hpge_cal_energy_peak_tops: fit failed for i_peak=%s, unknown error",
+                    "hpge_cal_energy_peak_tops: fit failed for i_peak=%s: %s",
                     i_peak,
+                    e,
+                    exc_info=True,
                 )
                 valid_pk = False
                 pars_i, errs_i, cov_i = return_nans(func_i)
@@ -787,8 +785,12 @@ class HPGeCalibration:
             results_dict["calibration_uncertainties"] = errs
             results_dict["calibration_covariance"] = cov
 
-        except ValueError:
-            log.error("Failed to fit enough peaks to get accurate calibration")
+        except ValueError as e:
+            log.error(
+                "failed to fit enough peaks to get accurate calibration for %s: %s",
+                self.energy_param,
+                e,
+            )
 
         self.update_results_dict(results_dict)
 
@@ -1005,13 +1007,8 @@ class HPGeCalibration:
                     csqr = (csqr[0], csqr[1] + len(np.where(mask)[0]))
 
                 if np.isnan(pars_i).any():
-                    log.debug(
-                        "hpge_fit_energy_peaks: fit failed for i_peak=%s at loc %g, par is nan : %s",
-                        i_peak,
-                        mode_guess,
-                        pars_i,
-                    )
-                    raise RuntimeError
+                    msg = f"fit at loc {mode_guess:g} returned nan parameters: {pars_i}"
+                    raise RuntimeError(msg)
 
                 p_val = scipy.stats.chi2.sf(csqr[0], csqr[1])
 
@@ -1076,18 +1073,17 @@ class HPGeCalibration:
                 elif peak_param == "mode":
                     mu, mu_err = func_i.get_mode(pars_i, cov=cov_i)
                 else:
-                    log.error(
-                        "hpge_fit_energy_peaks: mode %s not recognized",
-                        self.peak_param,
-                    )
-                    raise RuntimeError
+                    msg = f"unknown peak_param {peak_param!r}, expected 'mu' or 'mode'"
+                    raise ValueError(msg)
 
-            except BaseException as e:
-                if isinstance(e, KeyboardInterrupt) or self.debug_mode:
-                    raise (e)
+            except Exception as e:
+                if self.debug_mode:
+                    raise
                 log.debug(
-                    "hpge_fit_energy_peaks: fit failed for i_peak=%s, unknown error",
+                    "hpge_fit_energy_peaks: fit failed for i_peak=%s: %s",
                     i_peak,
+                    e,
+                    exc_info=True,
                 )
                 valid_pk = False
                 pars_i, errs_i, cov_i = return_nans(func_i)
@@ -1183,8 +1179,12 @@ class HPGeCalibration:
             results_dict["calibration_uncertainties"] = errs
             results_dict["calibration_covariance"] = cov
 
-        except ValueError:
-            log.error("Failed to fit enough peaks to get accurate calibration")
+        except ValueError as e:
+            log.error(
+                "failed to fit enough peaks to get accurate calibration for %s: %s",
+                self.energy_param,
+                e,
+            )
 
         self.update_results_dict(results_dict)
 
@@ -1285,7 +1285,8 @@ class HPGeCalibration:
         """
         try:
             if len(fwhm_peaks) == 0:
-                raise RuntimeError
+                msg = "no valid peaks available to fit the energy resolution curve"
+                raise RuntimeError(msg)
             c_lin = cost.LeastSquares(fwhm_peaks, fwhms, dfwhms, fwhm_func.func)
             # c_lin.loss = "soft_l1"
             m = Minuit(c_lin, *fwhm_func.guess(fwhm_peaks, fwhms, dfwhms))
@@ -1323,7 +1324,7 @@ class HPGeCalibration:
                     fwhme,
                     fwhm_func.func(peak, *results["parameters"]),
                 )
-        except RuntimeError:
+        except RuntimeError as e:
             pars, errs, cov = return_nans(fwhm_func.func)
             results = {
                 "function": fwhm_func,
@@ -1335,7 +1336,7 @@ class HPGeCalibration:
                 "csqr": (np.nan, np.nan),
                 "p_val": 0,
             }
-            log.error("FWHM fit failed to converge")
+            log.error("FWHM fit failed: %s", e)
         return results
 
     @staticmethod
@@ -1385,9 +1386,15 @@ class HPGeCalibration:
                     )
                     interp_err = np.nanstd(interp_vals)
                     interp_fwhm = fwhm_func.func(energy, *fwhm_results["parameters"])
-                except BaseException as e:
+                except Exception as e:
                     if debug_mode:
-                        raise (e)
+                        raise
+                    log.debug(
+                        "FWHM interpolation at %s keV failed, filling nan: %s",
+                        energy,
+                        e,
+                        exc_info=True,
+                    )
                     interp_fwhm = np.nan
                     interp_err = np.nan
                 fwhm_results.update(
@@ -1552,9 +1559,14 @@ class HPGeCalibration:
                                     peak_par[1][1] - 5,
                                 )
                                 peak_pars[j] = (peak, new_kev_ranges, peak_par[2])
-                except BaseException as e:
+                except Exception as e:
                     if self.debug_mode:
-                        raise (e)
+                        raise
+                    log.debug(
+                        "FWHM-based refit range adjustment failed, keeping original ranges: %s",
+                        e,
+                        exc_info=True,
+                    )
 
             self.hpge_fit_energy_peaks(
                 e_uncal,
@@ -1653,7 +1665,9 @@ class HPGeCalibration:
         log.debug("Find peaks and compute calibration curve for %s", self.energy_param)
         log.debug("Guess is %.3f", self.pars[1])
         if self.deg != 0:
-            log.error("deg must be 0 for calibrate_prominent_peak")
+            log.error(
+                "calibrate_prominent_peak requires deg = 0, got deg = %s", self.deg
+            )
             return
         self.hpge_find_energy_peaks(e_uncal)
         self.hpge_get_energy_peaks(e_uncal)
@@ -1929,9 +1943,12 @@ class HPGeCalibration:
                     new_locs, new_labels = get_peak_labels(locs, self.pars)
                     plt.xticks(ticks=new_locs, labels=new_labels)
 
-            except BaseException as e:
+            except Exception as e:
                 if self.debug_mode:
-                    raise (e)
+                    raise
+                log.debug(
+                    "calibration plot: peak labelling failed: %s", e, exc_info=True
+                )
 
         plt.tight_layout()
         plt.close()
@@ -2169,9 +2186,15 @@ def hpge_fit_energy_peak_tops(
                 inflate_errors=inflate_errors,
                 gof_method=gof_method,
             )
-        except BaseException as e:
-            if isinstance(e, KeyboardInterrupt) or debug_mode:
-                raise (e)
+        except Exception as e:
+            if debug_mode:
+                raise
+            log.debug(
+                "hpge_fit_energy_peak_tops: fit failed for peak at %s, filling None: %s",
+                e_peak,
+                e,
+                exc_info=True,
+            )
             pars, cov = None, None
 
         pars_list.append(pars)
@@ -2307,7 +2330,8 @@ def get_hpge_energy_peak_par_guess(
                 or abs(sigma / sigma_guess) > 5
                 or sigma > (fit_range[1] - fit_range[0]) / 2
             ):
-                raise ValueError
+                msg = f"interpolated sigma estimate {sigma} failed sanity checks"
+                raise ValueError(msg)
         except ValueError:
             try:
                 sigma = pgh.get_fwfm(
@@ -2421,8 +2445,11 @@ def get_hpge_energy_fixed(func):
         fixed = ["x_lo", "x_hi"]
 
     else:
-        log.error("get_hpge_energy_fixed not implemented for %s", func.__name__)
-        return None
+        msg = (
+            "get_hpge_energy_fixed not implemented for "
+            f"{getattr(func, '__name__', func)}"
+        )
+        raise NotImplementedError(msg)
     mask = ~np.isin(func.required_args(), fixed)
     return fixed, mask
 
@@ -2856,7 +2883,8 @@ def unbinned_staged_energy_fit(
                     & (~(np.array(m.errors)[mask] == 0).all())
                 )
             except Exception as e:
-                raise RuntimeError from e
+                msg = "minos error estimation failed after tail-drop refit"
+                raise RuntimeError(msg) from e
 
         fit = (m.values, m.errors, m.covariance, cs, func, mask, valid3, m)
 
@@ -2879,7 +2907,12 @@ def unbinned_staged_energy_fit(
         fit = fit2
 
     else:
-        raise RuntimeError
+        msg = (
+            "unable to choose between tail and no-tail fits: "
+            f"p-values ({cs[0]}, {cs2[0]}) and fractional errors "
+            f"({frac_errors1}, {frac_errors2}) are indistinguishable"
+        )
+        raise RuntimeError(msg)
 
     if (func == pgf.hpge_peak) and allow_tail_drop is True:
         p_val = chi2.sf(fit[3][0], fit[3][1])

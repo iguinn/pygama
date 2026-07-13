@@ -16,6 +16,7 @@ from scipy.stats import chi2
 
 from pygama.pargen.dsp_optimize import run_one_dsp
 from pygama.pargen.energy_optimisation import fom_fwhm_with_alpha_fit
+from pygama.pargen.utils import require_config_keys
 
 log = logging.getLogger(__name__)
 
@@ -57,6 +58,33 @@ def dplms_ge_dict(
     """
 
     t0 = time.time()
+
+    require_config_keys(
+        dplms_dict,
+        [
+            "bl_field",
+            "bsize",
+            "length",
+            "wsize",
+            "wf_field",
+            "peaks_kev",
+            "kev_widths",
+            "dp_coeffs",
+            "dp_def",
+            "fwhm_limit",
+            "err_limit",
+            "p_val_lim",
+            "rt_low",
+            "peak_lim",
+            "centroid_lim",
+        ],
+        name="dplms_dict",
+    )
+    require_config_keys(
+        dplms_dict["dp_def"],
+        ["nm", "za", "pl", "ft", "rt", "pt"],
+        name="dplms_dict['dp_def']",
+    )
     log.info("Using baseline-selected FFT events")
 
     dsp_fft = run_one_dsp(raw_fft, dsp_config, db_dict=par_dsp)
@@ -165,8 +193,16 @@ def dplms_ge_dict(
                 idxs=np.where(~np.isnan(dsp_opt[ctc_par].nda))[0],
                 frac_max=0.5,
             )
-        except Exception:
-            log.debug("FWHM not calculated")
+        except Exception as e:
+            log.debug(
+                "FWHM not calculated for grid point %s (nm=%s, za=%s, pl=%s, ft=%s): %s",
+                i,
+                nm_coeff,
+                za_coeff,
+                pl_coeff,
+                ft_coeff,
+                e,
+            )
             continue
 
         fwhm, fwhm_err, alpha, chisquare = (
@@ -223,9 +259,31 @@ def dplms_ge_dict(
         ):
             log.info("\nBest case: %s", best_case_values)
         else:
-            log.debug("Some values are missing in the best case results")
+            missing = [
+                k
+                for k, v in zip(
+                    ["fwhm", "fwhm_err", "alpha", "nm", "za", "pl", "ft", "rt", "pt"],
+                    [
+                        fwhm,
+                        fwhm_err,
+                        alpha,
+                        nm_coeff,
+                        za_coeff,
+                        pl_coeff,
+                        ft_coeff,
+                        rt_coeff,
+                        pt_coeff,
+                    ],
+                    strict=True,
+                )
+                if v is None
+            ]
+            log.warning("missing values in the best case results: %s", missing)
     else:
-        log.debug("Filter synthesis failed")
+        log.warning(
+            "no grid point passed the fwhm/err/p-value limits, "
+            "falling back to default coefficients"
+        )
         nm_coeff = dplms_dict["dp_def"]["nm"]
         za_coeff = dplms_dict["dp_def"]["za"]
         pl_coeff = dplms_dict["dp_def"]["pl"]

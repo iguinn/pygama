@@ -127,7 +127,7 @@ class ParGrid:
         """
         axes = []
         for i in range(self.get_n_dimensions()):
-            axes.append(self.dims[i].values_strs)
+            axes.append(self.dims[i].value_strs)
         return np.meshgrid(*axes, copy, sparse, indexing="ij")
 
     def get_zero_indices(self):
@@ -519,7 +519,10 @@ class BayesianOptimizer:
             self.sampling_rate = sampling_rate
         else:
             if sampling_rate is not None:
-                msg = "Unknown type for sampling rate"
+                msg = (
+                    "sampling_rate must be a str or pint.Quantity, "
+                    f"got {type(sampling_rate).__name__}"
+                )
                 raise TypeError(msg)
 
             self.sampling_rate = None
@@ -942,8 +945,11 @@ class BayesianOptimizer:
         fail_idxs = np.isnan(self.yerr_init)
         self.gauss_pr.fit(self.x_init[~nan_idxs], np.array(self.y_init)[~nan_idxs])
         if (len(self.dims) != 2) and (len(self.dims) != 1):
-            msg = "Acquisition Function Plotting not implemented for dim!=2"
-            raise Exception(msg)
+            msg = (
+                "acquisition function plotting is only implemented for "
+                f"1 or 2 dimensions, got {len(self.dims)}"
+            )
+            raise NotImplementedError(msg)
         if len(self.dims) == 1:
             points = np.arange(self.dims[0].min_val, self.dims[0].max_val, 0.1)
 
@@ -1046,8 +1052,11 @@ class BayesianOptimizer:
         nan_idxs = np.isnan(self.y_init)
         self.gauss_pr.fit(self.x_init[~nan_idxs], np.array(self.y_init)[~nan_idxs])
         if (len(self.dims) != 2) and (len(self.dims) != 1):
-            msg = "Acquisition Function Plotting not implemented for dim!=2"
-            raise Exception(msg)
+            msg = (
+                "acquisition function plotting is only implemented for "
+                f"1 or 2 dimensions, got {len(self.dims)}"
+            )
+            raise NotImplementedError(msg)
         if len(self.dims) == 1:
             points = np.arange(self.dims[0].min_val, self.dims[0].max_val, 0.1)
             ys = np.zeros_like(points)
