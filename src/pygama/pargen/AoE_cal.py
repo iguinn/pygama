@@ -318,8 +318,8 @@ class SigmaFit:
     def func(x, a, b, c):
         """Evaluate ``sqrt(a + (b/x)^c)``, returning NaN for non-positive arguments."""
         return np.where(
-            (x > 0) & ((a + (b / (x + 10**-99)) ** c) > 0),
-            np.sqrt(a + (b / (x + 10**-99)) ** c),
+            (x > 0) & ((a + (b / (x + 10**-30)) ** c) > 0),
+            np.sqrt(a + (b / (x + 10**-30)) ** c),
             np.nan,
         )
 
