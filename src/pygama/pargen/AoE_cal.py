@@ -326,7 +326,7 @@ class SigmaFit:
     @staticmethod
     def string_func(input_param):
         """Return the expression string for the hit-dict format."""
-        return f"(a+(b/({input_param}+10**-99))**c)**(0.5)"
+        return f"(a+(b/({input_param}+10**-30))**c)**(0.5)"
 
     @staticmethod
     def guess(_bands, sigmas, _sigma_errs):
