@@ -127,6 +127,7 @@ def get_peak_fwhm_with_dt_corr(
     bin_width=1,
     allow_tail_drop=False,
     display=0,
+    use_log_pdf=False,
 ):
     """
     Apply a drift-time correction and fit a peak, returning FWHM and fit quality.
@@ -167,6 +168,11 @@ def get_peak_fwhm_with_dt_corr(
         drop to zero.
     display
         Verbosity level; values > 0 produce diagnostic plots.
+    use_log_pdf
+        Passed through to the staged fit; build the extended unbinned NLL
+        from the model's log-density (``iminuit`` ``log=True`` mode).
+        Faster on large samples; results can differ from the standard mode
+        at machine-precision level.
 
     Returns
     -------
@@ -230,6 +236,7 @@ def get_peak_fwhm_with_dt_corr(
             guess=guess,
             allow_tail_drop=allow_tail_drop,
             bin_width=bin_width,
+            use_log_pdf=use_log_pdf,
             display=display,
         )
         if display > 0:
@@ -327,7 +334,14 @@ def get_peak_fwhm_with_dt_corr(
 
 
 def fom_fwhm_with_alpha_fit(
-    tb_in, kwarg_dict, ctc_parameter, nsteps=11, idxs=None, frac_max=0.2, display=0
+    tb_in,
+    kwarg_dict,
+    ctc_parameter,
+    nsteps=11,
+    idxs=None,
+    frac_max=0.2,
+    display=0,
+    use_log_pdf=False,
 ):
     """
     Figure-of-merit: FWHM minimised over a sweep of charge-trapping correction values.
@@ -338,7 +352,8 @@ def fom_fwhm_with_alpha_fit(
     the valid FWHM/max-ratio values to locate the optimal alpha, and the
     peak is re-fit at that alpha to obtain the final FWHM in keV.  An early
     termination heuristic stops the sweep when the FWHM curve is clearly
-    rising.
+    rising.  If *use_log_pdf* is ``True``, the underlying staged fits use
+    ``iminuit``'s ``log=True`` mode for faster unbinned NLL evaluation.
 
     Parameters
     ----------
@@ -360,6 +375,9 @@ def fom_fwhm_with_alpha_fit(
         Fractional height used to define the final FWHM.
     display
         Verbosity level; values > 0 produce diagnostic plots.
+    use_log_pdf
+        Passed through to the staged fits; build the extended unbinned NLL
+        from the model's log-density (``iminuit`` ``log=True`` mode).
 
     Returns
     -------
@@ -422,6 +440,7 @@ def fom_fwhm_with_alpha_fit(
                 guess=None,
                 frac_max=0.5,
                 allow_tail_drop=False,
+                use_log_pdf=use_log_pdf,
             )
             if not np.isnan(fwhm_o_max):
                 fwhms = np.append(fwhms, fwhm_o_max)
@@ -517,6 +536,7 @@ def fom_fwhm_with_alpha_fit(
             frac_max=frac_max,
             allow_tail_drop=True,
             bin_width=bin_width,
+            use_log_pdf=use_log_pdf,
             display=display,
         )
         if np.isnan(final_fwhm) or np.isnan(final_err):
@@ -558,6 +578,7 @@ def fom_fwhm_no_alpha_sweep(
     frac_max=0.5,
     kev=True,
     display=0,
+    use_log_pdf=False,
 ):
     """
     Figure-of-merit: FWHM at a fixed (or pre-computed) alpha, no sweep.
@@ -566,7 +587,9 @@ def fom_fwhm_no_alpha_sweep(
     the peak, returning a comprehensive set of fit quality metrics.  Used
     when the optimal alpha is already known (e.g. from a prior
     :func:`fom_fwhm_with_alpha_fit` call) or when no charge-trapping
-    correction is desired.
+    correction is desired.  If *use_log_pdf* is ``True``, the underlying
+    staged fit uses ``iminuit``'s ``log=True`` mode for faster unbinned NLL
+    evaluation.
 
     Parameters
     ----------
@@ -591,6 +614,9 @@ def fom_fwhm_no_alpha_sweep(
         If ``True``, return the FWHM in keV rather than ADC units.
     display
         Verbosity level; values > 0 produce diagnostic plots.
+    use_log_pdf
+        Passed through to the staged fit; build the extended unbinned NLL
+        from the model's log-density (``iminuit`` ``log=True`` mode).
 
     Returns
     -------
@@ -658,6 +684,7 @@ def fom_fwhm_no_alpha_sweep(
         kev_width=kev_width,
         frac_max=frac_max,
         kev=kev,
+        use_log_pdf=use_log_pdf,
         display=display,
     )
     return {
@@ -698,6 +725,9 @@ def fom_single_peak_alpha_sweep(data, kwarg_dict, display=0) -> dict:
           first entry is used.
         * ``frac_max`` *(optional, default 0.2)* - fraction of the peak  # noqa: RUF002
           maximum used to define the fit range.
+        * ``use_log_pdf`` *(optional, default False)* - use the model's  # noqa: RUF002
+          log-density in the unbinned fits (``iminuit`` ``log=True`` mode);
+          faster on large samples, results differ at machine-precision level.
     display
         Verbosity / plotting level passed through to the underlying fit.
 
@@ -715,12 +745,14 @@ def fom_single_peak_alpha_sweep(data, kwarg_dict, display=0) -> dict:
     ctc_param = kwarg_dict["ctc_param"]
     peak_dicts = kwarg_dict["peak_dicts"]
     frac_max = kwarg_dict.get("frac_max", 0.2)
+    use_log_pdf = kwarg_dict.get("use_log_pdf", False)
     return fom_fwhm_with_alpha_fit(
         data,
         peak_dicts[0],
         ctc_param,
         idxs=idx_list[0],
         frac_max=frac_max,
+        use_log_pdf=use_log_pdf,
         display=display,
     )
 
@@ -756,6 +788,9 @@ def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
           curve model used for the energy-resolution fit.
         * ``frac_max`` *(optional, default 0.2)* - fraction of peak maximum  # noqa: RUF002
           used to define fit range.
+        * ``use_log_pdf`` *(optional, default False)* - use the model's  # noqa: RUF002
+          log-density in the unbinned fits (``iminuit`` ``log=True`` mode);
+          faster on large samples, results differ at machine-precision level.
     display
         Verbosity / plotting level passed through to the underlying fits.
 
@@ -781,6 +816,7 @@ def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
     interp_energy = kwarg_dict.get("interp_energy", {"Qbb": 2039})
     fwhm_func = kwarg_dict.get("fwhm_func", pgc.FWHMLinear)
     frac_max = kwarg_dict.get("frac_max", 0.2)
+    use_log_pdf = kwarg_dict.get("use_log_pdf", False)
 
     out_dict = fom_fwhm_with_alpha_fit(
         data,
@@ -788,6 +824,7 @@ def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
         ctc_param,
         idxs=idx_list[-1],
         frac_max=frac_max,
+        use_log_pdf=use_log_pdf,
         display=display,
     )
     alpha = out_dict["alpha"]
@@ -804,6 +841,7 @@ def fom_interpolate_energy_res_with_single_peak_alpha_sweep(
             alpha=alpha,
             idxs=idx_list[i],
             frac_max=frac_max,
+            use_log_pdf=use_log_pdf,
             display=display,
         )
         fwhms.append(out_peak_dict["fwhm"])
