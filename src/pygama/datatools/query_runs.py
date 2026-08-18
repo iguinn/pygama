@@ -1,18 +1,20 @@
+from __future__ import annotations
+
 import os
 import re
 from collections.abc import Collection, Mapping
-from concurrent.futures import Executor, ProcessPoolExecutor
+from concurrent.futures import Executor
 from contextlib import ExitStack
 from copy import copy
 from pathlib import Path
-from rich.console import Console
-from rich.status import Status
 
 import awkward as ak
 import numpy as np
-from dbetto import Props, TextDB
+from dbetto import TextDB
+from rich.console import Console
+from rich.status import Status
 
-from .utils import get_recursive
+from .utils import _read_dataflow_config, _setup_executor, _setup_spinner, get_recursive
 
 
 def query_runs(
@@ -23,6 +25,7 @@ def query_runs(
     sort_by: str | Collection[str] = "cycle",
     cycle_def: str | None = None,
     tiers: str | Collection[str] | Mapping[str, str] | None = None,
+    join: str = "inner",
     ignored_cycles: str | Collection[str] | None = None,
     processes: int | None = None,
     executor: Executor | None = None,
@@ -87,6 +90,12 @@ def query_runs(
         - List of tier names/single tier name. Paths will be found in ``dataflow_config["paths"]``
         - ``None``: read from ``dataflow_config``; if ``tiers`` entry not found, use ``"raw"``
 
+    join
+        type of join to use for different tiers. Options:
+        - ``inner`` (default): select only cycles that have files in all tiers
+        - ``outer``: select all cycles with files in any tiers. Fill files not found with ``None``
+        - ``[tier]``: name of tier to use for "left" join; fill files in other tiers not found with ``None``
+
     ignored_cycles
         path(s) in metadata to list(s) of ignored cycles. By default get from dataflow-config,
         or else do not skip any cycles.
@@ -108,28 +117,9 @@ def query_runs(
         or:class:`rich.Console`
     """
     with ExitStack() as stack:
-        # set up the status bar
-        if isinstance(progress, Status):
-            progress.update("Querying runs...")
-            # start spinner in context if not already started
-            if not progress._live.is_started:
-                stack.enter_context(progress)
-        elif isinstance(progress, Console):
-            stack.enter_context(progress.status("Querying runs...", spinner="betaWave"))
-        elif progress:
-            stack.enter_context(Status("Querying runs...", spinner="betaWave"))
-
-        if isinstance(dataflow_config, (Path, str)):
-            df_config = Props.read_from(
-                os.path.expandvars(dataflow_config), subst_pathvar=True
-            )
-        elif isinstance(dataflow_config, Mapping):
-            df_config = dataflow_config
-        else:
-            msg = "dataflow_config must be a str, Path, or Mapping"
-            raise ValueError(msg)
-        df_paths = df_config.get("paths")
-        query_config = df_config.get("query", {})
+        _, executor = _setup_executor(stack, processes, executor)
+        progress = _setup_spinner(stack, progress)
+        dataflow_config, df_paths, query_config = _read_dataflow_config(dataflow_config)
 
         if cycle_def is None:
             if "cycle_def" not in query_config:
@@ -143,104 +133,149 @@ def query_runs(
         if isinstance(tiers, str):
             tiers = [tiers]
         if isinstance(tiers, Mapping):
-            tiers = [(f"tier_{t}", p) for t, p in tiers.items()]
+            tier_list = [(f"tier_{t}", p) for t, p in tiers.items()]
         else:
-            tiers = [(f"tier_{t}", df_paths[f"tier_{t}"]) for t in tiers]
+            tier_list = [(f"tier_{t}", df_paths[f"tier_{t}"]) for t in tiers]
 
         if ignored_cycles is None:
             ignored_cycles = query_config.get("ignored_cycles", None)
 
-        cwd = Path.cwd()
+        if join == "inner":
+            this_tier = tier_list[0]
+            other_tiers = tier_list[1:]
+        elif join == "outer":
+            this_tier = tier_list[0]
+            other_tiers = []
+        elif this_tier := next((t for t in tier_list if f"tier_{join}" == t[0]), False):
+            # if join is a tier name, find the matching entry in tiers
+            other_tiers = [t for t in tier_list if t != this_tier]
+        else:
+            msg = f"invalid join argument {join}"
+            raise ValueError(msg)
+        base_path = this_tier[1]
 
-        try:
-            os.chdir(tiers[0][1])
+        # Get list of removed cycles if it exists
+        if ignored_cycles is not None:
+            if isinstance(ignored_cycles, str):
+                ignored_cycles = [ignored_cycles]
+            meta = TextDB(df_paths["metadata"], lazy=True)
+            removed = set()
+            for iclist in ignored_cycles:
+                removed |= set(get_recursive(meta, iclist))
+        else:
+            removed = set()
 
-            # Get list of removed cycles if it exists
-            if ignored_cycles is not None:
-                if isinstance(ignored_cycles, str):
-                    ignored_cycles = [ignored_cycles]
-                meta = TextDB(df_paths["metadata"], lazy=True)
-                removed = set()
-                for iclist in ignored_cycles:
-                    removed |= set(get_recursive(meta, iclist))
-            else:
-                removed = {}
+        col_names = cycle_def.split("-")
+        records = []
 
-            col_names = cycle_def.split("-")
-            records = []
+        for dirpath, dirnames, files in os.walk(base_path, followlinks=True):
+            relpath = os.path.relpath(
+                dirpath, base_path
+            )  # get rid of base_path and the following slash
 
-            if executor is None and processes:
-                executor = stack.enter_context(ProcessPoolExecutor(processes))
-
-            for dirpath, dirnames, files in os.walk(".", followlinks=True):
-                relpath = dirpath[2:]  # get rid of ./
-
-                # Prune subdirectories that are not in all tiers
+            # Prune subdirectories that are not in all tiers
+            if join == "inner":
                 for subdir in copy(dirnames):
-                    if not all(Path(p, relpath, subdir).is_dir() for _, p in tiers[1:]):
+                    if not all(
+                        Path(p, relpath, subdir).is_dir() for _, p in other_tiers
+                    ):
                         dirnames.remove(subdir)
 
-                if executor is None:
-                    records += _get_run_records_loop(
+            if executor is None:
+                records += _get_run_records_loop(
+                    files,
+                    relpath,
+                    col_names,
+                    this_tier,
+                    other_tiers,
+                    join == "inner",
+                    removed,
+                    runs,
+                )
+            else:
+                records.append(
+                    executor.submit(
+                        _get_run_records_loop,
                         files,
                         relpath,
                         col_names,
-                        tiers,
+                        this_tier,
+                        other_tiers,
+                        join == "inner",
                         removed,
                         runs,
                     )
-                else:
-                    records.append(
-                        executor.submit(
-                            _get_run_records_loop,
-                            files,
-                            relpath,
-                            col_names,
-                            tiers,
-                            removed,
-                            runs,
-                        )
-                    )
-
-            # Format and return results
-            if executor is not None:
-                records = [r for recs in records for r in recs.result()]
-            records.sort(
-                key=lambda rec: (
-                    rec[sort_by]
-                    if isinstance(sort_by, str)
-                    else [rec[sb] for sb in sort_by]
                 )
+
+        if executor is not None:
+            records = [r for recs in records for r in recs.result()]
+
+        # If outer join, recursively query other tiers and perform outer join
+        if join == "outer" and len(tiers) > 1:
+            other = query_runs(
+                runs=runs,
+                dataflow_config=dataflow_config,
+                group_by=None,
+                sort_by=sort_by,
+                tiers=tiers[1:],
+                join="outer",
+                ignored_cycles=ignored_cycles,
+                processes=processes,
+                executor=executor,
+                library="pd",
+                progress=progress,
             )
-            result = ak.Array(records)
 
-            if group_by is not None:
-                if isinstance(group_by, str):
-                    lengths = [np.cumsum(ak.run_lengths(result[group_by]))]
-                else:
-                    lengths = [np.cumsum(ak.run_lengths(result[f])) for f in group_by]
-                lengths = np.unique(np.concatenate([0, *lengths]))
-                result = ak.unflatten(result, lengths[1:] - lengths[:-1])
-                result = ak.Array(
-                    {
-                        f: ak.firsts(result[f])
-                        if ak.all(ak.all(result[f] == ak.firsts(result[f]), axis=1), axis=0)
-                        else result[f]
-                        for f in result.fields
-                    }
+            if len(other) == 0:
+                records = [r | {f"tier_{t}": None for t in tiers[1:]} for r in records]
+            elif len(records) == 0:
+                records = [r | {f"tier_{this_tier}": None} for r in other]
+            else:
+                records = (
+                    ak.to_dataframe(records)
+                    .merge(
+                        other,
+                        on=["cycle", "relpath", *col_names],
+                        how="outer",
+                    )
+                    .where(records.notna(), None)
+                    .to_dict(orient="records")
                 )
 
-            if library == "ak":
-                return result
-            if library == "pd":
-                return ak.to_dataframe(result)
-            if library == "np":
-                return ak.to_numpy(result)
-            msg = "library must be 'ak', 'pd' or 'np'"
-            raise ValueError(msg)
+        # Format and return results
+        records.sort(
+            key=lambda rec: (
+                rec[sort_by]
+                if isinstance(sort_by, str)
+                else [rec[sb] for sb in sort_by]
+            )
+        )
+        result = ak.Array(records)
 
-        finally:
-            os.chdir(cwd)
+        if group_by is not None:
+            if isinstance(group_by, str):
+                lengths = [np.cumsum(ak.run_lengths(result[group_by]))]
+            else:
+                lengths = [np.cumsum(ak.run_lengths(result[f])) for f in group_by]
+            lengths = np.unique(np.concatenate([0, *lengths]))
+            result = ak.unflatten(result, lengths[1:] - lengths[:-1])
+            result = ak.Array(
+                {
+                    f: ak.firsts(result[f])
+                    if ak.all(ak.all(result[f] == ak.firsts(result[f]), axis=1), axis=0)
+                    else result[f]
+                    for f in result.fields
+                }
+            )
+
+        if library == "ak":
+            return result
+        if library == "pd":
+            return ak.to_dataframe(result)
+        if library == "np":
+            return ak.to_numpy(result)
+        msg = "library must be 'ak', 'pd' or 'np'"
+        raise ValueError(msg)
 
 
 def list_run_fields(
@@ -274,17 +309,7 @@ def list_run_fields(
         - List of tier names/single tier name. Paths will be found in ``dataflow_config["paths"]``
         - ``None``: read from ``dataflow_config``; if ``tiers`` entry not found, use ``"raw"``
     """
-    if isinstance(dataflow_config, (Path, str)):
-        df_config = Props.read_from(
-            os.path.expandvars(dataflow_config), subst_pathvar=True
-        )
-    elif isinstance(dataflow_config, Mapping):
-        df_config = dataflow_config
-    else:
-        msg = "dataflow_config must be a str, Path, or Mapping"
-        raise ValueError(msg)
-    df_paths = df_config.get("paths")
-    query_config = df_config.get("query", {})
+    _, df_paths, query_config = _read_dataflow_config(dataflow_config)
 
     if cycle_def is None:
         if "cycle_def" not in query_config:
@@ -302,20 +327,23 @@ def list_run_fields(
     else:
         tiers = [(f"tier_{t}", df_paths[f"tier_{t}"]) for t in tiers]
 
-    return {"relpath", "cycle"} | set(cycle_def.split("-")) | set(t[0] for t in tiers)
+    return {"relpath", "cycle"} | set(cycle_def.split("-")) | {t[0] for t in tiers}
+
 
 def _get_run_records_loop(
     files: list[str],
     relpath: str,
     col_names: list[str],
-    tiers: list[tuple[str, str]],
+    this_tier: tuple[str, str],
+    other_tiers: list[tuple[str, str]],
+    inner_join: bool,
     removed: set[str],
     runs,
 ):
     # Worker for query_runs to build a list of records for a directory
     records = []
     # parser to identify data files
-    parse_cycle = re.compile(f"(.*)-{tiers[0][0]}\\.lh5")
+    parse_cycle = re.compile(f"(.*)-{this_tier[0]}\\.lh5")
 
     # parse file names for data
     for f in sorted(files):
@@ -338,7 +366,7 @@ def _get_run_records_loop(
         for k, v in zip(col_names, cycle_vals, strict=True):
             record[k] = v
         record["cycle"] = cycle
-        record[tiers[0][0]] = f"{tiers[0][1]}/{relpath}/{f}"
+        record[this_tier[0]] = f"{this_tier[1]}/{relpath}/{f}"
 
         # evaluate the selection
         select_run = eval(runs, {}, record) if runs else True
@@ -346,11 +374,13 @@ def _get_run_records_loop(
             continue
 
         # check if file exists in all tiers and add other tiers' files
-        for t, p in tiers:
+        for t, p in other_tiers:
             path = f"{p}/{relpath}/{cycle}-{t}.lh5"
             if not Path(path).exists():
-                record = None
-                break
+                if inner_join:
+                    record = None
+                    break
+                path = None
             record[t] = path
         if not record:
             continue
