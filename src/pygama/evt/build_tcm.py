@@ -237,18 +237,33 @@ def build_tcm(
 
             # build entry list for each channel
             if channel_views not in ("none", None):
-                for key, (view, (old_entries, offset)) in zip(table_keys, view_gps.items(), strict=True):
+                for key, (view, (old_entries, offset)) in zip(
+                    table_keys, view_gps.items(), strict=True
+                ):
                     table_key = out_tbl.table_key.view_as("ak")
                     if channel_views == "sparse":
-                        entries = np.flatnonzero(np.array(ak.any(table_key == key, axis=-1)))
+                        entries = np.flatnonzero(
+                            np.array(ak.any(table_key == key, axis=-1))
+                        )
                         entries += tcm_row
                         offset += len(old_entries)
                     elif channel_views == "dense":
                         # This builds a 2d array of ranges where our mask is True by identifying
                         # indices where mask changes between True and False
-                        entries = np.reshape(np.flatnonzero(np.diff(
-                            np.concatenate([[0], np.array(ak.any(table_key == key, axis=-1)), [0]])
-                        )), (-1, 2))
+                        entries = np.reshape(
+                            np.flatnonzero(
+                                np.diff(
+                                    np.concatenate(
+                                        [
+                                            [0],
+                                            np.array(ak.any(table_key == key, axis=-1)),
+                                            [0],
+                                        ]
+                                    )
+                                )
+                            ),
+                            (-1, 2),
+                        )
                         entries += tcm_row
                         offset += len(old_entries)
                     elif channel_views == "all":
@@ -282,13 +297,13 @@ def build_tcm(
                             group=view,
                             link_type="hard",
                             write_start=offset,
-                            wo_mode=None if channel_views!="all" else "o",
+                            wo_mode=None if channel_views != "all" else "o",
                         )
 
             # build up the table in memory
             elif tcm is None:
                 tcm = deepcopy(out_tbl)
-                channel_entries = {k:v[0] for k, v in view_gps.items()}
+                channel_entries = {k: v[0] for k, v in view_gps.items()}
             else:
                 tcm.append(out_tbl)
                 if channel_views not in ("none", None):
@@ -296,13 +311,14 @@ def build_tcm(
                         if channel_views == "all":
                             channel_entries[ch_name] = new_entries
                         else:
-                            channel_entries[ch_name] = np.append(channel_entries[ch_name], new_entries, axis=0)
+                            channel_entries[ch_name] = np.append(
+                                channel_entries[ch_name], new_entries, axis=0
+                            )
 
             tcm_row += len(out_tbl)
 
     if tcm is None:
         return None
-    elif channel_views in ("none", None):
+    if channel_views in ("none", None):
         return tcm
-    else:
-        return tcm, channel_entries
+    return tcm, channel_entries

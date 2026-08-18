@@ -49,7 +49,7 @@ def test_generate_tcm_cols(lgnd_test_data):
               1084804, 1084804, 1084804, 1084803, 1084804, 1084804, 1121600,
               1121600, 1084804, 1121600, 1084804, 1121600, 1084803, 1084803,
               1121600, 1121600, 1121600, 1084803, 1084803, 1084803, 1084803,
-              1084803, 1084803, ]            
+              1084803, 1084803, ]
         )
     )
     exp_rows = VectorOfVectors(
@@ -67,7 +67,6 @@ def test_generate_tcm_cols(lgnd_test_data):
     assert tcm_cols.table_key == exp_keys
     assert tcm_cols.row_in_table == exp_rows
 
-
     # Test with sparse views enabled
     (tcm_cols2, chan_tcms) = evt.build_tcm(
         [(f_raw, "ch*/raw")],
@@ -83,7 +82,12 @@ def test_generate_tcm_cols(lgnd_test_data):
     assert all(np.issubdtype(v.dtype, np.integer) for v in chan_tcms.values())
     for chan_name, entries in chan_tcms.items():
         chan_id = int(chan_name[2:])
-        assert np.all(entries == np.flatnonzero(np.any(tcm_cols2.table_key.view_as('ak') == chan_id, axis=-1)))
+        assert np.all(
+            entries
+            == np.flatnonzero(
+                np.any(tcm_cols2.table_key.view_as("ak") == chan_id, axis=-1)
+            )
+        )
 
     # test with small buffer len
     tcm_cols = evt.build_tcm(
@@ -132,12 +136,16 @@ def test_generate_tcm_cols(lgnd_test_data):
     assert tcm_cols2.table_key == exp_idxs
     assert tcm_cols2.row_in_table == exp_rows
 
-    assert { f"ch{i}" for i in range(3) } == set(chan_tcms.keys())
+    assert {f"ch{i}" for i in range(3)} == set(chan_tcms.keys())
     assert all(np.issubdtype(v.dtype, np.integer) for v in chan_tcms.values())
     for chan_name, entries in chan_tcms.items():
         chan_id = int(chan_name[2:])
-        assert np.all(entries == np.flatnonzero(np.any(tcm_cols2.table_key.view_as('ak') == chan_id, axis=-1)))
-
+        assert np.all(
+            entries
+            == np.flatnonzero(
+                np.any(tcm_cols2.table_key.view_as("ak") == chan_id, axis=-1)
+            )
+        )
 
     # test invalid hash func
     with pytest.raises(NotImplementedError):
@@ -278,7 +286,7 @@ def test_build_tcm_write(lgnd_test_data, tmp_dir):
               1084804, 1084804, 1084804, 1084803, 1084804, 1084804, 1121600,
               1121600, 1084804, 1121600, 1084804, 1121600, 1084803, 1084803,
               1121600, 1121600, 1121600, 1084803, 1084803, 1084803, 1084803,
-              1084803, 1084803, ]            
+              1084803, 1084803, ]
         )
     )
     exp_rows = VectorOfVectors(
@@ -315,7 +323,7 @@ def test_build_tcm_write(lgnd_test_data, tmp_dir):
     for ch in channels:
         ch_tcm = lh5.read(f"{ch}/hardware_tcm", out_file)
         ch_id = int(ch[2:])
-        mask = ak.any(tcm_cols.table_key.view_as('ak') == ch_id, axis=-1)
+        mask = ak.any(tcm_cols.table_key.view_as("ak") == ch_id, axis=-1)
         assert ch_tcm == tcm_cols[mask]
 
     # Test both view modes with small buffers in a fresh output file.
@@ -364,7 +372,7 @@ def test_build_tcm_write(lgnd_test_data, tmp_dir):
     clone = f"{tmp_dir}/test-append-tcm-input.lh5"
     tables = ["ch1084803/raw", "ch1084804/raw", "ch1121600/raw"]
 
-    with lh5.LH5Store(keep_open=True, default_mode='of') as st:
+    with lh5.LH5Store(keep_open=True, default_mode="of") as st:
         for table in tables:
             st.write(lh5.read(table, f_raw), table, clone)
 
@@ -476,7 +484,7 @@ def test_build_tcm_phy(lgnd_test_data):
 
     assert set(channels) == set(chan_tcms.keys())
     assert all(np.issubdtype(v.dtype, np.integer) for v in chan_tcms.values())
-    assert all(np.all(v == np.array([0,10])) for v in chan_tcms.values())
+    assert all(np.all(v == np.array([0, 10])) for v in chan_tcms.values())
 
     # Now test with views in "all" mode with short buffer
     (tcm_cols, chan_tcms) = evt.build_tcm(
@@ -493,7 +501,7 @@ def test_build_tcm_phy(lgnd_test_data):
 
     assert set(channels) == set(chan_tcms.keys())
     assert all(np.issubdtype(v.dtype, np.integer) for v in chan_tcms.values())
-    assert all(np.all(v == np.array([0,10])) for v in chan_tcms.values())
+    assert all(np.all(v == np.array([0, 10])) for v in chan_tcms.values())
 
     # Now test with views in "dense" mode
     (tcm_cols, chan_tcms) = evt.build_tcm(
@@ -509,7 +517,7 @@ def test_build_tcm_phy(lgnd_test_data):
 
     assert set(channels) == set(chan_tcms.keys())
     assert all(np.issubdtype(v.dtype, np.integer) for v in chan_tcms.values())
-    assert all(np.all(v == np.array([0,10])) for v in chan_tcms.values())
+    assert all(np.all(v == np.array([0, 10])) for v in chan_tcms.values())
 
     # Now test with views in "dense" mode with short buffer
     (tcm_cols, chan_tcms) = evt.build_tcm(
@@ -525,7 +533,11 @@ def test_build_tcm_phy(lgnd_test_data):
 
     assert set(channels) == set(chan_tcms.keys())
     assert all(np.issubdtype(v.dtype, np.integer) for v in chan_tcms.values())
-    assert all(np.all(v == np.stack([np.arange(10), np.arange(1, 11)], axis=1)) for v in chan_tcms.values())
+    assert all(
+        np.all(v == np.stack([np.arange(10), np.arange(1, 11)], axis=1))
+        for v in chan_tcms.values()
+    )
+
 
 # Test with phy data (non-sparse mode); most important for views in dense/all modes
 def test_build_tcm_write_phy(lgnd_test_data, tmp_dir):
