@@ -205,7 +205,7 @@ def test_generate_tcm_cols(lgnd_test_data):
     assert tcm_cols.table_key == exp_keys
     assert set(chan_list) == set(chan_tcms.keys())
     for entries in chan_tcms.values():
-        entries = np.array([0])
+        assert (entries == np.array([0])).all()
 
 
 def test_build_tcm_multiple_cols(lgnd_test_data):

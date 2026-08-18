@@ -246,7 +246,7 @@ def build_tcm(
                             np.array(ak.any(table_key == key, axis=-1))
                         )
                         entries += tcm_row
-                        offset += len(old_entries)
+                        new_off = offset + len(old_entries)
                     elif channel_views == "dense":
                         # This builds a 2d array of ranges where our mask is True by identifying
                         # indices where mask changes between True and False
@@ -265,18 +265,18 @@ def build_tcm(
                             (-1, 2),
                         )
                         entries += tcm_row
-                        offset += len(old_entries)
+                        new_off = offset + len(old_entries)
                     elif channel_views == "all":
                         # Build a single 2d array with all entries; overwrite for each iteration
                         if not ak.all(ak.any(table_key == key, axis=-1)):
                             msg = f"channel {key} not found in all events; channel_views='all' failed"
                             raise RuntimeError(msg)
                         entries = np.array([[0, len(table_key) + tcm_row]])
-                        offset = 0
+                        new_off = 0
                     else:
                         msg = f"unknown channel_views mode: {channel_views}"
                         raise ValueError(msg)
-                    view_gps[view] = (entries, offset)
+                    view_gps[view] = (entries, new_off)
 
             # Write to file
             if out_file is not None:
